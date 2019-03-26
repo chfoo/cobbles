@@ -1,0 +1,5 @@
+# compiled output files
+out/
+
+# Visual Studio Code
+.vscode/

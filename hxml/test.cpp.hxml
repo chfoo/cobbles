@@ -1,0 +1,4 @@
+test.hxml
+# -lib hxcpp-debug-server
+-cpp out/cpp
+#-D HXCPP_VERBOSE

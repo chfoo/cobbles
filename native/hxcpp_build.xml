@@ -1,0 +1,15 @@
+<xml>
+    <files id="haxe">
+        <compilerflag value="-I/usr/include/freetype2" unless="windows" />
+        <compilerflag value="-I/usr/include/harfbuzz" unless="windows" />
+        <compilerflag value="-I${this_dir}" />
+        <compilerflag value="-I${haxelib:cobbles}/native" if="haxelib:cobbles" />
+        <file name="${this_dir}/cobbles_font.c" />
+        <file name="${this_dir}/cobbles_shaper.c" />
+        <file name="${this_dir}/cobbles.c" />
+    </files>
+    <target id="haxe">
+        <lib name="-lfreetype" />
+        <lib name="-lharfbuzz" />
+    </target>
+</xml>

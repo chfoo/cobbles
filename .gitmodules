@@ -1,0 +1,3 @@
+[submodule "fonts/liberation-fonts"]
+	path = fonts/liberation-fonts
+	url = https://github.com/liberationfonts/liberation-fonts

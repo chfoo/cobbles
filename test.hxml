@@ -1,0 +1,8 @@
+libs.hxml
+-lib utest
+-lib safety
+-cp src
+-cp test
+-debug
+-main cobbles.TestAll
+--macro nullSafety("cobbles", Loose)
