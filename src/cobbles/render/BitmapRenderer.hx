@@ -14,7 +14,7 @@ using Safety;
  */
 class BitmapRenderer extends BaseRenderer {
     var fontTable:FontTable;
-    var glyphCache:GlyphCache;
+    var glyphCache:GlyphCache<GlyphInfo>;
     var bitmap:Null<Bitmap>;
 
     public function new(fontTable:FontTable) {
@@ -53,7 +53,7 @@ class BitmapRenderer extends BaseRenderer {
     }
 
     function getGlyphInfo(penRun:PenRun, glyphShape:GlyphShape):GlyphInfo {
-        var cacheResult = glyphCache.get(penRun.fontKey, glyphShape.glyphID,
+        var cacheResult = glyphCache.getGlyph(penRun.fontKey, glyphShape.glyphID,
             penRun.fontSize, resolution);
 
         var glyphInfo;
@@ -64,7 +64,7 @@ class BitmapRenderer extends BaseRenderer {
             case None:
                 var font = fontTable.getFont(penRun.fontKey);
                 glyphInfo = font.getGlyphInfo(glyphShape.glyphID);
-                glyphCache.set(
+                glyphCache.setGlyph(
                     penRun.fontKey, glyphShape.glyphID,
                     penRun.fontSize, resolution, glyphInfo);
         }
