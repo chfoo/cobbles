@@ -10,9 +10,9 @@ import cobbles.font.FontTable;
 using Safety;
 
 /**
- * Renderer that outputs to a 8-bit greyscale bitmap.
+ * Renderer that outputs to a bitmap.
  */
-class GreyscaleBitmapRenderer extends BaseRenderer {
+class BitmapRenderer extends BaseRenderer {
     var fontTable:FontTable;
     var glyphCache:GlyphCache;
     var bitmap:Null<Bitmap>;

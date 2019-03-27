@@ -1,26 +1,19 @@
 package cobbles.render;
 
-import sys.io.File;
 import haxe.io.Bytes;
 
-/**
- * 8-bit, greyscale bitmap
- */
-class GreyscaleBitmap implements Bitmap {
+class BaseBitmap implements Bitmap {
     var width:Int;
     var height:Int;
-    var data:Bytes;
 
     public function new(width:Int, height:Int) {
         this.width = width;
         this.height = height;
-        data = Bytes.alloc(width * height);
     }
 
     public function getWidth():Int {
         return width;
     }
-
 
     public function getHeight():Int {
         return height;
@@ -37,17 +30,16 @@ class GreyscaleBitmap implements Bitmap {
                     continue;
                 }
 
-                var bitmapIndex = bitmapY * this.width + bitmapX;
                 var incomingIndex = row * width + col;
 
-                var bitmapValue = data.get(bitmapIndex);
+                var bitmapValue = getValue(bitmapX, bitmapY);
                 bitmapValue += bytes.get(incomingIndex);
 
                 if (bitmapValue > 255) {
                     bitmapValue = 255;
                 }
 
-                data.set(bitmapIndex, bitmapValue);
+                setValue(bitmapX, bitmapY, bitmapValue);
             }
         }
     }
@@ -86,20 +78,15 @@ class GreyscaleBitmap implements Bitmap {
                 continue;
             }
 
-            var bitmapIndex = y * this.width + x;
-
-            data.set(bitmapIndex, value);
+            setValue(x, y, value);
         }
     }
 
-    /**
-     * Saves the bitmap to a PGM file.
-     */
-    public function savePGM(filename:String) {
-        var file = File.write(filename);
+    function getValue(x:Int, y:Int):Int {
+        throw 'Not implemented';
+    }
 
-        file.writeString('P5 $width $height 255\n');
-        file.writeFullBytes(data, 0, data.length);
-        file.close();
+    function setValue(x:Int, y:Int, value:Int) {
+        throw 'Not implemented';
     }
 }

@@ -5,8 +5,8 @@ import utest.Test;
 import cobbles.test.TestLayout;
 #if sys
 import sys.FileSystem;
-import cobbles.render.GreyscaleBitmap;
-import cobbles.render.GreyscaleBitmapRenderer;
+import cobbles.render.GrayscaleBitmap;
+import cobbles.render.BitmapRenderer;
 #end
 
 class TestBitmapRender extends Test {
@@ -18,9 +18,9 @@ class TestBitmapRender extends Test {
 
         var width = layout.point64ToPixel(layout.boundingWidth);
         var height = layout.point64ToPixel(layout.boundingHeight);
-        var bitmap = new GreyscaleBitmap(width, height);
+        var bitmap = new GrayscaleBitmap(width, height);
 
-        var renderer = new GreyscaleBitmapRenderer(fontTable);
+        var renderer = new BitmapRenderer(fontTable);
         renderer.setBitmap(bitmap);
         renderer.render(layout);
 

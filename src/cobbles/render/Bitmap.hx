@@ -23,7 +23,7 @@ interface Bitmap {
      * @param y Position on y-axis in pixels.
      * @param width Width of the given bitmap in pixels.
      * @param height Height of the given bitmap in pixels.
-     * @param bytes The greyscale, 8 bits per pixel, bitmap to be drawn.
+     * @param bytes The grayscale, 8 bits per pixel, bitmap to be drawn.
      */
     public function drawBytes(x:Int, y:Int, width:Int, height:Int, bytes:Bytes):Void;
 
