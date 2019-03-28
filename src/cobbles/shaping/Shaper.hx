@@ -1,6 +1,6 @@
 package cobbles.shaping;
 
-import unifill.InternalEncoding;
+import cobbles.native.NativeData;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
 import cobbles.font.Font;
@@ -21,7 +21,7 @@ class Shaper implements Disposable {
     var _isDisposed = false;
 
     public function new() {
-        var shaperPointer_ = CobblesExtern.shaper_init();
+        var shaperPointer_ = CobblesExtern.shaper_init(NativeData.getCobblesPointer());
 
         if (shaperPointer_ == null) {
             throw new Exception("Failed to init shaper struct");
@@ -50,18 +50,7 @@ class Shaper implements Disposable {
      * Sets the text to be processed.
      */
     public function setText(text:String) {
-        var encoding = NativeEncoding.Utf8;
-
-        // switch InternalEncoding.internalEncoding {
-        //     case "UTF-8":
-        //         encoding = NativeEncoding.Utf8;
-        //     case "UTF-32":
-        //         encoding = NativeEncoding.Utf32;
-        //     default:
-        //         encoding = NativeEncoding.Utf16;
-        // }
-
-        CobblesExtern.shaper_set_text(shaperPointer, text, encoding);
+        CobblesExtern.shaper_set_text(shaperPointer, text.toNativeString());
     }
 
     /**
@@ -71,11 +60,13 @@ class Shaper implements Disposable {
      */
     public function setScript(?script:String, ?language:String) {
         if (script != null) {
-            CobblesExtern.shaper_set_script(shaperPointer, script);
+            CobblesExtern.shaper_set_script(
+                shaperPointer, script.toNativeString());
         }
 
         if (language != null) {
-            CobblesExtern.shaper_set_language(shaperPointer, language);
+            CobblesExtern.shaper_set_language(
+                shaperPointer, language.toNativeString());
         }
     }
 
@@ -104,7 +95,8 @@ class Shaper implements Disposable {
                 directionStr = "btt";
         }
 
-        CobblesExtern.shaper_set_direction(shaperPointer, directionStr);
+        CobblesExtern.shaper_set_direction(
+            shaperPointer, directionStr.toNativeString());
     }
 
     /**
@@ -118,6 +110,7 @@ class Shaper implements Disposable {
         var glyphCount = CobblesExtern.shaper_get_glyph_count(shaperPointer);
 
         var buffer = Bytes.alloc(24);
+        #if hl @:nullSafety(Off) #end // bug
         var glyphs = new Vector<GlyphShape>(glyphCount);
 
         for (i in 0...glyphCount) {

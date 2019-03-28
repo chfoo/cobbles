@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <hb-ft.h>
 
-CobblesShaper * FUNC_NAME(cobbles_shaper_init)() {
+CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles) {
     CobblesShaper * shaper = calloc(1, sizeof(CobblesShaper));
 
     if (shaper == NULL) {
@@ -11,6 +11,7 @@ CobblesShaper * FUNC_NAME(cobbles_shaper_init)() {
     }
 
     shaper->buffer = hb_buffer_create();
+    shaper->cobbles = cobbles;
 
     if (!hb_buffer_allocation_successful(shaper->buffer)) {
         shaper->hb_error_code = 1;
@@ -46,18 +47,19 @@ void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * fo
 
     // Set it back to defaults because not sure why
     // https://github.com/harfbuzz/harfbuzz/issues/312
-    hb_ft_font_set_load_flags(font->face, FT_LOAD_DEFAULT);
+    hb_ft_font_set_load_flags(shaper->font, FT_LOAD_DEFAULT);
 }
 
-void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding) {
+void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text) {
     hb_buffer_clear_contents(shaper->buffer);
 
-    switch (encoding) {
-        case 1:
-            hb_buffer_add_utf16(shaper->buffer, text, -1, 0, -1);
+    switch (shaper->cobbles->encoding) {
+        case COBBLES_UTF16:
+            // FIXME: check if endian is correct
+            hb_buffer_add_utf16(shaper->buffer, (const uint16_t*) text, -1, 0, -1);
             break;
-        case 2:
-            hb_buffer_add_utf32(shaper->buffer, text, -1, 0, -1);
+        case COBBLES_UTF32:
+            hb_buffer_add_utf32(shaper->buffer, (const uint32_t*) text, -1, 0, -1);
             break;
         default:
             hb_buffer_add_utf8(shaper->buffer, text, -1, 0, -1);
@@ -70,18 +72,21 @@ void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper) {
 }
 
 void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction) {
+    direction = _cobbles_get_utf8_string(shaper->cobbles, direction);
     hb_buffer_set_direction(shaper->buffer,
-        hb_direction_from_string(direction, strlen(direction)));
+        hb_direction_from_string(direction, strlen(direction + 1)));
 }
 
 void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script) {
+    script = _cobbles_get_utf8_string(shaper->cobbles, script);
     hb_buffer_set_script(shaper->buffer,
-        hb_script_from_string(script, strlen(script)));
+        hb_script_from_string(script, strlen(script + 1)));
 }
 
 void FUNC_NAME(cobbles_shaper_set_language)(CobblesShaper * shaper, const char * langauge) {
+    langauge = _cobbles_get_utf8_string(shaper->cobbles, langauge);
     hb_buffer_set_language(shaper->buffer,
-        hb_language_from_string(langauge, strlen(langauge)));
+        hb_language_from_string(langauge, strlen(langauge + 1)));
 }
 
 void FUNC_NAME(cobbles_shaper_shape)(CobblesShaper * shaper) {
@@ -111,11 +116,11 @@ void FUNC_NAME(cobbles_shaper_get_glyph_info)(CobblesShaper * shaper, int glyph_
 }
 
 #ifdef LIBHL_EXPORTS
-DEFINE_PRIM(_ABSTRACT(CobblesShaper), cobbles_shaper_init, _NO_ARG);
+DEFINE_PRIM(_ABSTRACT(CobblesShaper), cobbles_shaper_init, _ABSTRACT(Cobbles));
 DEFINE_PRIM(_VOID, cobbles_shaper_destroy, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_I32, cobbles_shaper_get_error, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_VOID, cobbles_shaper_set_font, _ABSTRACT(CobblesShaper) _ABSTRACT(CobblesFont));
-DEFINE_PRIM(_VOID, cobbles_shaper_set_text, _ABSTRACT(CobblesShaper) _BYTES _I32);
+DEFINE_PRIM(_VOID, cobbles_shaper_set_text, _ABSTRACT(CobblesShaper) _BYTES);
 DEFINE_PRIM(_VOID, cobbles_shaper_guess_text_properties, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_VOID, cobbles_shaper_set_direction, _ABSTRACT(CobblesShaper) _BYTES);
 DEFINE_PRIM(_VOID, cobbles_shaper_set_script, _ABSTRACT(CobblesShaper) _BYTES);

@@ -47,6 +47,7 @@ class SimpleLineBreaker implements LineBreakingAlgorithm {
     }
 
     public function getBreaks(text:String):BreakInfo {
+        #if hl @:nullSafety(Off) #end // bug
         var flagsVector = new Vector<BreakFlags>(text.uLength());
 
         var index = 0;
@@ -80,8 +81,8 @@ class SimpleLineBreaker implements LineBreakingAlgorithm {
     }
 
     function isMandatory(codePoint:CodePoint, previous:CodePoint):Bool {
-        return codePoint == '\n'.code && previous != '\r' ||
-            codePoint == '\r' ||
+        return codePoint == "\n".code && previous != "\r".code ||
+            codePoint == "\r".code ||
             codePoint == 0x85; // newline
     }
 

@@ -21,17 +21,26 @@
 extern "C" {
 #endif
 
+#define COBBLES_UTF8 0
+#define COBBLES_UTF16 1
+#define COBBLES_UTF32 2
+typedef int CobblesEncoding;
+
 typedef struct {
     int error_code;
     FT_Library ft_library;
+    CobblesEncoding encoding;
+    char * encodingStringBuffer;
 } Cobbles;
 
 typedef struct {
+    Cobbles * cobbles;
     int ft_error_code;
     FT_Face face;
 } CobblesFont;
 
 typedef struct {
+    Cobbles * cobbles;
     int hb_error_code;
     hb_buffer_t * buffer;
     hb_font_t * font;
@@ -56,7 +65,7 @@ typedef uint8_t * CobblesFontGlyphInfoArray;
 // 20 - int32 - advance_y
 typedef uint8_t * CobblesShaperGlyphInfoArray;
 
-FUNC Cobbles * FUNC_NAME(cobbles_init)();
+FUNC Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding);
 FUNC void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles);
 FUNC int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles);
 
@@ -70,11 +79,11 @@ FUNC int FUNC_NAME(cobbles_font_get_glyph_id)(CobblesFont * font, int code_point
 FUNC void FUNC_NAME(cobbles_font_get_glyph_info)(CobblesFont * font, CobblesFontGlyphInfoArray info);
 FUNC void FUNC_NAME(cobbles_font_get_glyph_bitmap)(CobblesFont * font, uint8_t * buffer);
 
-FUNC CobblesShaper * FUNC_NAME(cobbles_shaper_init)();
+FUNC CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles);
 FUNC void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper);
 FUNC int FUNC_NAME(cobbles_shaper_get_error)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * font);
-FUNC void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding);
+FUNC void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text);
 FUNC void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction);
 FUNC void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script);
@@ -87,6 +96,9 @@ FUNC void FUNC_NAME(cobbles_shaper_get_glyph_info)(CobblesShaper * shaper, int g
 
 int _cobbles_bytes_read_int(uint8_t * bytes, int index);
 void _cobbles_bytes_write_int(uint8_t * bytes, int index, int value);
+size_t _cobbles_string_length(Cobbles * cobbles, const char * input);
+const char* _cobbles_encode_string(Cobbles * cobbles, const char * inputEncoding, const char * outputEncoding, const char * input);
+const char* _cobbles_get_utf8_string(Cobbles * cobbles, const char * input);
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,5 @@
 package cobbles.render;
 
-import cobbles.layout.Layout;
 import cobbles.layout.InlineObject;
 import cobbles.font.GlyphInfo;
 import cobbles.shaping.GlyphShape;

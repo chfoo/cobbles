@@ -9,6 +9,8 @@ CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * 
         return NULL;
     }
 
+    font->cobbles = cobbles;
+    path = _cobbles_get_utf8_string(cobbles, path);
     font->ft_error_code = FT_New_Face(cobbles->ft_library, path, face_index, &(font->face));
 
     return font;
@@ -21,6 +23,7 @@ CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * by
         return NULL;
     }
 
+    font->cobbles = cobbles;
     font->ft_error_code = FT_New_Memory_Face(cobbles->ft_library, bytes, length, face_index, &(font->face));
 
     return font;
@@ -70,7 +73,7 @@ void FUNC_NAME(cobbles_font_get_glyph_bitmap)(CobblesFont * font, uint8_t * buff
 #ifdef LIBHL_EXPORTS
 DEFINE_PRIM(_ABSTRACT(CobblesFont), cobbles_open_font_file, _ABSTRACT(Cobbles) _BYTES _I32);
 DEFINE_PRIM(_ABSTRACT(CobblesFont), cobbles_open_font_bytes, _ABSTRACT(Cobbles) _BYTES _I32 _I32);
-DEFINE_PRIM(_I32, cobbles_font_get_error, _ABSTRACT(Cobbles));
+DEFINE_PRIM(_I32, cobbles_font_get_error, _ABSTRACT(CobblesFont));
 DEFINE_PRIM(_VOID, cobbles_font_close, _ABSTRACT(CobblesFont));
 DEFINE_PRIM(_VOID, cobbles_font_set_size, _ABSTRACT(CobblesFont) _I32 _I32 _I32 _I32);
 DEFINE_PRIM(_I32, cobbles_font_get_glyph_id, _ABSTRACT(CobblesFont) _I32);

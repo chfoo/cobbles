@@ -29,7 +29,7 @@ class Font implements Disposable {
 
         if (path != null) {
             fontPointer_ = CobblesExtern.open_font_file(
-                NativeData.getCobblesPointer(), path, faceIndex);
+                NativeData.getCobblesPointer(), path.toNativeString(), faceIndex);
         } else if (bytes != null) {
             var bytesPointer = bytes.toNativeBytes();
 
@@ -132,10 +132,14 @@ class Font implements Disposable {
         var bitmapWidth = buffer.getInt32(0);
         var bitmapHeight = buffer.getInt32(4);
         var bitmap = Bytes.alloc(bitmapWidth * bitmapHeight);
-        bufferPointer = bitmap.toNativeBytes();
 
-        CobblesExtern.font_get_glyph_bitmap(pointer, bufferPointer);
-        buffer.releaseNativeBytes(bufferPointer);
+        // Check length because HashLink allocation failure on 0 bytes.
+        if (bitmap.length > 0) {
+            bufferPointer = bitmap.toNativeBytes();
+
+            CobblesExtern.font_get_glyph_bitmap(pointer, bufferPointer);
+            buffer.releaseNativeBytes(bufferPointer);
+        }
 
         var glyphInfo:GlyphInfo = {
             bitmapWidth: bitmapWidth,

@@ -1,8 +1,10 @@
 package cobbles.native;
 
 import haxe.io.Bytes;
-import cobbles.native.CobblesExtern.NativeBytes;
+import cobbles.native.CobblesExtern;
 import haxe.io.BytesData;
+
+using Safety;
 
 class BytesTools {
     public static function toNativeBytes(bytes:Bytes):NativeBytes {
@@ -29,6 +31,17 @@ class BytesTools {
 
         new js.html.Uint8Array(bytes.getData()).set(view);
         js.Syntax.code("Module._free({0})", pointer);
+        #end
+    }
+
+    #if hl @:access(String.__string) #end
+    public static function toNativeString(string:String):NativeString {
+        #if hl
+        // UTF-16LE strings
+        return  string.__string();
+        #else
+        // UTF-8 C strings
+        return string;
         #end
     }
 }

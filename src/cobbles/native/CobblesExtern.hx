@@ -26,7 +26,7 @@ package cobbles.native;
     typedef CobblesPointer = hl.Abstract<"Cobbles">;
     typedef CobblesFontPointer = hl.Abstract<"CobblesFont">;
     typedef CobblesShaperPointer = hl.Abstract<"CobblesShaper">;
-    typedef NativeString = String;
+    typedef NativeString = hl.Bytes;
     typedef NativeBytes = hl.Bytes;
 
 #elseif js
@@ -68,7 +68,7 @@ extern class CobblesExtern {
     // cobbles.c
     #if cpp @:native("cobbles_init")
     #elseif hl @:hlNative("cobbles", "cobbles_init") #end
-    public static function init():CobblesPointer;
+    public static function init(encoding:NativeEncoding):CobblesPointer;
 
     #if cpp @:native("cobbles_destroy")
     #elseif hl @:hlNative("cobbles", "cobbles_destroy") #end
@@ -118,7 +118,7 @@ extern class CobblesExtern {
     // cobbles_shaper.c
     #if cpp @:native("cobbles_shaper_init")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_init") #end
-    public static function shaper_init():Null<CobblesShaperPointer>;
+    public static function shaper_init(cobbles:CobblesPointer):Null<CobblesShaperPointer>;
 
     #if cpp @:native("cobbles_shaper_destroy")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_destroy") #end
@@ -134,7 +134,7 @@ extern class CobblesExtern {
 
     #if cpp @:native("cobbles_shaper_set_text")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_set_text") #end
-    public static function shaper_set_text(shaper:CobblesShaperPointer, text:NativeString, encoding:NativeEncoding):Void;
+    public static function shaper_set_text(shaper:CobblesShaperPointer, text:NativeString):Void;
 
     #if cpp @:native("cobbles_shaper_guess_text_properties")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_guess_text_properties") #end

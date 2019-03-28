@@ -2,7 +2,7 @@ var cobbles = {};
 
 function cobbles_bind() {
     // cobbles.c
-    cobbles.init = Module.cwrap('cobbles_init', 'number', []);
+    cobbles.init = Module.cwrap('cobbles_init', 'number', ['number']);
     cobbles.destroy = Module.cwrap('cobbles_destroy', null, ['number']);
     cobbles.get_error = Module.cwrap('cobbles_get_error', 'number', ['number']);
 
@@ -18,11 +18,11 @@ function cobbles_bind() {
     cobbles.font_close = Module.cwrap('cobbles_font_close', null, ['number']);
 
     // cobbles_shaper.c
-    cobbles.shaper_init = Module.cwrap('cobbles_shaper_init', 'number', []);
+    cobbles.shaper_init = Module.cwrap('cobbles_shaper_init', 'number', ['number']);
     cobbles.shaper_destroy = Module.cwrap('cobbles_shaper_destroy', null, ['number']);
     cobbles.shaper_get_error = Module.cwrap('cobbles_shaper_get_error', 'number', ['number']);
     cobbles.shaper_set_font = Module.cwrap('cobbles_shaper_set_font', null, ['number', 'number']);
-    cobbles.shaper_set_text = Module.cwrap('cobbles_shaper_set_text', null, ['number', 'string', 'number']);
+    cobbles.shaper_set_text = Module.cwrap('cobbles_shaper_set_text', null, ['number', 'string']);
     cobbles.shaper_guess_text_properties = Module.cwrap('cobbles_shaper_guess_text_properties', null, ['number']);
     cobbles.shaper_set_direction = Module.cwrap('cobbles_shaper_set_direction', null, ['number', 'string']);
     cobbles.shaper_set_script = Module.cwrap('cobbles_shaper_set_script', null, ['number', 'string']);
