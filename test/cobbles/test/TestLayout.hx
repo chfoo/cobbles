@@ -29,7 +29,8 @@ class TestLayout extends Test {
 
         var font = fontTable.addFont(TestFont.getSerifFont());
 
-        var textSource = new TextSource(font, lineBreaker);
+        var textSource = new TextSource(lineBreaker);
+        textSource.defaultTextProperties.fontKey = font;
         textSource.defaultTextProperties.fontPointSize = 24;
         textSource.addText("ABC 一二三 😂");
         textSource.addLineBreak();

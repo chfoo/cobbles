@@ -1,5 +1,6 @@
 package cobbles.layout;
 
+import cobbles.font.FontTable;
 import cobbles.font.FontTable.FontKey;
 
 /**
@@ -39,8 +40,8 @@ class TextProperties {
      */
     public var script:String = "Latn";
 
-    public function new(fontKey:FontKey) {
-        this.fontKey = fontKey;
+    public function new() {
+        this.fontKey = FontTable.notdefFont;
     }
 
     function get_fontPointSize():Float {
@@ -56,11 +57,12 @@ class TextProperties {
      * Returns a copy.
      */
     public function copy():TextProperties {
-        var newCopy = new TextProperties(fontKey);
+        var newCopy = new TextProperties();
 
         newCopy.color = color;
         newCopy.direction = direction;
         newCopy.fontSize = fontSize;
+        newCopy.fontKey = fontKey;
         newCopy.script = script;
 
         return newCopy;

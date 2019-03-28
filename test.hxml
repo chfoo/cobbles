@@ -1,3 +1,4 @@
+extraParams.hxml
 libs.hxml
 -lib utest
 -cp src

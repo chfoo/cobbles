@@ -145,6 +145,10 @@ const char* _cobbles_encode_string(Cobbles * cobbles,
 }
 
 const char* _cobbles_get_utf8_string(Cobbles * cobbles, const char * input) {
+    if (cobbles->encoding == COBBLES_UTF8) {
+        return input;
+    }
+
     return _cobbles_encode_string(cobbles,
         cobbles->encoding == COBBLES_UTF32 ? "UTF-32LE" : "UTF-16LE",
         "UTF-8",

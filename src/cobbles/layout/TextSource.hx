@@ -59,7 +59,7 @@ class TextSource {
      *  cause a line break. Otherwise, you must call `addLineBreak()`
      *  manually if you want explicit line breaks.
      */
-    public function new(fontKey:FontKey, ?bidiAlgorithm:BidiAlgorithm,
+    public function new(?bidiAlgorithm:BidiAlgorithm,
     ?lineBreaker:LineBreakingAlgorithm) {
 
         this.bidiAlgorithm = bidiAlgorithm != null ? Some(bidiAlgorithm) : None;
@@ -67,8 +67,7 @@ class TextSource {
 
         items = new Array();
 
-        defaultTextProperties = new TextProperties(fontKey);
-        defaultTextProperties.fontKey = fontKey;
+        defaultTextProperties = new TextProperties();
     }
 
     /**
