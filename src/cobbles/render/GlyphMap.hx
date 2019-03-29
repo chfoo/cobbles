@@ -18,7 +18,7 @@ class GlyphMap<T> implements IMap<Int64,T> {
     }
 
     public function getGlyph(fontKey:FontKey, glyphID:Int, height:Int, resolution:Int):Option<T> {
-        var key = toKey(fontKey, height, glyphID, resolution);
+        var key = toKey(fontKey, glyphID, height, resolution);
         var result = _map.get(key);
 
         if (result != null) {
@@ -29,12 +29,12 @@ class GlyphMap<T> implements IMap<Int64,T> {
     }
 
     public function setGlyph(fontKey:FontKey, glyphID:Int, height:Int, resolution:Int, value:T) {
-        var key = toKey(fontKey, height, glyphID, resolution);
+        var key = toKey(fontKey, glyphID, height, resolution);
         _map.set(key, value);
     }
 
     public function existsGlyph(fontKey:FontKey, glyphID:Int, height:Int, resolution:Int) {
-        var key = toKey(fontKey, height, glyphID, resolution);
+        var key = toKey(fontKey, glyphID, height, resolution);
         return _map.exists(key);
     }
 

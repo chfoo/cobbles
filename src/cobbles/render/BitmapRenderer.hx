@@ -13,14 +13,14 @@ using Safety;
  */
 class BitmapRenderer extends BaseRenderer {
     var fontTable:FontTable;
-    var glyphCache:GlyphCache<GlyphInfo>;
+    var glyphInfoCache:GlyphInfoCache;
     var bitmap:Null<Bitmap>;
 
     public function new(fontTable:FontTable) {
         super();
 
         this.fontTable = fontTable;
-        glyphCache = new GlyphCache();
+        glyphInfoCache = new GlyphInfoCache(fontTable);
     }
 
     public function setBitmap(bitmap:Bitmap) {
@@ -52,23 +52,7 @@ class BitmapRenderer extends BaseRenderer {
     }
 
     function getGlyphInfo(penRun:PenRun, glyphShape:GlyphShape):GlyphInfo {
-        var cacheResult = glyphCache.getGlyph(penRun.fontKey, glyphShape.glyphID,
-            penRun.fontSize, resolution);
-
-        var glyphInfo;
-
-        switch cacheResult {
-            case Some(glyphInfo_):
-                glyphInfo = glyphInfo_;
-            case None:
-                var font = fontTable.getFont(penRun.fontKey);
-                glyphInfo = font.getGlyphInfo(glyphShape.glyphID);
-                glyphCache.setGlyph(
-                    penRun.fontKey, glyphShape.glyphID,
-                    penRun.fontSize, resolution, glyphInfo);
-        }
-
-        return glyphInfo;
+        return glyphInfoCache.getGlyphInfo(penRun, glyphShape, resolution);
     }
 
     function drawNotDef(penRun:PenRun, glyphShape:GlyphShape) {

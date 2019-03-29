@@ -1,6 +1,7 @@
 extraParams.hxml
 libs.hxml
 -lib utest
+-lib heaps
 -cp src
 -cp test
 -debug
