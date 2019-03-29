@@ -1,7 +1,9 @@
 package cobbles;
 
 /**
- * Indicates the visual direction and orientation of a text run.
+ * Indicates the visual flow of content.
+ *
+ * The definition depends on the context. See user class for details.
  */
 enum Direction {
     LeftToRight;

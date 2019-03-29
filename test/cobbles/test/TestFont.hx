@@ -7,7 +7,7 @@ import utest.Test;
 using Safety;
 
 class TestFont extends Test {
-    static inline var SERIF_FONT_PATH = "fonts/liberation/LiberationSerif-Regular.ttf";
+    static inline var SERIF_FONT_PATH = "resource/fonts/liberation/LiberationSerif-Regular.ttf";
 
     #if js
     static var serifData:Null<js.html.ArrayBuffer>;

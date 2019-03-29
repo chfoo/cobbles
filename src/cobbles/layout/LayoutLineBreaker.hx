@@ -5,7 +5,7 @@ import cobbles.algorithm.LineBreakingAlgorithm;
 class LayoutLineBreaker {
     var inputShapedItems:Array<ShapedItem>;
     var outputShapedItems:Array<ShapedItem>;
-    var verticalOrientation:Bool = false;
+    var orientation:Orientation = Orientation.HorizontalTopBottom;
     var lineBreakLength:Int;
     var currentLineLength:Int = 0;
     var defaultLineSpacing:Int;
@@ -18,13 +18,7 @@ class LayoutLineBreaker {
         this.defaultLineSpacing = defaultLineSpacing;
         lineBreakLength = layout.lineBreakLength;
         outputShapedItems = [];
-
-        switch layout.direction {
-            case LeftToRight | RightToLeft:
-                verticalOrientation = false;
-            case TopToBottom | BottomToTop:
-                verticalOrientation = true;
-        }
+        orientation = layout.orientation;
     }
 
     public function lineBreakItems():Array<ShapedItem> {
@@ -63,7 +57,7 @@ class LayoutLineBreaker {
     }
 
     function getInlineObjectLength(inlineObject:InlineObject):Int {
-        if (!verticalOrientation) {
+        if (orientation == HorizontalTopBottom) {
             return inlineObject.getWidth();
         } else {
             return inlineObject.getHeight();
@@ -141,7 +135,7 @@ class LayoutLineBreaker {
     }
 
     function getPenRunLength(penRun:PenRun):Int {
-        if (!verticalOrientation) {
+        if (orientation == HorizontalTopBottom) {
             return penRun.width;
         } else {
             return penRun.height;
@@ -166,7 +160,7 @@ class LayoutLineBreaker {
             var glyphShape = glyphShapes[glyphIndex];
             var glyphAdvance;
 
-            if (!verticalOrientation) {
+            if (orientation == HorizontalTopBottom) {
                 glyphAdvance = glyphShape.advanceX;
             } else {
                 glyphAdvance = glyphShape.advanceY;

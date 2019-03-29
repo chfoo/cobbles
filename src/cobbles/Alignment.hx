@@ -1,10 +1,9 @@
 package cobbles;
 
 /**
- * Indicates the text justification.
+ * Indicates the relative position of the text or object.
  *
- * For horizontal orientation, indicates left, center, or right justified text.
- * For vertical orientation, indicates top, middle, or bottom justified text.
+ * The definition depends on the context. See the user class for details.
  */
 enum Alignment {
     Start;

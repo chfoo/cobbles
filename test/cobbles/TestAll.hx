@@ -8,20 +8,9 @@ class TestAll {
         #if js
         cobbles.test.TestFont.preloadFonts()
         .then((success:Bool) -> {
-            trace("Loading runtime...");
-
-            // https://github.com/emscripten-core/emscripten/issues/5820
-            return new js.Promise((accept, reject) -> {
-                js.Syntax.code("cobbles_runtime()").then(module -> {
-                    js.Syntax.delete(module, "then");
-                    accept(module);
-                });
-            });
+            return cobbles.Runtime.loadEmscripten();
         })
-        .then((module:Any) -> {
-            trace("Binding functions...");
-            Reflect.setField(js.Browser.window, "Module", module);
-            js.Syntax.code("cobbles_bind()");
+        .then((success:Bool) -> {
             trace("Running tests...");
             runTests();
         })

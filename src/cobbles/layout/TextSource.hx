@@ -17,6 +17,7 @@ class TextRun {
     public var fontSize:Int;
     public var color:Int;
     public var direction:Direction;
+    public var language:String;
     public var script:String;
 }
 
@@ -34,14 +35,6 @@ class TextSource {
     public var items(default, null):Array<TextSourceItem>;
 
     /**
-     * Language as a BCP 47 tag.
-     *
-     * It is usually two characters. See
-     * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-     */
-    public var language:String = "en";
-
-    /**
      * Default text properties.
      */
     public var defaultTextProperties:TextProperties;
@@ -50,7 +43,6 @@ class TextSource {
     var lineBreaker:Option<LineBreakingAlgorithm>;
 
     /**
-     * @param fontKey The default font.
      * @param bidiAlgorithm  Optional bidirectional algorithm.
      *  If provided, it is applied automatically to text. The text direction
      *  should be set to match the algorithm's output direction.
@@ -112,6 +104,7 @@ class TextSource {
             fontSize: properties.fontSize,
             color: properties.color,
             direction: properties.direction,
+            language: properties.language,
             script: properties.script
         };
 
@@ -146,5 +139,12 @@ class TextSource {
      */
     public function addLineBreak(relativeSpacing:Float = 1.2) {
         items.push(LineBreakItem(relativeSpacing));
+    }
+
+    /**
+     * Clears the contents of `items`.
+     */
+    public function clear() {
+        items = [];
     }
 }

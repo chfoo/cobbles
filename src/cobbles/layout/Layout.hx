@@ -1,8 +1,6 @@
 package cobbles.layout;
 
-import cobbles.shaping.GlyphShape;
-import haxe.ds.Vector;
-import cobbles.layout.LayoutLine.LayoutLineItem;
+import haxe.ds.Option;
 import cobbles.font.FontTable;
 import cobbles.algorithm.LineBreakingAlgorithm;
 import cobbles.shaping.Shaper;
@@ -24,18 +22,38 @@ class Layout {
     public var lineBreakLength:Int = 0;
 
     /**
-     * The alignment of the text.
+     * Indicates the text alignment or justification.
      *
-     * See `Alignment` for details.
+     * * For horizontal orientation, this indicates flush left, centered, or
+     *   flush right.
+     * * For vertical orientation, this indicates top alignment, middle
+     *   alignment, or bottom alignment.
      */
     public var alignment:Alignment = Alignment.Start;
 
     /**
-     * The default text direction.
+     * The order in which runs are placed in lines.
      *
-     * See `Direction` for details.
+     * * For left-to-right or top-to-bottom, this has no effect.
+     * * For right-to-left or bottom-to-top, the order of the items in a line
+     *   is reversed for visual ordering.
+     *
+     * Note this is different from the direction of a text run. Direction
+     * on a text run controls the visual ordering of individual characters.
      */
-    @:isVar public var direction(get, set):Direction = Direction.LeftToRight;
+    public var direction:Direction = Direction.LeftToRight;
+
+    /**
+     * The orientation and flow direction of lines.
+     *
+     * * If horizontal, a line of text will flow from left to right and
+     *   subsequent lines will flow toward the bottom.
+     * * If vertical left-right, a line of text will flow from top to bottom
+     *   and subsequent lines will flow toward the right.
+     * * If vertical right-left, a line of text will flow from top to bottom
+     *   and subsequent lines will flow toward the left.
+     */
+    public var orientation:Orientation = HorizontalTopBottom;
 
     /**
      * The default line spacing as a multiplier of the font height.
@@ -50,9 +68,7 @@ class Layout {
     var fontTable:FontTable;
     var textSource:TextSource;
     var shaper:Shaper;
-    var lineBreaker:LineBreakingAlgorithm;
-
-    var verticalOrientation:Bool = false;
+    var lineBreaker:Option<LineBreakingAlgorithm>;
 
     /**
      * The text processed into lines.
@@ -71,33 +87,25 @@ class Layout {
 
     var currentLine:LayoutLine;
 
+    /**
+     * @param fontTable Font table
+     * @param textSource Text source
+     * @param shaper Shaper
+     * @param lineBreaker If `lineBreakLength` is not 0, `lineBreaker` will
+     *  be used to perform line breaking.
+     */
     public function new(fontTable:FontTable, textSource:TextSource,
-    shaper:Shaper, lineBreaker:LineBreakingAlgorithm) {
+    shaper:Shaper, ?lineBreaker:LineBreakingAlgorithm) {
         this.fontTable = fontTable;
         this.textSource = textSource;
         this.shaper = shaper;
-        this.lineBreaker = lineBreaker;
+        this.lineBreaker = lineBreaker != null ? Some(lineBreaker) : None;
 
         lines = [];
         currentLine = new LayoutLine();
 
 
         clearLines();
-    }
-
-    function get_direction():Direction {
-        return this.direction;
-    }
-
-    function set_direction(value:Direction):Direction {
-        switch value {
-            case LeftToRight | RightToLeft:
-                verticalOrientation = false;
-            case TopToBottom | BottomToTop:
-                verticalOrientation = true;
-        }
-
-        return this.direction = value;
     }
 
     /**
@@ -139,9 +147,16 @@ class Layout {
      */
     public function layout() {
         var shapedItems = shapeTextRuns();
-        var layoutLineBreaker = new LayoutLineBreaker(this, shapedItems,
-            lineBreaker, relativeToAbsoluteLineSpacing(relativeLineSpacing));
-        shapedItems = layoutLineBreaker.lineBreakItems();
+
+        switch lineBreaker {
+            case Some(lineBreaker_):
+                var layoutLineBreaker = new LayoutLineBreaker(
+                    this, shapedItems,
+                    lineBreaker_,
+                    relativeToAbsoluteLineSpacing(relativeLineSpacing));
+                shapedItems = layoutLineBreaker.lineBreakItems();
+            case None:
+        }
 
         convertShapedItemsToLines(shapedItems);
         alignLines();
@@ -187,7 +202,7 @@ class Layout {
         shaper.setText(textRun.text);
         shaper.setDirection(textRun.direction);
         shaper.setFont(font);
-        shaper.setScript(textRun.script, textSource.language);
+        shaper.setScript(textRun.script, textRun.language);
 
         var glyphShapes = shaper.shape();
 
@@ -206,7 +221,7 @@ class Layout {
     function addLayoutLineInlineObject(inlineObject:InlineObject) {
         var objectSize;
 
-        if (!verticalOrientation) {
+        if (orientation == HorizontalTopBottom) {
             objectSize = inlineObject.getWidth();
         } else {
             objectSize = inlineObject.getHeight();
@@ -218,7 +233,7 @@ class Layout {
     function addRunToCurrentLine(penRun:PenRun) {
         currentLine.items.push(LayoutLineItem.PenRunItem(penRun));
 
-        if (!verticalOrientation) {
+        if (orientation == HorizontalTopBottom) {
             currentLine.length += penRun.width;
         } else {
             currentLine.length += penRun.height;
@@ -259,7 +274,7 @@ class Layout {
         var lineSpacingSum = 0;
 
         for (line in lines) {
-            if (!verticalOrientation) {
+            if (orientation == HorizontalTopBottom) {
                 switch alignment {
                     case Start:
                         line.x = 0;
@@ -271,7 +286,7 @@ class Layout {
 
                 lineSpacingSum += line.spacing;
                 line.y = lineSpacingSum;
-                trace(line.y);
+
                 if (line.length > boundingWidth) {
                     boundingWidth = line.length;
                 }
@@ -295,7 +310,7 @@ class Layout {
             }
         }
 
-        if (!verticalOrientation) {
+        if (orientation == HorizontalTopBottom) {
             boundingHeight += Math.round(
                 textSource.defaultTextProperties.fontSize *
                 relativeLineSpacing * 0.5);

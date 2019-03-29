@@ -23,7 +23,13 @@ class TextProperties {
     public var color:Int = 0xff000000;
 
     /**
-     * Text direction.
+     * Visual ordering of the characters in the text.
+     *
+     * * For left-to-right or top-to-bottom, this has no effect.
+     * * For right-to-left or bottom-to-top, the characters in the text
+     *   will be reversed for visual ordering. If a bidirectional algorithm
+     *   has been applied, then do not use this direction as the bidi algorithm
+     *   would have reversed the characters already.
      */
     public var direction:Direction = Direction.LeftToRight;
 
@@ -33,10 +39,22 @@ class TextProperties {
     public var fontPointSize(get, set):Float;
 
     /**
+     * Language as a BCP 47 tag.
+     *
+     * It is usually two characters. See
+     * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
+     * for a full list.
+     *
+     * This field is used for OpenType fonts for enhanced context where
+     * the script tag is not enough information to determine how to shape text.
+     */
+    public var language:String = "en";
+
+    /**
      * Script of the text as a ISO 15924 tag.
      *
      * It should be a 4 character string, such as "Latn". See
-     * https://unicode.org/iso15924/codelists.html
+     * https://unicode.org/iso15924/codelists.html for a full list.
      */
     public var script:String = "Latn";
 

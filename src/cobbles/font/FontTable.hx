@@ -40,8 +40,8 @@ class FontTable implements Disposable {
         if (_notdefFontKey == null) {
             _notdefFontKey = new FontKey(-1);
 
-            _notdefFont = new Font(
-                Resource.getBytes("fonts/adobe-notdef/AND-Regular.otf"));
+            _notdefFont = new Font(Resource.getBytes(
+                "resource/fonts/adobe-notdef/AND-Regular.otf"));
         }
 
         return _notdefFontKey;
