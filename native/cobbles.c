@@ -141,11 +141,17 @@ const char* _cobbles_encode_string(Cobbles * cobbles,
     cobbles->encodingStringBuffer = outputBuffer;
     iconv_close(converter);
 
+    #ifdef COBBLES_DEBUG
+    printf("conv str: '%s'\n", outputBuffer);
+    #endif
     return outputBuffer;
 }
 
 const char* _cobbles_get_utf8_string(Cobbles * cobbles, const char * input) {
     if (cobbles->encoding == COBBLES_UTF8) {
+        #ifdef COBBLES_DEBUG
+        printf("c str: '%s'\n", input);
+        #endif
         return input;
     }
 

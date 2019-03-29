@@ -7,6 +7,7 @@ INCLUDES ?= $(HL_INCLUDE) -I /usr/include/freetype2 -I /usr/include/harfbuzz
 EMCC ?= emcc
 EMCONFIGURE ?= emconfigure
 EMMAKE ?= emmake
+OPTIMIZE_FLAGS ?= -O2
 FILES = cobbles.c cobbles_font.c cobbles_shaper.c
 
 all: hdll js
@@ -14,13 +15,15 @@ all: hdll js
 .PHONY: all hdll js libunistring.bc
 
 hdll:
-	$(GCC) -O2 -D LIBHL_EXPORTS -fPIC -shared -std=c11 \
+	$(GCC) $(OPTIMIZE_FLAGS) -D LIBHL_EXPORTS -fPIC -shared -std=c11 \
 		-o ../out/hl/cobbles.hdll \
 		$(FILES) $(INCLUDES) \
 		-lfreetype -lharfbuzz -lc
+	# I don't know how to tell gcc that it is not executable
+	chmod -x ../out/hl/cobbles.hdll
 
 js:
-	$(EMCC) -O2 -fPIC -std=c11 \
+	$(EMCC) $(OPTIMIZE_FLAGS) -fPIC -std=c11 \
 		-o ../out/js/cobbles.js $(FILES) \
 		-s USE_FREETYPE=1 -s USE_HARFBUZZ=1 \
 		-s MODULARIZE=1 -s 'EXPORT_NAME="cobbles_runtime"' \

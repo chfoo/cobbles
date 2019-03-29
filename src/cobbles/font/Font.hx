@@ -15,6 +15,8 @@ class Font implements Disposable {
     var fontPointer:CobblesFontPointer;
 
     var _isDisposed = false;
+    var _bytes:Null<Bytes>;
+    var _bytesPointer:Null<NativeBytes>;
 
     /**
      * Opens a font.
@@ -31,11 +33,14 @@ class Font implements Disposable {
             fontPointer_ = CobblesExtern.open_font_file(
                 NativeData.getCobblesPointer(), path.toNativeString(), faceIndex);
         } else if (bytes != null) {
-            var bytesPointer = bytes.toNativeBytes();
+            // Freetype requires bytes to be kept alive, so we keep
+            // a reference to it
+            _bytes = bytes;
+            _bytesPointer = bytes.toNativeBytes();
 
             fontPointer_ = CobblesExtern.open_font_bytes(
-                NativeData.getCobblesPointer(), bytesPointer, bytes.length, faceIndex);
-            bytes.releaseNativeBytes(bytesPointer);
+                NativeData.getCobblesPointer(), _bytesPointer,
+                _bytes.length, faceIndex);
         } else {
             throw "path or bytes must be given";
         }
@@ -55,10 +60,19 @@ class Font implements Disposable {
     }
 
     public function dispose() {
-        fontPointer.run(fontPointer_ -> {
-            CobblesExtern.font_close(fontPointer_);
-            _isDisposed = true;
-        });
+        if (_isDisposed) {
+            return;
+        }
+
+        _isDisposed = true;
+
+        CobblesExtern.font_close(fontPointer);
+
+        if (_bytes != null && _bytesPointer != null) {
+            _bytes.releaseNativeBytes(_bytesPointer);
+            _bytes = null;
+            _bytesPointer = null;
+        }
     }
 
     public function isDisposed():Bool {
@@ -124,10 +138,10 @@ class Font implements Disposable {
         }
 
         var buffer = Bytes.alloc(16);
-        var bufferPointer = buffer.toNativeBytes();
+        var bytesPointer = buffer.toNativeBytes();
 
-        CobblesExtern.font_get_glyph_info(pointer, bufferPointer);
-        buffer.releaseNativeBytes(bufferPointer);
+        CobblesExtern.font_get_glyph_info(pointer, bytesPointer);
+        buffer.releaseNativeBytes(bytesPointer);
 
         var bitmapWidth = buffer.getInt32(0);
         var bitmapHeight = buffer.getInt32(4);
@@ -135,10 +149,10 @@ class Font implements Disposable {
 
         // Check length because HashLink allocation failure on 0 bytes.
         if (bitmap.length > 0) {
-            bufferPointer = bitmap.toNativeBytes();
+            bytesPointer = bitmap.toNativeBytes();
 
-            CobblesExtern.font_get_glyph_bitmap(pointer, bufferPointer);
-            buffer.releaseNativeBytes(bufferPointer);
+            CobblesExtern.font_get_glyph_bitmap(pointer, bytesPointer);
+            bitmap.releaseNativeBytes(bytesPointer);
         }
 
         var glyphInfo:GlyphInfo = {
