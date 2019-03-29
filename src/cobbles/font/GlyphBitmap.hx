@@ -6,28 +6,28 @@ import haxe.io.Bytes;
  * Information for drawing a glyph.
  */
 @:structInit
-class GlyphInfo {
+class GlyphBitmap {
     /**
      * Width of bitmap in pixels.
      */
-    public var bitmapWidth(default, null):Int;
+    public var width(default, null):Int;
 
     /**
      * Height of bitmap in pixels.
      */
-    public var bitmapHeight(default, null):Int;
+    public var height(default, null):Int;
 
     /**
      * Alpha channel, 8-bit pixel bitmap.
      */
-    public var bitmap(default, null):Bytes;
+    public var data(default, null):Bytes;
 
     /**
      * Bearing X in pixels.
      *
      * (Distance from the origin to the leftmost of the ink.)
      */
-    public var bitmapLeft(default, null):Int;
+    public var left(default, null):Int;
 
     /**
      * Bearing Y in pixels.
@@ -36,5 +36,5 @@ class GlyphInfo {
      *
      * (Distance from the baseline to the topmost of the ink.)
      */
-    public var bitmapTop(default, null):Int;
+    public var top(default, null):Int;
 }

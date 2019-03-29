@@ -2,7 +2,7 @@ package cobbles.render.heaps;
 
 
 import haxe.Int64;
-import cobbles.font.GlyphInfo;
+import cobbles.font.GlyphBitmap;
 import h2d.Tile;
 import h3d.mat.Texture;
 import h3d.mat.Data.TextureFormat;
@@ -15,7 +15,7 @@ class GlyphAtlasInfo {
     public var y:Int;
     public var width:Int;
     public var height:Int;
-    public var glyphInfo:GlyphInfo;
+    public var glyphBitmap:GlyphBitmap;
 }
 
 class TextureAtlas {
@@ -45,11 +45,11 @@ class TextureAtlas {
 
         for (item in items) {
             var glyphAtlasInfo = item.value;
-            var glyphInfo = glyphAtlasInfo.glyphInfo;
+            var glyphBitmap = glyphAtlasInfo.glyphBitmap;
 
             bitmap.drawBytes(penX, penY,
                 glyphAtlasInfo.width, glyphAtlasInfo.height,
-                glyphInfo.bitmap);
+                glyphBitmap.data);
 
             glyphAtlasInfo.x = penX;
             glyphAtlasInfo.y = penY;
@@ -91,14 +91,14 @@ class TextureAtlas {
     }
 
     public function addGlyph(fontKey:FontKey, glyphID:Int, height:Int,
-    resolution:Int, glyphInfo:GlyphInfo) {
+    resolution:Int, glyphBitmap:GlyphBitmap) {
         glyphMap.setGlyph(
             fontKey, glyphID, height, resolution, {
                 x: 0,
                 y: 0,
-                width: glyphInfo.bitmapWidth,
-                height: glyphInfo.bitmapHeight,
-                glyphInfo: glyphInfo
+                width: glyphBitmap.width,
+                height: glyphBitmap.height,
+                glyphBitmap: glyphBitmap
             });
 
         var result = glyphMap.getGlyph(fontKey, glyphID, height, resolution);

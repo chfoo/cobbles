@@ -125,9 +125,9 @@ class Font implements Disposable {
     }
 
     /**
-     * Returns glyph information for the given glyph ID.
+     * Returns glyph bitmap for the given glyph ID.
      */
-    public function getGlyphInfo(glyphID:Int):GlyphInfo {
+    public function getGlyphBitmap(glyphID:Int):GlyphBitmap {
         var pointer = fontPointer.sure();
         CobblesExtern.font_load_glyph(pointer, glyphID);
 
@@ -155,14 +155,14 @@ class Font implements Disposable {
             bitmap.releaseNativeBytes(bytesPointer);
         }
 
-        var glyphInfo:GlyphInfo = {
-            bitmapWidth: bitmapWidth,
-            bitmapHeight: bitmapHeight,
-            bitmapLeft: buffer.getInt32(8),
-            bitmapTop: buffer.getInt32(12),
-            bitmap: bitmap,
+        var glyphBitmap:GlyphBitmap = {
+            width: bitmapWidth,
+            height: bitmapHeight,
+            left: buffer.getInt32(8),
+            top: buffer.getInt32(12),
+            data: bitmap,
         };
 
-        return glyphInfo;
+        return glyphBitmap;
     }
 }

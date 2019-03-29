@@ -3,9 +3,9 @@ package cobbles.render;
 import cobbles.shaping.GlyphShape;
 import cobbles.layout.PenRun;
 import cobbles.font.FontTable;
-import cobbles.font.GlyphInfo;
+import cobbles.font.GlyphBitmap;
 
-class GlyphInfoCache extends GlyphCache<GlyphInfo> {
+class GlyphBitmapCache extends GlyphCache<GlyphBitmap> {
     var fontTable:FontTable;
 
     public function new(fontTable:FontTable, maxSize:Int = 1024) {
@@ -13,7 +13,7 @@ class GlyphInfoCache extends GlyphCache<GlyphInfo> {
         this.fontTable = fontTable;
     }
 
-    public function getGlyphInfo(penRun:PenRun, glyphShape:GlyphShape, resolution:Int):GlyphInfo {
+    public function getGlyphBitmap(penRun:PenRun, glyphShape:GlyphShape, resolution:Int):GlyphBitmap {
         var cacheResult = getGlyph(penRun.fontKey, glyphShape.glyphID,
             penRun.fontSize, resolution);
 
@@ -24,7 +24,7 @@ class GlyphInfoCache extends GlyphCache<GlyphInfo> {
                 glyphInfo = glyphInfo_;
             case None:
                 var font = fontTable.getFont(penRun.fontKey);
-                glyphInfo = font.getGlyphInfo(glyphShape.glyphID);
+                glyphInfo = font.getGlyphBitmap(glyphShape.glyphID);
                 setGlyph(
                     penRun.fontKey, glyphShape.glyphID,
                     penRun.fontSize, resolution, glyphInfo);

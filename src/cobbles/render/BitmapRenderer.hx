@@ -1,7 +1,7 @@
 package cobbles.render;
 
 import cobbles.layout.InlineObject;
-import cobbles.font.GlyphInfo;
+import cobbles.font.GlyphBitmap;
 import cobbles.shaping.GlyphShape;
 import cobbles.layout.PenRun;
 import cobbles.font.FontTable;
@@ -13,14 +13,14 @@ using Safety;
  */
 class BitmapRenderer extends BaseRenderer {
     var fontTable:FontTable;
-    var glyphInfoCache:GlyphInfoCache;
+    var glyphBitmapCache:GlyphBitmapCache;
     var bitmap:Null<Bitmap>;
 
     public function new(fontTable:FontTable) {
         super();
 
         this.fontTable = fontTable;
-        glyphInfoCache = new GlyphInfoCache(fontTable);
+        glyphBitmapCache = new GlyphBitmapCache(fontTable);
     }
 
     public function setBitmap(bitmap:Bitmap) {
@@ -29,7 +29,7 @@ class BitmapRenderer extends BaseRenderer {
 
     override function renderGlyph(penRun:PenRun, glyphShapeIndex:Int) {
         var glyphShape = penRun.glyphShapes[glyphShapeIndex];
-        var glyphInfo = getGlyphInfo(penRun, glyphShape);
+        var glyphBitmap = getGlyphBitmap(penRun, glyphShape);
 
         if (glyphShape.glyphID == 0) {
             drawNotDef(penRun, glyphShape);
@@ -37,10 +37,10 @@ class BitmapRenderer extends BaseRenderer {
         }
 
         bitmap.sure().drawBytes(
-            penPixelX + point64ToPixel(glyphShape.offsetX) + glyphInfo.bitmapLeft,
-            penPixelY + point64ToPixel(glyphShape.offsetY) - glyphInfo.bitmapTop,
-            glyphInfo.bitmapWidth, glyphInfo.bitmapHeight,
-            glyphInfo.bitmap);
+            penPixelX + point64ToPixel(glyphShape.offsetX) + glyphBitmap.left,
+            penPixelY + point64ToPixel(glyphShape.offsetY) - glyphBitmap.top,
+            glyphBitmap.width, glyphBitmap.height,
+            glyphBitmap.data);
     }
 
     override function renderInlineObject(inlineObject:InlineObject) {
@@ -51,8 +51,8 @@ class BitmapRenderer extends BaseRenderer {
             false);
     }
 
-    function getGlyphInfo(penRun:PenRun, glyphShape:GlyphShape):GlyphInfo {
-        return glyphInfoCache.getGlyphInfo(penRun, glyphShape, resolution);
+    function getGlyphBitmap(penRun:PenRun, glyphShape:GlyphShape):GlyphBitmap {
+        return glyphBitmapCache.getGlyphBitmap(penRun, glyphShape, resolution);
     }
 
     function drawNotDef(penRun:PenRun, glyphShape:GlyphShape) {

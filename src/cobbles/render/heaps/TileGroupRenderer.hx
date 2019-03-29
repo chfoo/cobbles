@@ -4,13 +4,13 @@ import cobbles.layout.InlineObject;
 import cobbles.layout.PenRun;
 import h2d.Tile;
 import cobbles.layout.Layout;
-import cobbles.font.GlyphInfo;
+import cobbles.font.GlyphBitmap;
 import cobbles.font.FontTable;
 import h2d.TileGroup;
 
 class TileGroupRenderer extends BaseRenderer {
     var fontTable:FontTable;
-    var glyphInfoCache:GlyphInfoCache;
+    var glyphBitmapCache:GlyphBitmapCache;
     public var textureAtlas(default, null):TextureAtlas;
     var tileGroup:TileGroup;
 
@@ -18,7 +18,7 @@ class TileGroupRenderer extends BaseRenderer {
         super();
 
         this.fontTable = fontTable;
-        glyphInfoCache = new GlyphInfoCache(fontTable);
+        glyphBitmapCache = new GlyphBitmapCache(fontTable);
         textureAtlas = new TextureAtlas(textureSize, textureSize);
     }
 
@@ -64,9 +64,9 @@ class TileGroupRenderer extends BaseRenderer {
                 continue;
             }
 
-            var glyphInfo = glyphInfoCache.getGlyphInfo(penRun, glyphShape, resolution);
+            var glyphBitmap = glyphBitmapCache.getGlyphBitmap(penRun, glyphShape, resolution);
 
-            textureAtlas.addGlyph(penRun.fontKey, glyphShape.glyphID, penRun.fontSize, resolution, glyphInfo);
+            textureAtlas.addGlyph(penRun.fontKey, glyphShape.glyphID, penRun.fontSize, resolution, glyphBitmap);
             missCount += 1;
         }
 
@@ -86,7 +86,7 @@ class TileGroupRenderer extends BaseRenderer {
         var blue = (penRun.color & 0xFF) / 255;
 
         // tileGroup.addColor(penPixelX, penPixelY, red, green, blue, 1.0, tile);
-        tileGroup.add(penPixelX, penPixelY, tile);
+        tileGroup.add(penPixelX + glyphShape.offsetX, penPixelY, tile);
     }
 
     override function renderInlineObject(inlineObject:InlineObject) {

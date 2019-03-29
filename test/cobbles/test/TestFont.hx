@@ -61,20 +61,20 @@ class TestFont extends Test {
 
         Assert.notEquals(0, glyphID);
 
-        var glyphInfo = font.getGlyphInfo(glyphID);
+        var glyphBitmap = font.getGlyphBitmap(glyphID);
 
-        Assert.notEquals(0, glyphInfo.bitmapWidth);
-        Assert.notEquals(0, glyphInfo.bitmapHeight);
+        Assert.notEquals(0, glyphBitmap.width);
+        Assert.notEquals(0, glyphBitmap.height);
 
-        trace('${glyphInfo.bitmapWidth} ${glyphInfo.bitmapHeight}');
+        trace('${glyphBitmap.width} ${glyphBitmap.height}');
 
         var buf = new StringBuf();
         buf.add("Glyph:\n");
 
-        for (row in 0...glyphInfo.bitmapHeight) {
-            for (col in 0...glyphInfo.bitmapWidth) {
-                var index = row * glyphInfo.bitmapWidth + col;
-                var value = glyphInfo.bitmap.get(index);
+        for (row in 0...glyphBitmap.height) {
+            for (col in 0...glyphBitmap.width) {
+                var index = row * glyphBitmap.width + col;
+                var value = glyphBitmap.data.get(index);
 
                 if (value >= 127) {
                     buf.add("X");
