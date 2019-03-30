@@ -45,6 +45,13 @@ class BaseBitmap implements Bitmap {
     }
 
     public function drawDebugBox(x:Int, y:Int, width:Int, height:Int, filled:Bool) {
+        if (width > 0) {
+            width -= 1;
+        }
+        if (height > 0) {
+            height -= 1;
+        }
+
         // Top line
         drawLine(x, y, x + width, y);
 

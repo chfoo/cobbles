@@ -71,6 +71,8 @@ class TextureAtlas {
             }
         }
 
+        drawNotdefGlyph();
+
         texture.uploadPixels(bitmap.pixels);
     }
 
@@ -87,6 +89,11 @@ class TextureAtlas {
         });
 
         return items;
+    }
+
+    function drawNotdefGlyph() {
+        var size = 16;
+        bitmap.drawDebugBox(width - size, height - size, size, size, true);
     }
 
     public function hasGlyph(glyphKey:GlyphRenderKey) {
@@ -111,16 +118,24 @@ class TextureAtlas {
         if (glyphAtlasInfo != null) {
             tile.setPosition(glyphAtlasInfo.x, glyphAtlasInfo.y);
             tile.setSize(glyphAtlasInfo.width, glyphAtlasInfo.height);
+
+            return {
+                tile: tile,
+                bitmapTop: glyphAtlasInfo.glyphBitmap.top,
+                bitmapLeft: glyphAtlasInfo.glyphBitmap.left
+            };
         } else {
-            // TODO: fallback glyph
-            tile.setSize(16, 16);
+            var size = 16;
+            tile.setPosition(width - size, height - size);
+            tile.setSize(size, size);
+
+            return {
+                tile: tile,
+                bitmapTop: size,
+                bitmapLeft: 0
+            };
         }
 
-        return {
-            tile: tile,
-            bitmapTop: glyphAtlasInfo.glyphBitmap.top,
-            bitmapLeft: glyphAtlasInfo.glyphBitmap.left
-        };
     }
 
     public function clear() {

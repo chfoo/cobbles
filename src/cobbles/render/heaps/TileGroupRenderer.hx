@@ -61,6 +61,11 @@ class TileGroupRenderer extends BaseRenderer {
         var missCount = 0;
 
         for (glyphShape in penRun.glyphShapes) {
+            if (glyphShape.glyphID == 0) {
+                // We'll draw our own .notdef glyph
+                continue;
+            }
+
             var glyphKey = new GlyphRenderKey(penRun.fontKey,
                 glyphShape.glyphID, penRun.fontSize, resolution);
 
