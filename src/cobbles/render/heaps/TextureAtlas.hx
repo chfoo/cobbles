@@ -31,8 +31,12 @@ class TextureAtlas {
         this.height = height;
         bitmap = new PixelsBitmap(width, height);
         texture = new Texture(width, height, TextureFormat.RGBA);
-        // glyphMap = new GlyphMap(new GlyphCache(maxGlyphs));
-        glyphMap = new GlyphMap(new Int64Map<GlyphAtlasInfo>());
+
+        if (maxGlyphs > 0) {
+            glyphMap = new GlyphMap(new GlyphCache(maxGlyphs));
+        } else {
+            glyphMap = new GlyphMap(new Int64Map<GlyphAtlasInfo>());
+        }
     }
 
     public function buildTexture() {
@@ -85,45 +89,49 @@ class TextureAtlas {
         return items;
     }
 
-    public function hasGlyph(fontKey:FontKey, glyphID:Int, height:Int,
-    resolution:Int) {
-        return glyphMap.existsGlyph(fontKey, glyphID, height, resolution);
+    public function hasGlyph(glyphKey:GlyphRenderKey) {
+        return glyphMap.exists(glyphKey);
     }
 
-    public function addGlyph(fontKey:FontKey, glyphID:Int, height:Int,
-    resolution:Int, glyphBitmap:GlyphBitmap) {
-        glyphMap.setGlyph(
-            fontKey, glyphID, height, resolution, {
+    public function addGlyph(glyphKey:GlyphRenderKey, glyphBitmap:GlyphBitmap) {
+        glyphMap.set(
+            glyphKey, {
                 x: 0,
                 y: 0,
                 width: glyphBitmap.width,
                 height: glyphBitmap.height,
                 glyphBitmap: glyphBitmap
             });
-
-        var result = glyphMap.getGlyph(fontKey, glyphID, height, resolution);
     }
 
-    public function getGlyphTile(fontKey:FontKey, glyphID:Int, height:Int,
-    resolution:Int):Tile {
+    public function getGlyphTile(glyphKey:GlyphRenderKey):GlyphTile {
         var tile = Tile.fromTexture(texture);
+        var glyphAtlasInfo = glyphMap.get(glyphKey);
 
-        var result = glyphMap.getGlyph(fontKey, glyphID, height, resolution);
-
-        // trace('get $fontKey, $glyphID, $height, $resolution $result');
-
-        switch result {
-            case Some(glyphAtlasInfo):
-                tile.setPosition(glyphAtlasInfo.x, glyphAtlasInfo.y);
-                tile.setSize(glyphAtlasInfo.width, glyphAtlasInfo.height);
-            case None:
-                tile.setSize(16, 16);
+        if (glyphAtlasInfo != null) {
+            tile.setPosition(glyphAtlasInfo.x, glyphAtlasInfo.y);
+            tile.setSize(glyphAtlasInfo.width, glyphAtlasInfo.height);
+        } else {
+            // TODO: fallback glyph
+            tile.setSize(16, 16);
         }
 
-        return tile;
+        return {
+            tile: tile,
+            bitmapTop: glyphAtlasInfo.glyphBitmap.top,
+            bitmapLeft: glyphAtlasInfo.glyphBitmap.left
+        };
     }
 
     public function clear() {
         glyphMap = new GlyphMap(new Int64Map());
     }
+}
+
+
+@:structInit
+class GlyphTile {
+    public var tile:Tile;
+    public var bitmapTop:Int;
+    public var bitmapLeft:Int;
 }

@@ -226,6 +226,7 @@ class Cobbles {
      */
     public function clearText() {
         textSource.clear();
+        layout.clearLines();
     }
 
     /**

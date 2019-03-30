@@ -1,18 +1,5 @@
 package cobbles.example.heaps;
 
-import haxe.Resource;
-import cobbles.font.FontTable;
-import cobbles.render.heaps.TextureAtlas;
-import h2d.TileGroup;
-import h2d.Bitmap;
-import h2d.Tile;
-import h3d.mat.Data.TextureFormat;
-import h3d.mat.Texture;
-import haxe.io.Bytes;
-import cobbles.render.heaps.PixelsBitmap;
-
-using unifill.Unifill;
-
 class HeapsExample extends hxd.App {
     var textLayout:TextLayout;
     var fpsText:h2d.Text;
@@ -42,7 +29,7 @@ class HeapsExample extends hxd.App {
     }
 
     override function update(dt:Float) {
-        // textLayout.update();
+        textLayout.update();
         fpsText.text = 'FPS ${hxd.Timer.fps()}';
 	}
 }

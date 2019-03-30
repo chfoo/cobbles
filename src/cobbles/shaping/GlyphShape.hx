@@ -18,25 +18,25 @@ class GlyphShape {
     public var textIndex:Int;
 
     /**
-     * Amount to move the pen, temporarily, towards the right in 1/6th of a
+     * Amount to move the pen, temporarily, towards the right in 1/64th of a
      * point before drawing.
      */
     public var offsetX:Int;
 
     /**
-     * Amount to move the pen, temporarily, towards the bottom in 1/6th of a
+     * Amount to move the pen, temporarily, towards the bottom in 1/64th of a
      * point before drawing.
      */
     public var offsetY:Int;
 
     /**
-     * Amount to move the pen towards the right in 1/6th of a point after
+     * Amount to move the pen towards the right in 1/64th of a point after
      * drawing.
      */
     public var advanceX:Int;
 
     /**
-     * Amount to move the pen towards the bottom in 1/6th of a point after
+     * Amount to move the pen towards the bottom in 1/64th of a point after
      * drawing.
      */
     public var advanceY:Int;

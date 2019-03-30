@@ -46,7 +46,8 @@ class TileGroupRenderer extends BaseRenderer {
             for (item in line.items) {
                 switch item {
                     case PenRunItem(penRun):
-                        missCount += addPenRunGlyphsToAtlas(penRun, layout.resolution);
+                        missCount += addPenRunGlyphsToAtlas(
+                            penRun, layout.resolution);
                     default:
                         // pass
                 }
@@ -60,13 +61,17 @@ class TileGroupRenderer extends BaseRenderer {
         var missCount = 0;
 
         for (glyphShape in penRun.glyphShapes) {
-            if (textureAtlas.hasGlyph(penRun.fontKey, glyphShape.glyphID, penRun.fontSize, resolution)) {
+            var glyphKey = new GlyphRenderKey(penRun.fontKey,
+                glyphShape.glyphID, penRun.fontSize, resolution);
+
+            if (textureAtlas.hasGlyph(glyphKey)) {
                 continue;
             }
 
-            var glyphBitmap = glyphBitmapCache.getGlyphBitmap(penRun, glyphShape, resolution);
+            var glyphBitmap = glyphBitmapCache.getGlyphBitmap(
+                    penRun, glyphShape, resolution);
 
-            textureAtlas.addGlyph(penRun.fontKey, glyphShape.glyphID, penRun.fontSize, resolution, glyphBitmap);
+            textureAtlas.addGlyph(glyphKey, glyphBitmap);
             missCount += 1;
         }
 
@@ -75,21 +80,24 @@ class TileGroupRenderer extends BaseRenderer {
 
     override function renderGlyph(penRun:PenRun, glyphShapeIndex:Int) {
         var glyphShape = penRun.glyphShapes[glyphShapeIndex];
-
-        var tile = textureAtlas.getGlyphTile(
-            penRun.fontKey, glyphShape.glyphID,
+        var glyphKey = new GlyphRenderKey(penRun.fontKey, glyphShape.glyphID,
             penRun.fontSize, resolution);
+
+        var glyphTile = textureAtlas.getGlyphTile(glyphKey);
 
 
         var red = ((penRun.color & 0xFF0000) >> 16) / 255;
         var green = ((penRun.color & 0xFF00) >> 8) / 255;
         var blue = (penRun.color & 0xFF) / 255;
 
+        // TODO: color
         // tileGroup.addColor(penPixelX, penPixelY, red, green, blue, 1.0, tile);
-        tileGroup.add(penPixelX + glyphShape.offsetX, penPixelY, tile);
+        var drawX = penPixelX + glyphTile.bitmapLeft + point64ToPixel(glyphShape.offsetX);
+        var drawY = penPixelY - glyphTile.bitmapTop - point64ToPixel(glyphShape.offsetY);
+        tileGroup.add(drawX, drawY, glyphTile.tile);
     }
 
     override function renderInlineObject(inlineObject:InlineObject) {
-
+        // TODO: draw a box
     }
 }

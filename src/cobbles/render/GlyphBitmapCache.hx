@@ -14,22 +14,18 @@ class GlyphBitmapCache extends GlyphCache<GlyphBitmap> {
     }
 
     public function getGlyphBitmap(penRun:PenRun, glyphShape:GlyphShape, resolution:Int):GlyphBitmap {
-        var cacheResult = getGlyph(penRun.fontKey, glyphShape.glyphID,
+        var key = new GlyphRenderKey(penRun.fontKey, glyphShape.glyphID,
             penRun.fontSize, resolution);
+        var glyphBitmap = get(key);
 
-        var glyphInfo;
-
-        switch cacheResult {
-            case Some(glyphInfo_):
-                glyphInfo = glyphInfo_;
-            case None:
-                var font = fontTable.getFont(penRun.fontKey);
-                glyphInfo = font.getGlyphBitmap(glyphShape.glyphID);
-                setGlyph(
-                    penRun.fontKey, glyphShape.glyphID,
-                    penRun.fontSize, resolution, glyphInfo);
+        if (glyphBitmap != null) {
+            return glyphBitmap;
         }
 
-        return glyphInfo;
+        var font = fontTable.getFont(penRun.fontKey);
+        glyphBitmap = font.getGlyphBitmap(glyphShape.glyphID);
+        set(key, glyphBitmap);
+
+        return glyphBitmap;
     }
 }
