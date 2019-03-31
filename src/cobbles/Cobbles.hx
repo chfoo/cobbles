@@ -9,6 +9,8 @@ import cobbles.layout.Layout;
 import cobbles.layout.TextSource;
 import cobbles.font.FontTable;
 
+using unifill.Unifill;
+
 /**
  * Simple interface for text layout,
  */
@@ -103,10 +105,13 @@ class Cobbles {
      */
     public var lineSpacing(get, set):Float;
 
-    /**
-     * Font resolution in dots per inch.
-     */
-    public var resolution(get, set):Int;
+    // Not supported in Harfbuzz
+    // /**
+    //  * Font resolution in dots per inch.
+    //  */
+    // public var resolution(get, set):Int;
+
+    var _pendingText:Null<CobblesText>;
 
     public function new() {
         var lineBreaker = new SimpleLineBreaker();
@@ -251,10 +256,14 @@ class Cobbles {
      *  that different from the default.
      */
     public function addText(text:String):CobblesText {
-        var textProperties = textSource.defaultTextProperties.copy();
-        textSource.addText(text, textProperties);
+        if (_pendingText != null) {
+            textSource.addText(_pendingText.text, _pendingText.textProperties);
+        }
 
-        return new CobblesText(textProperties);
+        var textProperties = textSource.defaultTextProperties.copy();
+
+        _pendingText = new CobblesText(text, textProperties, fontTable);
+        return _pendingText;
     }
 
     /**
@@ -263,6 +272,11 @@ class Cobbles {
      * The layout will be ready for use in a renderer.
      */
     public function layoutText() {
+        if (_pendingText != null) {
+            textSource.addText(_pendingText.text, _pendingText.textProperties);
+            _pendingText = null;
+        }
+
         layout.layout();
     }
 }
@@ -272,10 +286,15 @@ class Cobbles {
  * `Cobbles.addText` fluent interface.
  */
 class CobblesText {
-    var textProperties:TextProperties;
+    @:allow(cobbles.Cobbles) var text:String;
+    @:allow(cobbles.Cobbles) var textProperties:TextProperties;
+    var fontTable:FontTable;
 
-    public function new(textProperties:TextProperties) {
+    public function new(text:String, textProperties:TextProperties,
+    fontTable:FontTable) {
+        this.text = text;
         this.textProperties = textProperties;
+        this.fontTable = fontTable;
     }
 
     /**
@@ -283,6 +302,16 @@ class CobblesText {
      */
     public function font(font:FontKey):CobblesText {
         textProperties.fontKey = font;
+        return this;
+    }
+
+    /**
+     * Find an appropriate font that can display the text and set that font.
+     */
+    public function detectFont():CobblesText {
+        if (text != "") {
+            textProperties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
+        }
         return this;
     }
 

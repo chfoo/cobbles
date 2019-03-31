@@ -23,6 +23,7 @@ class GlyphBitmapCache extends GlyphCache<GlyphBitmap> {
         }
 
         var font = fontTable.getFont(penRun.fontKey);
+        font.setSize(0, penRun.fontSize, 0, resolution);
         glyphBitmap = font.getGlyphBitmap(glyphShape.glyphID);
         set(key, glyphBitmap);
 

@@ -90,16 +90,15 @@ class TileGroupRenderer extends BaseRenderer {
 
         var glyphTile = textureAtlas.getGlyphTile(glyphKey);
 
-
         var red = ((penRun.color & 0xFF0000) >> 16) / 255;
         var green = ((penRun.color & 0xFF00) >> 8) / 255;
         var blue = (penRun.color & 0xFF) / 255;
 
-        // TODO: color
-        // tileGroup.addColor(penPixelX, penPixelY, red, green, blue, 1.0, tile);
         var drawX = penPixelX + glyphTile.bitmapLeft + point64ToPixel(glyphShape.offsetX);
         var drawY = penPixelY - glyphTile.bitmapTop - point64ToPixel(glyphShape.offsetY);
-        tileGroup.add(drawX, drawY, glyphTile.tile);
+
+        tileGroup.addColor(drawX, drawY, red, green, blue, 1.0, glyphTile.tile);
+        // tileGroup.add(drawX, drawY, glyphTile.tile);
     }
 
     override function renderInlineObject(inlineObject:InlineObject) {

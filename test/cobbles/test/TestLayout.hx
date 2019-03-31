@@ -42,7 +42,8 @@ class TestLayout extends Test {
         var layout = new Layout(fontTable, textSource, shaper, lineBreaker);
         // layout.alignment = Alignment.Center;
         layout.lineBreakLength = layout.pixelToPoint64(200);
-        layout.resolution = 96;
+        // Harfbuzz doesn't use dpi apparently
+        // layout.resolution = 96;
 
         layout.layout();
 
