@@ -17,6 +17,7 @@ class Cobbles {
      * Font table instance.
      */
     public var fontTable(default, null):FontTable;
+    static var _fontTableSingleton:Null<FontTable>;
 
     /**
      * Input text source instance.
@@ -110,7 +111,11 @@ class Cobbles {
     public function new() {
         var lineBreaker = new SimpleLineBreaker();
 
-        fontTable = new FontTable();
+        if (_fontTableSingleton == null) {
+            _fontTableSingleton = new FontTable();
+        }
+
+        fontTable = _fontTableSingleton;
         textSource = new TextSource(lineBreaker);
         shaper = new Shaper();
         layout = new Layout(fontTable, textSource, shaper, lineBreaker);

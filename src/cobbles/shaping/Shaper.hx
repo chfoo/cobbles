@@ -7,7 +7,7 @@ import cobbles.font.Font;
 import cobbles.native.CobblesExtern;
 
 using cobbles.native.BytesTools;
-
+using Safety;
 
 /**
  * Calculates the required glyphs and their positions for text.
@@ -20,6 +20,13 @@ class Shaper implements Disposable {
     var shaperPointer:CobblesShaperPointer;
     var _isDisposed = false;
 
+    var cache:ShapeCache;
+    var font:Null<Font>;
+    var text:String = "";
+    var script:String = "";
+    var language:String = "";
+    var direction:Direction = Direction.LeftToRight;
+
     public function new() {
         var shaperPointer_ = CobblesExtern.shaper_init(NativeData.getCobblesPointer());
 
@@ -28,6 +35,7 @@ class Shaper implements Disposable {
         }
 
         shaperPointer = shaperPointer_;
+        cache = new ShapeCache();
     }
 
     public function dispose() {
@@ -44,6 +52,7 @@ class Shaper implements Disposable {
      */
     public function setFont(font:Font) {
         CobblesExtern.shaper_set_font(shaperPointer, font.fontPointer);
+        this.font = font;
     }
 
     /**
@@ -51,6 +60,7 @@ class Shaper implements Disposable {
      */
     public function setText(text:String) {
         CobblesExtern.shaper_set_text(shaperPointer, text.toNativeString());
+        this.text = text;
     }
 
     /**
@@ -62,11 +72,17 @@ class Shaper implements Disposable {
         if (script != null) {
             CobblesExtern.shaper_set_script(
                 shaperPointer, script.toNativeString());
+            this.script = script;
+        } else {
+            this.script = "";
         }
 
         if (language != null) {
             CobblesExtern.shaper_set_language(
                 shaperPointer, language.toNativeString());
+            this.language = language;
+        } else {
+            this.language = "";
         }
     }
 
@@ -97,6 +113,7 @@ class Shaper implements Disposable {
 
         CobblesExtern.shaper_set_direction(
             shaperPointer, directionStr.toNativeString());
+        this.direction = direction;
     }
 
     /**
@@ -105,6 +122,12 @@ class Shaper implements Disposable {
      * Font and text must be set before calling this method.
      */
     public function shape():Vector<GlyphShape> {
+        switch cache.getShapes(font.sure(), text, language, script, direction) {
+            case Some(shapes):
+                return shapes;
+            case None: // pass
+        }
+
         CobblesExtern.shaper_shape(shaperPointer);
 
         var glyphCount = CobblesExtern.shaper_get_glyph_count(shaperPointer);
@@ -116,6 +139,8 @@ class Shaper implements Disposable {
         for (i in 0...glyphCount) {
             glyphs[i] = getGlyphInfo(shaperPointer, i, buffer);
         }
+
+        cache.setShapes(font.sure(), text, language, script, direction, glyphs);
 
         return glyphs;
     }

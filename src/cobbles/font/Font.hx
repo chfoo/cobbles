@@ -1,8 +1,10 @@
 package cobbles.font;
 
+import haxe.Int64;
 import cobbles.native.CobblesExtern;
 import cobbles.native.NativeData;
 import haxe.io.Bytes;
+import cobbles.ds.FNV1aHasher;
 
 using Safety;
 using cobbles.native.BytesTools;
@@ -18,6 +20,12 @@ class Font implements Disposable {
     var _bytes:Null<Bytes>;
     var _bytesPointer:Null<NativeBytes>;
 
+    public var hashCode64(default, null):Int64;
+    public var width(default, null):Int = 0;
+    public var height(default, null):Int = 0;
+    public var horizontalResolution(default, null):Int = 0;
+    public var verticalResolution(default, null):Int = 0;
+
     /**
      * Opens a font.
      *
@@ -28,10 +36,12 @@ class Font implements Disposable {
      */
     public function new(?path:String, ?bytes:Bytes, faceIndex:Int = 0) {
         var fontPointer_;
+        var hasher = new FNV1aHasher();
 
         if (path != null) {
             fontPointer_ = CobblesExtern.open_font_file(
                 NativeData.getCobblesPointer(), path.toNativeString(), faceIndex);
+            hasher.addBytes(Bytes.ofString(path));
         } else if (bytes != null) {
             // Freetype requires bytes to be kept alive, so we keep
             // a reference to it
@@ -41,6 +51,7 @@ class Font implements Disposable {
             fontPointer_ = CobblesExtern.open_font_bytes(
                 NativeData.getCobblesPointer(), _bytesPointer,
                 _bytes.length, faceIndex);
+            hasher.addBytes(bytes);
         } else {
             throw "path or bytes must be given";
         }
@@ -55,6 +66,8 @@ class Font implements Disposable {
         if (errorCode != 0) {
             throw new Exception('Failed load font, FT error $errorCode');
         }
+
+        hashCode64 = hasher.get();
 
         setPointSize(16);
     }
@@ -122,6 +135,11 @@ class Font implements Disposable {
         if (errorCode != 0) {
             throw new Exception('Failed setting size, FT error $errorCode');
         }
+
+        this.width = width;
+        this.height = height;
+        this.verticalResolution = verticalResolution;
+        this.horizontalResolution = horizontalResolution;
     }
 
     /**

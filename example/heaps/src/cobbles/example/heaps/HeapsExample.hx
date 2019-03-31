@@ -30,6 +30,6 @@ class HeapsExample extends hxd.App {
 
     override function update(dt:Float) {
         textLayout.update();
-        fpsText.text = 'FPS ${hxd.Timer.fps()}';
+        fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}';
 	}
 }
