@@ -13,7 +13,7 @@ class ShapeCache {
     var _cache:Cache<Int64,Vector<GlyphShape>>;
     var _hasher:FNV1aHasher;
 
-    public function new (maxSize:Int = 64) {
+    public function new (maxSize:Int = 128) {
         _cache = new Cache(maxSize, new Int64Map());
         _hasher = new FNV1aHasher();
     }

@@ -27,7 +27,7 @@ class Cache<K,V> implements IMap<K,V> {
     var _tail:Null<CacheNode<K,V>>;
     var _count:Int = 0;
 
-    public function new(maxSize:Int = 1024, mapImpl:IMap<K,CacheNode<K,V>>) {
+    public function new(maxSize:Int = 256, mapImpl:IMap<K,CacheNode<K,V>>) {
         this.maxSize = maxSize;
 
         _map = mapImpl;

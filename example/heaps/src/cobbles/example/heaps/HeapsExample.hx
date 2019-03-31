@@ -8,7 +8,13 @@ class HeapsExample extends hxd.App {
         super.init();
 
         textLayout = new TextLayout();
-        textLayout.tileGroup.y = 50;
+
+        var atlasBitmap = new h2d.Bitmap(
+            h2d.Tile.fromTexture(textLayout.texture), s2d);
+        atlasBitmap.y = 30;
+        atlasBitmap.alpha = 0.5;
+
+        textLayout.tileGroup.y = 30;
         s2d.addChild(textLayout.tileGroup);
         textLayout.update();
 

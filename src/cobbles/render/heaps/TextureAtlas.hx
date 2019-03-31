@@ -51,6 +51,12 @@ class TextureAtlas {
             var glyphAtlasInfo = item.value;
             var glyphBitmap = glyphAtlasInfo.glyphBitmap;
 
+            if (penX + glyphAtlasInfo.width >= width) {
+                penX = 0;
+                penY += maxHeight;
+                maxHeight = 0;
+            }
+
             bitmap.drawBytes(penX, penY,
                 glyphAtlasInfo.width, glyphAtlasInfo.height,
                 glyphBitmap.data);
@@ -63,12 +69,6 @@ class TextureAtlas {
             }
 
             penX += glyphAtlasInfo.width;
-
-            if (penX >= width) {
-                penX = 0;
-                penY += maxHeight;
-                maxHeight = 0;
-            }
         }
 
         drawNotdefGlyph();

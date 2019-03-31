@@ -14,7 +14,7 @@ class TileGroupRenderer extends BaseRenderer {
     public var textureAtlas(default, null):TextureAtlas;
     var tileGroup:TileGroup;
 
-    public function new(fontTable:FontTable, textureSize:Int = 1024) {
+    public function new(fontTable:FontTable, textureSize:Int = 512) {
         super();
 
         this.fontTable = fontTable;
