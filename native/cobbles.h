@@ -78,6 +78,8 @@ FUNC void FUNC_NAME(cobbles_font_load_glyph)(CobblesFont * font, int glyph_id);
 FUNC int FUNC_NAME(cobbles_font_get_glyph_id)(CobblesFont * font, int code_point);
 FUNC void FUNC_NAME(cobbles_font_get_glyph_info)(CobblesFont * font, CobblesFontGlyphInfoArray info);
 FUNC void FUNC_NAME(cobbles_font_get_glyph_bitmap)(CobblesFont * font, uint8_t * buffer);
+void _cobbles_font_dump(CobblesFont * font);
+
 
 FUNC CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles);
 FUNC void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper);

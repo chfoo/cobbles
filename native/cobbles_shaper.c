@@ -74,19 +74,19 @@ void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper) {
 void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction) {
     direction = _cobbles_get_utf8_string(shaper->cobbles, direction);
     hb_buffer_set_direction(shaper->buffer,
-        hb_direction_from_string(direction, strlen(direction + 1)));
+        hb_direction_from_string(direction, -1));
 }
 
 void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script) {
     script = _cobbles_get_utf8_string(shaper->cobbles, script);
     hb_buffer_set_script(shaper->buffer,
-        hb_script_from_string(script, strlen(script + 1)));
+        hb_script_from_string(script, -1));
 }
 
-void FUNC_NAME(cobbles_shaper_set_language)(CobblesShaper * shaper, const char * langauge) {
-    langauge = _cobbles_get_utf8_string(shaper->cobbles, langauge);
+void FUNC_NAME(cobbles_shaper_set_language)(CobblesShaper * shaper, const char * language) {
+    language = _cobbles_get_utf8_string(shaper->cobbles, language);
     hb_buffer_set_language(shaper->buffer,
-        hb_language_from_string(langauge, strlen(langauge + 1)));
+        hb_language_from_string(language, -1));
 }
 
 void FUNC_NAME(cobbles_shaper_shape)(CobblesShaper * shaper) {

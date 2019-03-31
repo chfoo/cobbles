@@ -13,6 +13,10 @@ CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * 
     path = _cobbles_get_utf8_string(cobbles, path);
     font->ft_error_code = FT_New_Face(cobbles->ft_library, path, face_index, &(font->face));
 
+    #ifdef COBBLES_DEBUG
+    _cobbles_font_dump(font);
+    #endif
+
     return font;
 }
 
@@ -25,6 +29,10 @@ CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * by
 
     font->cobbles = cobbles;
     font->ft_error_code = FT_New_Memory_Face(cobbles->ft_library, bytes, length, face_index, &(font->face));
+
+    #ifdef COBBLES_DEBUG
+    _cobbles_font_dump(font);
+    #endif
 
     return font;
 }
@@ -68,6 +76,17 @@ void FUNC_NAME(cobbles_font_get_glyph_bitmap)(CobblesFont * font, uint8_t * buff
     }
 
     memcpy(buffer, font->face->glyph->bitmap.buffer, length);
+}
+
+void _cobbles_font_dump(CobblesFont * font) {
+    FT_ULong charcode;
+    FT_UInt gindex;
+
+    charcode = FT_Get_First_Char(font->face, &gindex);
+    while (gindex != 0) {
+        printf("charcode %lx index %d\n", charcode, gindex);
+        charcode = FT_Get_Next_Char(font->face, charcode, &gindex);
+    }
 }
 
 #ifdef LIBHL_EXPORTS
