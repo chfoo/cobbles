@@ -1,5 +1,6 @@
 package cobbles.example.heaps;
 
+import haxe.io.Bytes;
 import h3d.mat.Texture;
 import haxe.Resource;
 import h2d.TileGroup;
@@ -14,7 +15,7 @@ enum DemoMode {
 
 class TextLayout {
     var cobbles:Cobbles;
-    var defaultFont:FontKey;
+    var defaultFont:Null<FontKey>;
     var counter:Int = 0;
     var demoMode:DemoMode = LeftText;
 
@@ -23,10 +24,22 @@ class TextLayout {
     public var tileGroup(default, null):TileGroup;
     public var texture(default, null):Texture;
 
-    public function new() {
+    public function new(fonts:Array<{name:String, data:Bytes}>) {
         cobbles = new Cobbles();
-        defaultFont = cobbles.addFontBytes(Resource.getBytes(
-            "resource/fonts/liberation/LiberationSerif-Regular.ttf"));
+
+        for (font in fonts) {
+            var fontKey;
+
+            if (font.data != null) {
+                fontKey = cobbles.addFontBytes(font.data);
+            } else {
+                fontKey = cobbles.addFontFile(font.name);
+            }
+
+            if (defaultFont == null) {
+                defaultFont = fontKey;
+            }
+        }
 
         cobbles.lineBreakLength = 0;
         cobbles.font = defaultFont;

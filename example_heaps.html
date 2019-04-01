@@ -15,11 +15,52 @@
                 height: 100%;
             }
         </style>
+        <link href="https://code.jquery.com/ui/1.12.1/themes/dark-hive/jquery-ui.css" rel="stylesheet">
     </head>
     <body>
+        <noscript>JavaScript is required.</noscript>
         <canvas id="webgl" width="640" height="480"></canvas>
-        <script src="out/js/cobbles.js"></script>
-        <script src="cobbles_binding.js"></script>
-        <script src="out/js/example_heaps.js"></script>
+        <div id="downloadDialog">The engine requires a minimal download of 3 MB and the fonts requires 16 MB.</div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
+            crossorigin="anonymous"></script>
+        <script>
+            var demoLoadAllFonts = false;
+
+            $("#downloadDialog").dialog({
+                title: "Download data?",
+                buttons: [
+                    {
+                        text: "Minimal only",
+                        click: function () {
+                            loadScripts();
+                            $(this).dialog("close");
+                        }
+                    },
+                    {
+                        text: "Download all",
+                        click: function () {
+                            demoLoadAllFonts = true;
+                            loadScripts();
+                            $(this).dialog("close");
+                        }
+                    }
+                ]
+            });
+
+            function loadScripts() {
+                var urls = ["out/js/cobbles.js", "cobbles_binding.js", "out/js/example_heaps.js"];
+                var urlsLength = urls.length;
+
+                for (var index = 0; index < urlsLength; index++) {
+                    var scriptElement = document.createElement("script");
+                    scriptElement.src = urls[index];
+                    document.body.appendChild(scriptElement);
+                }
+            }
+        </script>
     </body>
 </html>

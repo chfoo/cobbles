@@ -28,5 +28,6 @@ js:
 		-s USE_FREETYPE=1 -s USE_HARFBUZZ=1 \
 		-s MODULARIZE=1 -s 'EXPORT_NAME="cobbles_runtime"' \
 		-s EXTRA_EXPORTED_RUNTIME_METHODS='["ccall", "cwrap"]' \
+		-s ALLOW_MEMORY_GROWTH=1 \
 		-s EXPORTED_FUNCTIONS='[ "_cobbles_init", "_cobbles_destroy", "_cobbles_get_error", "_cobbles_open_font_file", "_cobbles_open_font_bytes", "_cobbles_font_close", "_cobbles_font_get_error",  "_cobbles_font_set_size", "_cobbles_font_get_glyph_id",  "_cobbles_font_load_glyph", "_cobbles_font_get_glyph_info", "_cobbles_font_get_glyph_bitmap", "_cobbles_shaper_init", "_cobbles_shaper_destroy", "_cobbles_shaper_get_error", "_cobbles_shaper_set_font", "_cobbles_shaper_set_text", "_cobbles_shaper_guess_text_properties", "_cobbles_shaper_set_direction", "_cobbles_shaper_set_script", "_cobbles_shaper_set_language", "_cobbles_shaper_set_direction", "_cobbles_shaper_shape", "_cobbles_shaper_get_glyph_count", "_cobbles_shaper_get_glyph_info" ]'
 

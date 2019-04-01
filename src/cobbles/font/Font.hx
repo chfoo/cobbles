@@ -45,12 +45,15 @@ class Font implements Disposable {
         } else if (bytes != null) {
             // Freetype requires bytes to be kept alive, so we keep
             // a reference to it
+            #if !(js)
+            // except on js since bytes are copied into the Emscripten heap
             _bytes = bytes;
+            #end
             _bytesPointer = bytes.toNativeBytes();
 
             fontPointer_ = CobblesExtern.open_font_bytes(
                 NativeData.getCobblesPointer(), _bytesPointer,
-                _bytes.length, faceIndex);
+                bytes.length, faceIndex);
             hasher.addBytes(bytes);
         } else {
             throw "path or bytes must be given";
@@ -84,6 +87,10 @@ class Font implements Disposable {
         if (_bytes != null && _bytesPointer != null) {
             _bytes.releaseNativeBytes(_bytesPointer);
             _bytes = null;
+            _bytesPointer = null;
+        } else if(_bytesPointer != null) {
+            var dummy = Bytes.alloc(0);
+            dummy.releaseNativeBytes(_bytesPointer);
             _bytesPointer = null;
         }
     }
