@@ -93,7 +93,7 @@ class LayoutLineBreaker {
 
     function processPenRunBreakOpportunity(penRun:PenRun):Int {
         var runLength = 0;
-        var sot = lineBuffer.length == 0;
+        var lineBreakRules = layout.lineBreakRules.sure();
 
         if (penRun.glyphShapes.length > 0) {
             breakOpportunity.emergencyPenRunItemIndex = lineBuffer.length;
@@ -106,7 +106,7 @@ class LayoutLineBreaker {
             var codePointIndex = glyphShape.textIndex + penRun.textOffset;
 
             if (lineLength + glyphAdvance < layout.lineBreakLength) {
-                if (layout.lineBreakRules[codePointIndex] == Opportunity) {
+                if (lineBreakRules[codePointIndex] == Opportunity) {
                     breakOpportunity.glyphIndex = glyphIndex;
                 }
 
