@@ -47,9 +47,9 @@ package cobbles.native;
 
 @:enum
 abstract NativeEncoding(Int) {
-    var Utf8 = 0;
-    var Utf16 = 1;
-    var Utf32 = 2;
+    var Utf8 = 1;
+    var Utf16 = 2;
+    var Utf32 = 3;
 }
 
 #if cpp
@@ -134,7 +134,11 @@ extern class CobblesExtern {
 
     #if cpp @:native("cobbles_shaper_set_text")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_set_text") #end
-    public static function shaper_set_text(shaper:CobblesShaperPointer, text:NativeString):Void;
+    public static function shaper_set_text(shaper:CobblesShaperPointer, text:NativeString, encoding:NativeEncoding):Void;
+
+    #if cpp @:native("cobbles_shaper_set_text")
+    #elseif hl @:hlNative("cobbles", "cobbles_shaper_set_text") #end
+    public static function shaper_set_text_binary(shaper:CobblesShaperPointer, text:NativeBytes, encoding:NativeEncoding):Void;
 
     #if cpp @:native("cobbles_shaper_guess_text_properties")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_guess_text_properties") #end

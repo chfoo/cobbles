@@ -1,5 +1,6 @@
 package cobbles.shaping;
 
+import unifill.CodePoint;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
 import cobbles.ds.FNV1aHasher;
@@ -9,19 +10,20 @@ import cobbles.ds.Cache;
 import cobbles.ds.Int64Map;
 import haxe.ds.Option;
 
+using Safety;
+
+/**
+ * Helper for ShapeCache to cache shaped text.
+ */
 class ShapeCache {
     var _cache:Cache<Int64,Vector<GlyphShape>>;
-    var _hasher:FNV1aHasher;
 
     public function new (maxSize:Int = 128) {
         _cache = new Cache(maxSize, new Int64Map());
-        _hasher = new FNV1aHasher();
     }
 
-    public function getShapes(font:Font, text:String, language:String,
-    script:String, direction:Direction):Option<Vector<GlyphShape>> {
-        var key = getKey(font, text, language, script, direction);
-        var result = _cache.get(key);
+    public function getShapes(cacheKey:ShapeCacheKey):Option<Vector<GlyphShape>> {
+        var result = _cache.get(cacheKey.getHash());
 
         if (result != null) {
             return Some(result);
@@ -30,35 +32,102 @@ class ShapeCache {
         }
     }
 
-    public function setShapes(font:Font, text:String, language:String,
-    script:String, direction:Direction, glyphShapes:Vector<GlyphShape>) {
-        var key = getKey(font, text, language, script, direction);
-        _cache.set(key, glyphShapes);
+    public function setShapes(cacheKey:ShapeCacheKey, glyphShapes:Vector<GlyphShape>) {
+        _cache.set(cacheKey.getHash(), glyphShapes);
+    }
+}
+
+
+/**
+ * Represents a key for the cache
+ */
+class ShapeCacheKey {
+    var hasher:FNV1aHasher;
+    var dirty:Bool = true;
+    var font:Null<Font>;
+    var text:Null<String>;
+    var codePoints:Null<Array<CodePoint>>;
+    var language:String = "";
+    var script:String = "";
+    var direction:Direction = Direction.LeftToRight;
+
+    public function new() {
+        hasher = new FNV1aHasher();
     }
 
-    function getKey(font:Font, text:String, language:String, script:String, direction:Direction):Int64 {
-        _hasher.reset();
+    public function setFont(font:Font) {
+        this.font = font;
+        dirty = true;
+    }
 
-        _hasher.addInt64(font.hashCode64);
-        _hasher.addInt(font.width);
-        _hasher.addInt(font.height);
-        _hasher.addInt(font.horizontalResolution);
-        _hasher.addInt(font.verticalResolution);
-        _hasher.addBytes(Bytes.ofString(text));
-        _hasher.addBytes(Bytes.ofString(language));
-        _hasher.addBytes(Bytes.ofString(script));
+    public function setText(text:String) {
+        this.text = text;
+        this.codePoints = null;
+        dirty = true;
+    }
+
+    public function setCodePoints(codePoints:Array<CodePoint>) {
+        this.codePoints = codePoints;
+        this.text = null;
+        dirty = true;
+    }
+
+    public function setLanguage(language:String) {
+        this.language = language;
+        dirty = true;
+    }
+
+    public function setScript(script:String) {
+        this.script = script;
+        dirty = true;
+    }
+
+    public function setDirection(direction:Direction) {
+        this.direction = direction;
+        dirty = true;
+    }
+
+    public function getHash():Int64 {
+        if (!dirty) {
+            return hasher.get();
+        }
+
+        hasher.reset();
+
+        var font = font.sure();
+
+        hasher.addInt64(font.hashCode64);
+        hasher.addInt(font.width);
+        hasher.addInt(font.height);
+        hasher.addInt(font.horizontalResolution);
+        hasher.addInt(font.verticalResolution);
+
+        if (text != null) {
+            hasher.addBytes(Bytes.ofString(text));
+        }
+
+        if (codePoints != null) {
+            for (codePoint in codePoints) {
+                hasher.addInt(codePoint);
+            }
+        }
+
+        hasher.addBytes(Bytes.ofString(language));
+        hasher.addBytes(Bytes.ofString(script));
 
         switch direction {
             case LeftToRight:
-                _hasher.addByte(1);
+                hasher.addByte(1);
             case RightToLeft:
-                _hasher.addByte(2);
+                hasher.addByte(2);
             case TopToBottom:
-                _hasher.addByte(3);
+                hasher.addByte(3);
             case BottomToTop:
-                _hasher.addByte(4);
+                hasher.addByte(4);
         }
 
-        return _hasher.get();
+        dirty = false;
+
+        return hasher.get();
     }
 }

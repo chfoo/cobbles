@@ -1,5 +1,6 @@
 package cobbles.algorithm;
 
+import unifill.CodePoint;
 
 /**
  * Determines where it is suitable for breaking runs of texts into lines.
@@ -10,26 +11,35 @@ package cobbles.algorithm;
  */
 interface LineBreakingAlgorithm {
     /**
-     * Returns break information from the given text.
+     * Returns break information from the given text in code points.
+     *
+     * @param codePoints Text as iterable Unicode code points.
+     * @param sot If true, a line break is never allowed at the start of the
+     *  text. If false, it is assumed that the given input is a segment of a
+     *  whole text and breaking at the start of the given input may be allowed.
      */
-    public function getBreaks(text:String):LineBreakInfo;
+    public function getBreaks(codePoints:Iterable<CodePoint>, sot:Bool):Array<LineBreakRule>;
 }
 
-interface LineBreakInfo {
+/**
+ * Line breaking rule for breaking before the code point.
+ */
+enum LineBreakRule {
     /**
-     * Returns the number of code points.
+     * Break is required.
      */
-    public function count():Int;
-
+    Mandatory;
     /**
-     * Returns whether a break is permitted before the code point
-     * at the given index.
+     * May be broken.
      */
-    public function canBreak(index:Int):Bool;
-
+    Opportunity;
     /**
-     * Returns whether a line break is mandatory before the code
-     * point at the given index.
+     * Break is not allowed.
      */
-    public function isMandatory(index:Int):Bool;
+    Prohibited;
+    /**
+     * Not specified.
+     */
+    Unspecified;
 }
+

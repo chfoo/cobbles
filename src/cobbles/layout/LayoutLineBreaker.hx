@@ -1,218 +1,191 @@
 package cobbles.layout;
 
+import cobbles.shaping.GlyphShape;
 import cobbles.algorithm.LineBreakingAlgorithm;
+import cobbles.layout.Layout.ShapedItem;
+
+using Safety;
+
+private class ItemBreakInfo {
+    public var penRunItemIndex:Int = -1;
+    public var glyphIndex:Int = -1;
+
+    public var emergencyPenRunItemIndex:Int = -1;
+    public var emergencyGlyphIndex:Int = -1;
+
+    public var inlineObjectItemIndex:Int = -1;
+
+    public function new() {
+    }
+
+    public function reset() {
+        penRunItemIndex = -1;
+        glyphIndex = -1;
+        emergencyPenRunItemIndex = -1;
+        emergencyGlyphIndex = -1;
+        inlineObjectItemIndex = -1;
+    }
+}
 
 class LayoutLineBreaker {
-    var inputShapedItems:Array<ShapedItem>;
-    var outputShapedItems:Array<ShapedItem>;
-    var orientation:Orientation = Orientation.HorizontalTopBottom;
-    var lineBreakLength:Int;
-    var currentLineLength:Int = 0;
-    var defaultLineSpacing:Int;
+    var layout:Layout;
     var lineBreaker:LineBreakingAlgorithm;
 
-    public function new(layout:Layout, inputShapedItems:Array<ShapedItem>,
-    lineBreaker:LineBreakingAlgorithm, defaultLineSpacing:Int) {
-        this.inputShapedItems = inputShapedItems;
+    var lineBuffer:Array<ShapedItem>;
+    var lineLength:Int = 0;
+    var breakOpportunity:ItemBreakInfo;
+
+    public function new(layout:Layout, lineBreaker:LineBreakingAlgorithm) {
+        this.layout = layout;
         this.lineBreaker = lineBreaker;
-        this.defaultLineSpacing = defaultLineSpacing;
-        lineBreakLength = layout.lineBreakLength;
-        outputShapedItems = [];
-        orientation = layout.orientation;
+        lineBuffer = [];
+        breakOpportunity = new ItemBreakInfo();
     }
 
-    public function lineBreakItems():Array<ShapedItem> {
-        while (true) {
-            var shapedItem = inputShapedItems.shift();
-
-            if (shapedItem == null) {
-                break;
-            }
-
-            switch shapedItem {
-                case PenRunItem(penRun):
-                    processPenRun(penRun);
-                case InlineObjectItem(inlineObject):
-                    processInlineObject(inlineObject);
-                case LineBreakItem(spacing):
-                    pushOutputLineBreak(spacing);
-            }
-        }
-
-        return outputShapedItems;
+    public function willPenRunOverflowLine(penRun:PenRun):Bool {
+        return willOverflowLine(getPenRunLength(penRun));
     }
 
-    function processInlineObject(inlineObject:InlineObject) {
-        var itemLength = getInlineObjectLength(inlineObject);
-
-        if (willOverflowLine(itemLength)) {
-            pushOutputLineBreak();
-        }
-
-        pushOutputItem(InlineObjectItem(inlineObject), itemLength);
-
-        if (willOverflowLine(0)) {
-            pushOutputLineBreak();
-        }
+    public function willInlineObjectOverflowLine(inlineObject:InlineObject):Bool {
+        return willOverflowLine(getInlineObjectLength(inlineObject));
     }
 
-    function getInlineObjectLength(inlineObject:InlineObject):Int {
-        if (orientation == HorizontalTopBottom) {
-            return inlineObject.getWidth();
-        } else {
-            return inlineObject.getHeight();
-        }
+    public function isLineOverflown():Bool {
+        return willOverflowLine(0);
     }
 
     function willOverflowLine(extraLength:Int):Bool {
-        return lineBreakLength > 0 &&
-            currentLineLength + extraLength > lineBreakLength;
-    }
-
-    function pushOutputLineBreak(?spacing:Int) {
-        if (spacing == null) {
-            spacing = defaultLineSpacing;
-        }
-
-        outputShapedItems.push(LineBreakItem(spacing));
-        currentLineLength = 0;
-    }
-
-    function pushOutputItem(item:ShapedItem, itemLength:Int) {
-        outputShapedItems.push(item);
-        currentLineLength += itemLength;
-    }
-
-    function undoOutputPenRunItem():PenRun {
-        var item = outputShapedItems.pop();
-        var itemLength;
-
-        switch item {
-            case PenRunItem(penRun):
-                itemLength = getPenRunLength(penRun);
-                currentLineLength -= itemLength;
-                return penRun;
-            default:
-                throw "wrong type";
-        }
-    }
-
-    function processPenRun(penRun:PenRun) {
-        var overflowIndex = tryPushFullPenRun(penRun);
-
-        if (overflowIndex >= 0 && isLastOutputInlineObject()) {
-            pushOutputLineBreak();
-            overflowIndex = tryPushFullPenRun(penRun);
-        }
-
-        if (overflowIndex < 0) {
-            return;
-        }
-
-        var breakIndex = findBreakOpportunity(penRun, 0, overflowIndex);
-
-        if (breakIndex >= 0) {
-            breakAndAddPenRun(penRun, breakIndex);
-            return;
-
-        } else if (isLastOutputPenRun()) {
-            var previousPenRun = undoOutputPenRunItem();
-            var previousBreakOpportunity = findBreakOpportunity(
-                previousPenRun, 0, previousPenRun.glyphShapes.length - 1);
-
-            if (previousBreakOpportunity >= 0) {
-                inputShapedItems.unshift(PenRunItem(penRun));
-                breakAndAddPenRun(previousPenRun, previousBreakOpportunity);
-                return;
-            }
-
-            // FIXME: there could be even more break opportunities in
-            // previously output pen runs
-        }
-
-        pushOutputLineBreak();
-        pushOutputItem(PenRunItem(penRun), getPenRunLength(penRun));
+        return layout.lineBreakLength > 0 &&
+            lineLength + extraLength > layout.lineBreakLength;
     }
 
     function getPenRunLength(penRun:PenRun):Int {
-        if (orientation == HorizontalTopBottom) {
+        if (layout.orientation == HorizontalTopBottom) {
             return penRun.width;
         } else {
             return penRun.height;
         }
     }
 
-    function tryPushFullPenRun(penRun:PenRun):Int {
-        var nextOverflowIndex = findNextOverflow(penRun, 0);
-
-        if (nextOverflowIndex < 0) {
-            pushOutputItem(PenRunItem(penRun), getPenRunLength(penRun));
+    function getInlineObjectLength(inlineObject:InlineObject):Int {
+        if (layout.orientation == HorizontalTopBottom) {
+            return inlineObject.getWidth();
+        } else {
+            return inlineObject.getHeight();
         }
-
-        return nextOverflowIndex;
     }
 
-    function findNextOverflow(penRun:PenRun, glyphStartIndex:Int):Int {
+    public function flush(destination:Array<ShapedItem>) {
+        for (item in lineBuffer) {
+            destination.push(item);
+        }
+
+        lineBuffer = [];
+        lineLength = 0;
+        breakOpportunity.reset();
+    }
+
+    public function pushPenRun(penRun:PenRun) {
+        var runLength = processPenRunBreakOpportunity(penRun);
+        lineLength += runLength;
+        lineBuffer.push(PenRunItem(penRun));
+    }
+
+    function processPenRunBreakOpportunity(penRun:PenRun):Int {
         var runLength = 0;
-        var glyphShapes = penRun.glyphShapes;
+        var sot = lineBuffer.length == 0;
 
-        for (glyphIndex in glyphStartIndex...glyphShapes.length) {
-            var glyphShape = glyphShapes[glyphIndex];
-            var glyphAdvance;
+        if (penRun.glyphShapes.length > 0) {
+            breakOpportunity.emergencyPenRunItemIndex = lineBuffer.length;
+            breakOpportunity.emergencyGlyphIndex = 1;
+        }
 
-            if (orientation == HorizontalTopBottom) {
-                glyphAdvance = glyphShape.advanceX;
-            } else {
-                glyphAdvance = glyphShape.advanceY;
-            }
+        for (glyphIndex in 0...penRun.glyphShapes.length) {
+            var glyphShape = penRun.glyphShapes[glyphIndex];
+            var glyphAdvance = getGlyphAdvance(glyphShape);
+            var codePointIndex = glyphShape.textIndex + penRun.textOffset;
 
-            if (willOverflowLine(runLength + glyphAdvance)) {
-                return glyphIndex;
+            if (lineLength + glyphAdvance < layout.lineBreakLength) {
+                if (layout.lineBreakRules[codePointIndex] == Opportunity) {
+                    breakOpportunity.glyphIndex = glyphIndex;
+                }
+
+                breakOpportunity.emergencyGlyphIndex = glyphIndex;
+                breakOpportunity.penRunItemIndex = lineBuffer.length;
             }
 
             runLength += glyphAdvance;
         }
 
-        return -1;
+        return runLength;
     }
 
-    function findBreakOpportunity(penRun:PenRun, glyphStartIndex:Int,
-    glyphEndIndex:Int):Int {
-        var glyphShapes = penRun.glyphShapes;
-        var glyphIndex = glyphEndIndex;
-        var lineBreaks = lineBreaker.getBreaks(penRun.text);
+    function getGlyphAdvance(glyphShape:GlyphShape):Int {
+        if (layout.orientation == HorizontalTopBottom) {
+            return glyphShape.advanceX;
+        } else {
+            return glyphShape.advanceY;
+        }
+    }
 
-        while (glyphIndex > glyphStartIndex) {
-            if (lineBreaks.canBreak(glyphShapes[glyphIndex].textIndex)) {
-                return glyphIndex;
+    public function pushInlineObject(inlineObject:InlineObject) {
+        breakOpportunity.emergencyPenRunItemIndex = lineBuffer.length;
+        lineBuffer.push(InlineObjectItem(inlineObject));
+        lineLength += getInlineObjectLength(inlineObject);
+    }
+
+    public function popOverflowedItems(rejectItems:Array<ShapedItem>) {
+        if (breakOpportunity.penRunItemIndex >= 0 || breakOpportunity.inlineObjectItemIndex >= 0) {
+            if (breakOpportunity.penRunItemIndex > breakOpportunity.inlineObjectItemIndex) {
+                popOverflowAtPenRunGlyph(
+                    breakOpportunity.penRunItemIndex,
+                    breakOpportunity.glyphIndex,
+                    rejectItems);
+            } else {
+                popLineBufferUntilIndex(
+                    breakOpportunity.inlineObjectItemIndex,
+                    rejectItems);
             }
 
-            glyphIndex -= 1;
+        } else if (breakOpportunity.emergencyPenRunItemIndex >= 0) {
+            popOverflowAtPenRunGlyph(
+                breakOpportunity.emergencyPenRunItemIndex,
+                breakOpportunity.emergencyGlyphIndex, rejectItems);
+        } else {
+            // Impossible to not overflow
+        }
+    }
+
+    function popOverflowAtPenRunGlyph(penRunItemIndex:Int, glyphIndex:Int, rejectItems:Array<ShapedItem>) {
+        popLineBufferUntilIndex(penRunItemIndex, rejectItems);
+        var rejectPenRun = splitPenRunInBuffer(glyphIndex);
+        rejectItems.push(PenRunItem(rejectPenRun));
+    }
+
+    function popLineBufferUntilIndex(untilIndex:Int, rejectItems:Array<ShapedItem>) {
+        var itemIndex = lineBuffer.length - 1;
+
+        while (itemIndex > untilIndex) {
+            rejectItems.unshift(lineBuffer.pop().sure());
+        }
+    }
+
+    function splitPenRunInBuffer(index:Int):PenRun {
+        switch lineBuffer.pop().sure() {
+            case PenRunItem(penRun):
+                lineLength -= getPenRunLength(penRun);
+
+                var keep = penRun.slice(0, index);
+                var reject = penRun.slice(index, penRun.glyphShapes.length);
+
+                lineBuffer.push(PenRunItem(keep));
+                lineLength += getPenRunLength(keep);
+
+                return reject;
+
+            default:
+                throw "not pen run";
         }
 
-        return -1;
-    }
-
-    function isLastOutputPenRun():Bool {
-        var length = outputShapedItems.length;
-        return length > 0 &&
-            outputShapedItems[length - 1].match(PenRunItem(_));
-    }
-
-    function isLastOutputInlineObject():Bool {
-        var length = outputShapedItems.length;
-        return length > 0 &&
-            outputShapedItems[length - 1].match(InlineObjectItem(_));
-    }
-
-    function breakAndAddPenRun(penRun:PenRun, breakIndex:Int) {
-        var donePenRun = penRun.slice(0, breakIndex);
-        var pendingPenRun = penRun.slice(breakIndex, penRun.glyphShapes.length);
-        var doneLength = getPenRunLength(donePenRun);
-        var pendingLength = getPenRunLength(pendingPenRun);
-
-        pushOutputItem(PenRunItem(donePenRun), doneLength);
-        pushOutputLineBreak();
-        pushOutputItem(PenRunItem(pendingPenRun), pendingLength);
     }
 }

@@ -1,24 +1,41 @@
 package cobbles.layout;
 
+import haxe.ds.Vector;
+import unifill.CodePoint;
 import cobbles.algorithm.LineBreakingAlgorithm;
 import haxe.ds.Option;
 import cobbles.font.FontTable.FontKey;
 import cobbles.algorithm.BidiAlgorithm;
 
 using unifill.Unifill;
+using cobbles.util.MoreUnicodeTools;
 
 /**
  * A segment of text containing the same properties.
  */
 @:structInit
 class TextRun {
-    public var text:String;
+    public var codePointIndex:Int;
+    public var codePointCount:Int;
     public var fontKey:FontKey;
     public var fontSize:Int;
     public var color:Int;
     public var direction:Direction;
     public var language:String;
     public var script:String;
+
+    public function copy():TextRun {
+        return {
+            codePointIndex: codePointIndex,
+            codePointCount: codePointCount,
+            fontKey: fontKey,
+            fontSize: fontSize,
+            color: color,
+            direction: direction,
+            language: language,
+            script: script
+        };
+    }
 }
 
 
@@ -33,6 +50,7 @@ enum TextSourceItem {
  */
 class TextSource {
     public var items(default, null):Array<TextSourceItem>;
+    public var codePoints(default, null):Array<CodePoint>;
 
     /**
      * Default text properties.
@@ -40,24 +58,18 @@ class TextSource {
     public var defaultTextProperties:TextProperties;
 
     var bidiAlgorithm:Option<BidiAlgorithm>;
-    var lineBreaker:Option<LineBreakingAlgorithm>;
 
     /**
      * @param bidiAlgorithm  Optional bidirectional algorithm.
      *  If provided, it is applied automatically to text. The text direction
      *  should be set to match the algorithm's output direction.
-     * @param lineBreaker Optional line breaking algorithm.
-     *  If provided, any mandatory line breaking characters will automatically
-     *  cause a line break. Otherwise, you must call `addLineBreak()`
-     *  manually if you want explicit line breaks.
      */
     public function new(?bidiAlgorithm:BidiAlgorithm,
     ?lineBreaker:LineBreakingAlgorithm) {
-
         this.bidiAlgorithm = bidiAlgorithm != null ? Some(bidiAlgorithm) : None;
-        this.lineBreaker = lineBreaker != null ? Some(lineBreaker) : None;
 
-        items = new Array();
+        items = [];
+        codePoints = [];
 
         defaultTextProperties = new TextProperties();
     }
@@ -88,18 +100,14 @@ class TextSource {
                 // pass
         }
 
-        switch lineBreaker {
-            case Some(lineBreaker_):
-                breakLinesAndAddRun(lineBreaker_, text, properties);
-            case None:
-                addRunFromProperties(text, properties);
-        }
-
+        addRunFromProperties(text.toCodePoints(), properties);
     }
 
-    function addRunFromProperties(text:String, properties:TextProperties) {
+    function addRunFromProperties(codePoints:Array<CodePoint>,
+    properties:TextProperties) {
         var run:TextRun = {
-            text: text,
+            codePointIndex: this.codePoints.length,
+            codePointCount: codePoints.length,
             fontKey: properties.fontKey,
             fontSize: properties.fontSize,
             color: properties.color,
@@ -109,26 +117,10 @@ class TextSource {
         };
 
         items.push(RunItem(run));
-    }
 
-    function breakLinesAndAddRun(lineBreaker:LineBreakingAlgorithm,
-    text:String, properties:TextProperties) {
-        var beginIndex = 0;
-        var lineBreaks = lineBreaker.getBreaks(text);
-
-        for (breakIndex in 0...lineBreaks.count()) {
-            if (lineBreaks.isMandatory(breakIndex)) {
-                var endIndex = breakIndex;
-
-                addRunFromProperties(
-                    text.uSubstring(beginIndex, endIndex), properties);
-
-                beginIndex = endIndex;
-            }
+        for (codePoint in codePoints) {
+            this.codePoints.push(codePoint);
         }
-
-        @:nullSafety(Off) // bug with inline
-        addRunFromProperties(text.uSubstr(beginIndex), properties);
     }
 
     /**
@@ -146,5 +138,6 @@ class TextSource {
      */
     public function clear() {
         items = [];
+        codePoints = [];
     }
 }

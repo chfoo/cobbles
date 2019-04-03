@@ -21,9 +21,9 @@
 extern "C" {
 #endif
 
-#define COBBLES_UTF8 0
-#define COBBLES_UTF16 1
-#define COBBLES_UTF32 2
+#define COBBLES_UTF8 1
+#define COBBLES_UTF16 2
+#define COBBLES_UTF32 3
 typedef int CobblesEncoding;
 
 typedef struct {
@@ -85,7 +85,7 @@ FUNC CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles);
 FUNC void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper);
 FUNC int FUNC_NAME(cobbles_shaper_get_error)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * font);
-FUNC void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text);
+FUNC void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding);
 FUNC void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction);
 FUNC void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script);

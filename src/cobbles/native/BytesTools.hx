@@ -11,6 +11,10 @@ class BytesTools {
         #if cpp
         return cpp.NativeArray.address(bytes.getData(), 0);
         #elseif hl
+        if (bytes.length == 0) {
+            throw "0 sized bytes not supported in HL";
+        }
+
         return (bytes.getData():hl.Bytes).sure();
 
         #elseif js

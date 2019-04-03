@@ -4,4 +4,3 @@ libs.hxml
 -cp src
 -cp example/heaps/src
 -main cobbles.example.heaps.HeapsExample
--resource resource/fonts/liberation/LiberationSerif-Regular.ttf@resource/fonts/liberation/LiberationSerif-Regular.ttf

@@ -1,5 +1,6 @@
 package cobbles.layout;
 
+import cobbles.shaping.GlyphShape;
 import haxe.ds.Option;
 import cobbles.font.FontTable;
 import cobbles.algorithm.LineBreakingAlgorithm;
@@ -7,6 +8,12 @@ import cobbles.shaping.Shaper;
 import cobbles.layout.TextSource;
 
 using Safety;
+
+enum ShapedItem {
+    PenRunItem(penRun:PenRun);
+    InlineObjectItem(inlineObject:InlineObject);
+    LineBreakItem(spacing:Int);
+}
 
 /**
  * Arranges glyphs and lines.
@@ -60,13 +67,14 @@ class Layout {
      */
     public var relativeLineSpacing:Float = 1.2;
 
+    // Harfbuzz doesn't use DPI in the calculations, so disable writing to it.
     /**
      * Font resolution in dots per inch.
      */
-    public var resolution:Int = 72;
+    public var resolution(default, null):Int = 72;
 
     var fontTable:FontTable;
-    var textSource:TextSource;
+    public var textSource(default, null):TextSource;
     var shaper:Shaper;
     var lineBreaker:Option<LineBreakingAlgorithm>;
 
@@ -86,6 +94,9 @@ class Layout {
     public var boundingHeight(default, null):Int = 0;
 
     var currentLine:LayoutLine;
+
+    @:allow(cobbles.layout.LayoutLineBreaker)
+    var lineBreakRules:Null<Array<LineBreakRule>>;
 
     /**
      * @param fontTable Font table
@@ -136,7 +147,7 @@ class Layout {
         return Math.round(pixels / resolution * 72 * 64);
     }
 
-    function relativeToAbsoluteLineSpacing(relativeSpacing:Float):Int {
+    public function relativeToAbsoluteLineSpacing(relativeSpacing:Float):Int {
         return Math.round(textSource.defaultTextProperties.fontSize * relativeSpacing);
     }
 
@@ -146,19 +157,27 @@ class Layout {
      * The processed lines are appended to the array in the `lines` member.
      */
     public function layout() {
-        var shapedItems = shapeTextRuns();
+        var textSourceItems;
 
         switch lineBreaker {
             case Some(lineBreaker_):
-                var layoutLineBreaker = new LayoutLineBreaker(
-                    this, shapedItems,
-                    lineBreaker_,
-                    relativeToAbsoluteLineSpacing(relativeLineSpacing));
-                shapedItems = layoutLineBreaker.lineBreakItems();
+                lineBreakRules = lineBreaker_.getBreaks(textSource.codePoints, true);
+                textSourceItems = convertMandatoryBreaks(lineBreaker_);
             case None:
+                textSourceItems = textSource.items;
+        }
+
+        var shapedItems = shapeTextRuns(textSourceItems);
+
+        switch lineBreaker {
+            case Some(lineBreaker_):
+                shapedItems = processLineBreaking(shapedItems, lineBreaker_);
+            case None:
+                // pass
         }
 
         convertShapedItemsToLines(shapedItems);
+        calculateBoundingSize();
         alignLines();
     }
 
@@ -177,10 +196,10 @@ class Layout {
         lines.push(currentLine);
     }
 
-    function shapeTextRuns():Array<ShapedItem> {
+    function shapeTextRuns(textSourceItems:Array<TextSourceItem>):Array<ShapedItem> {
         var shapedItems:Array<ShapedItem> = [];
 
-        for (textSourceItem in textSource.items) {
+        for (textSourceItem in textSourceItems) {
             switch textSourceItem {
                 case RunItem(textRun):
                     shapedItems.push(PenRunItem(shapeTextRun(textRun)));
@@ -195,11 +214,61 @@ class Layout {
         return shapedItems;
     }
 
+    function convertMandatoryBreaks(lineBreaker:LineBreakingAlgorithm):Array<TextSourceItem> {
+        var items = [];
+        for (item in textSource.items) {
+            switch item {
+                case RunItem(textRun):
+                    convertMandatoryBreaksTextRun(lineBreaker, textRun, items);
+                default:
+                    items.push(item);
+            }
+        }
+        return items;
+    }
+
+    function convertMandatoryBreaksTextRun(lineBreaker:LineBreakingAlgorithm,
+    textRun:TextRun, output:Array<TextSourceItem>) {
+        var beginIndex = textRun.codePointIndex;
+        var length = textRun.codePointCount;
+        var lineBreakRules = lineBreakRules.sure();
+        var lastBreakIndex = 0;
+
+        for (index in beginIndex...beginIndex+length) {
+            if (index > 0 && lineBreakRules[index] == Mandatory) {
+                var newTextRun = textRun.copy();
+
+                newTextRun.codePointIndex = lastBreakIndex;
+                newTextRun.codePointCount = index - lastBreakIndex;
+
+                output.push(RunItem(newTextRun));
+                output.push(LineBreakItem(relativeLineSpacing));
+
+                // + 1 to not include the line break character
+                lastBreakIndex = index + 1;
+            }
+        }
+
+        if (lastBreakIndex == 0) {
+            output.push(RunItem(textRun));
+        } else {
+            var newTextRun = textRun.copy();
+
+            newTextRun.codePointIndex = lastBreakIndex;
+            newTextRun.codePointCount = length - lastBreakIndex;
+
+            output.push(RunItem(newTextRun));
+        }
+    }
+
     function shapeTextRun(textRun:TextRun):PenRun {
         var font = fontTable.getFont(textRun.fontKey);
         font.setSize(0, textRun.fontSize, 0, resolution);
 
-        shaper.setText(textRun.text);
+        var codePoints = textSource.codePoints.slice(
+            textRun.codePointIndex,
+            textRun.codePointIndex + textRun.codePointCount);
+        shaper.setCodePoints(codePoints);
         shaper.setDirection(textRun.direction);
         shaper.setFont(font);
         shaper.setScript(textRun.script, textRun.language);
@@ -207,15 +276,59 @@ class Layout {
         var glyphShapes = shaper.shape();
 
         var penRun:PenRun = {
-            text: textRun.text,
             fontKey: textRun.fontKey,
             fontSize: textRun.fontSize,
             script: textRun.script,
             color: textRun.color,
-            glyphShapes: glyphShapes
+            glyphShapes: glyphShapes,
+            textOffset: textRun.codePointIndex
         };
 
         return penRun;
+    }
+
+    function processLineBreaking(input:Array<ShapedItem>, lineBreaker:LineBreakingAlgorithm) {
+        var layoutLineBreaker = new LayoutLineBreaker(this, lineBreaker);
+        var output = [];
+
+        function flushAndAddNewLine() {
+            layoutLineBreaker.flush(output);
+            output.push(LineBreakItem(getDefaultSpacing()));
+        }
+
+        while (true) {
+            var item = input.shift();
+
+            if (item == null) {
+                break;
+            }
+
+            switch item {
+                case PenRunItem(penRun):
+                    layoutLineBreaker.pushPenRun(penRun);
+
+                    if (layoutLineBreaker.isLineOverflown()) {
+                        layoutLineBreaker.popOverflowedItems(input);
+                        flushAndAddNewLine();
+                    }
+
+                case InlineObjectItem(inlineObject):
+                    if (layoutLineBreaker.willInlineObjectOverflowLine(inlineObject)) {
+                        flushAndAddNewLine();
+                    }
+
+                    layoutLineBreaker.pushInlineObject(inlineObject);
+
+                    if (layoutLineBreaker.isLineOverflown()) {
+                        flushAndAddNewLine();
+                    }
+                case LineBreakItem(spacing):
+                    layoutLineBreaker.flush(output);
+                    output.push(item);
+            }
+        }
+
+        return output;
     }
 
     function addLayoutLineInlineObject(inlineObject:InlineObject) {
@@ -249,10 +362,15 @@ class Layout {
         lines.push(currentLine);
 
         if (spacing == null) {
-            currentLine.spacing = relativeToAbsoluteLineSpacing(relativeLineSpacing);
+            currentLine.spacing = getDefaultSpacing();
         } else {
             currentLine.spacing = spacing;
         }
+    }
+
+    @:allow(cobbles.layout.LayoutLineBreaker)
+    function getDefaultSpacing():Int {
+        return relativeToAbsoluteLineSpacing(relativeLineSpacing);
     }
 
     function convertShapedItemsToLines(shapedItems:Array<ShapedItem>) {
@@ -269,44 +387,72 @@ class Layout {
     }
 
     function alignLines() {
-        boundingWidth = 0;
-        boundingHeight = 0;
+        switch orientation {
+            case HorizontalTopBottom:
+                alignHorizontalLines();
+            case VerticalLeftRight | VerticalRightLeft:
+                alignVerticalLines();
+        }
+    }
+
+    function alignHorizontalLines() {
+         var lineSpacingSum = 0;
+
+        for (line in lines) {
+            switch alignment {
+                case Start:
+                    line.x = 0;
+                case Center:
+                    line.x = Math.round((boundingWidth - line.length) / 2);
+                case End:
+                    line.x = boundingWidth - line.length;
+            }
+
+            lineSpacingSum += line.spacing;
+            line.y = lineSpacingSum;
+        }
+    }
+
+    function alignVerticalLines() {
         var lineSpacingSum = 0;
 
         for (line in lines) {
+            switch alignment {
+                case Start:
+                    line.y = 0;
+                case Center:
+                    line.y = Math.round((boundingHeight - line.length) / 2);
+                case End:
+                    line.y = boundingHeight - line.length;
+            }
+
+            lineSpacingSum += line.spacing;
+
+            if (orientation == VerticalLeftRight) {
+                line.x = lineSpacingSum;
+            } else {
+                line.x = boundingWidth - lineSpacingSum;
+            }
+        }
+    }
+
+    function calculateBoundingSize() {
+        boundingWidth = 0;
+        boundingHeight = 0;
+
+        for (line in lines) {
             if (orientation == HorizontalTopBottom) {
-                switch alignment {
-                    case Start:
-                        line.x = 0;
-                    case Center:
-                        line.x = Math.round((lineBreakLength - line.length) / 2);
-                    case End:
-                        line.x = lineBreakLength - line.length;
-                }
-
-                lineSpacingSum += line.spacing;
-                line.y = lineSpacingSum;
-
                 if (line.length > boundingWidth) {
                     boundingWidth = line.length;
                 }
-                boundingHeight = lineSpacingSum;
-            } else {
-                switch alignment {
-                    case Start:
-                        line.y = 0;
-                    case Center:
-                        line.y = Math.round((lineBreakLength - line.length) / 2);
-                    case End:
-                        line.y = lineBreakLength - line.length;
-                }
 
-                lineSpacingSum += line.spacing;
-                line.x = lineSpacingSum;
-                boundingWidth = lineSpacingSum;
+                boundingHeight += line.spacing;
+            } else {
                 if (line.length > boundingHeight) {
                     boundingHeight = line.length;
                 }
+
+                boundingWidth += line.spacing;
             }
         }
 
@@ -320,6 +466,5 @@ class Layout {
                 relativeLineSpacing * 0.5);
         }
     }
-
 
 }

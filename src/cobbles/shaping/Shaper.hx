@@ -1,5 +1,7 @@
 package cobbles.shaping;
 
+import cobbles.shaping.ShapeCache;
+import unifill.CodePoint;
 import cobbles.native.NativeData;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
@@ -7,6 +9,7 @@ import cobbles.font.Font;
 import cobbles.native.CobblesExtern;
 
 using cobbles.native.BytesTools;
+using cobbles.util.MoreUnicodeTools;
 using Safety;
 
 /**
@@ -21,11 +24,7 @@ class Shaper implements Disposable {
     var _isDisposed = false;
 
     var cache:ShapeCache;
-    var font:Null<Font>;
-    var text:String = "";
-    var script:String = "";
-    var language:String = "";
-    var direction:Direction = Direction.LeftToRight;
+    var cacheKey:ShapeCacheKey;
 
     public function new() {
         var shaperPointer_ = CobblesExtern.shaper_init(NativeData.getCobblesPointer());
@@ -36,6 +35,7 @@ class Shaper implements Disposable {
 
         shaperPointer = shaperPointer_;
         cache = new ShapeCache();
+        cacheKey = new ShapeCacheKey();
     }
 
     public function dispose() {
@@ -52,15 +52,36 @@ class Shaper implements Disposable {
      */
     public function setFont(font:Font) {
         CobblesExtern.shaper_set_font(shaperPointer, font.fontPointer);
-        this.font = font;
+        cacheKey.setFont(font);
     }
 
     /**
      * Sets the text to be processed.
      */
     public function setText(text:String) {
-        CobblesExtern.shaper_set_text(shaperPointer, text.toNativeString());
-        this.text = text;
+        CobblesExtern.shaper_set_text(shaperPointer, text.toNativeString(), cast 0);
+        cacheKey.setText(text);
+    }
+
+    /**
+     * Sets the text as array of code points to be processed.
+     */
+    public function setCodePoints(codePoints:Array<CodePoint>) {
+        #if hl
+        // Can't allocate 0 bytes in HashLink
+        if (codePoints.length == 0) {
+            setText("");
+            return;
+        }
+        #end
+
+        var buffer = codePoints.toUTF32Bytes();
+        var bufferPointer = buffer.toNativeBytes();
+
+        CobblesExtern.shaper_set_text_binary(shaperPointer, bufferPointer, NativeEncoding.Utf32);
+        buffer.releaseNativeBytes(bufferPointer);
+
+        cacheKey.setCodePoints(codePoints);
     }
 
     /**
@@ -72,17 +93,17 @@ class Shaper implements Disposable {
         if (script != null) {
             CobblesExtern.shaper_set_script(
                 shaperPointer, script.toNativeString());
-            this.script = script;
+            cacheKey.setScript(script);
         } else {
-            this.script = "";
+            cacheKey.setScript("");
         }
 
         if (language != null) {
             CobblesExtern.shaper_set_language(
                 shaperPointer, language.toNativeString());
-            this.language = language;
+            cacheKey.setLanguage(language);
         } else {
-            this.language = "";
+            cacheKey.setLanguage("");
         }
     }
 
@@ -113,7 +134,7 @@ class Shaper implements Disposable {
 
         CobblesExtern.shaper_set_direction(
             shaperPointer, directionStr.toNativeString());
-        this.direction = direction;
+        cacheKey.setDirection(direction);
     }
 
     /**
@@ -122,7 +143,7 @@ class Shaper implements Disposable {
      * Font and text must be set before calling this method.
      */
     public function shape():Vector<GlyphShape> {
-        switch cache.getShapes(font.sure(), text, language, script, direction) {
+        switch cache.getShapes(cacheKey) {
             case Some(shapes):
                 return shapes;
             case None: // pass
@@ -140,7 +161,7 @@ class Shaper implements Disposable {
             glyphs[i] = getGlyphInfo(shaperPointer, i, buffer);
         }
 
-        cache.setShapes(font.sure(), text, language, script, direction, glyphs);
+        cache.setShapes(cacheKey, glyphs);
 
         return glyphs;
     }

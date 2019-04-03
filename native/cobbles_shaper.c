@@ -50,10 +50,14 @@ void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * fo
     hb_ft_font_set_load_flags(shaper->font, FT_LOAD_DEFAULT);
 }
 
-void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text) {
+void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding) {
     hb_buffer_clear_contents(shaper->buffer);
 
-    switch (shaper->cobbles->encoding) {
+    if (encoding == 0) {
+        encoding = shaper->cobbles->encoding;
+    }
+
+    switch (encoding) {
         case COBBLES_UTF16:
             // FIXME: check if endian is correct
             hb_buffer_add_utf16(shaper->buffer, (const uint16_t*) text, -1, 0, -1);
@@ -120,7 +124,7 @@ DEFINE_PRIM(_ABSTRACT(CobblesShaper), cobbles_shaper_init, _ABSTRACT(Cobbles));
 DEFINE_PRIM(_VOID, cobbles_shaper_destroy, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_I32, cobbles_shaper_get_error, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_VOID, cobbles_shaper_set_font, _ABSTRACT(CobblesShaper) _ABSTRACT(CobblesFont));
-DEFINE_PRIM(_VOID, cobbles_shaper_set_text, _ABSTRACT(CobblesShaper) _BYTES);
+DEFINE_PRIM(_VOID, cobbles_shaper_set_text, _ABSTRACT(CobblesShaper) _BYTES _I32);
 DEFINE_PRIM(_VOID, cobbles_shaper_guess_text_properties, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_VOID, cobbles_shaper_set_direction, _ABSTRACT(CobblesShaper) _BYTES);
 DEFINE_PRIM(_VOID, cobbles_shaper_set_script, _ABSTRACT(CobblesShaper) _BYTES);

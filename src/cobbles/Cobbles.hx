@@ -16,9 +16,9 @@ using unifill.Unifill;
  */
 class Cobbles {
     /**
-     * Font table instance.
+     * Font table singleton.
      */
-    public var fontTable(default, null):FontTable;
+    public static var fontTable(get, never):FontTable;
     static var _fontTableSingleton:Null<FontTable>;
 
     /**
@@ -116,14 +116,17 @@ class Cobbles {
     public function new() {
         var lineBreaker = new SimpleLineBreaker();
 
+        textSource = new TextSource(lineBreaker);
+        shaper = new Shaper();
+        layout = new Layout(fontTable, textSource, shaper, lineBreaker);
+    }
+
+    static function get_fontTable():FontTable {
         if (_fontTableSingleton == null) {
             _fontTableSingleton = new FontTable();
         }
 
-        fontTable = _fontTableSingleton;
-        textSource = new TextSource(lineBreaker);
-        shaper = new Shaper();
-        layout = new Layout(fontTable, textSource, shaper, lineBreaker);
+        return _fontTableSingleton;
     }
 
     function get_font():FontKey {
@@ -219,17 +222,9 @@ class Cobbles {
         return layout.resolution;
     }
 
-    function set_resolution(value:Int):Int {
-        return layout.resolution = value;
-    }
-
-    public function addFontFile(filename:String):FontKey {
-        return fontTable.openFile(filename);
-    }
-
-    public function addFontBytes(fontBytes:Bytes):FontKey {
-        return fontTable.openBytes(fontBytes);
-    }
+    // function set_resolution(value:Int):Int {
+    //     return layout.resolution = value;
+    // }
 
     /**
      * Clear the text so that new text may be added.

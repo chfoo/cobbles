@@ -1,52 +1,41 @@
 package cobbles.test.algorithm;
 
+import cobbles.algorithm.LineBreakingAlgorithm.LineBreakRule;
 import utest.Assert;
 import cobbles.algorithm.SimpleLineBreaker;
 import utest.Test;
 
+using cobbles.util.MoreUnicodeTools;
+
 class TestSimpleLineBreaker extends Test {
     public function testNewlines() {
         var breaker = new SimpleLineBreaker();
-        var breaks = breaker.getBreaks("01\n34");
+        var breaks = breaker.getBreaks("01\n34".toCodePoints(), true);
 
-        Assert.isFalse(breaks.canBreak(0));
-        Assert.isFalse(breaks.canBreak(1));
-        Assert.isTrue(breaks.canBreak(2));
-        Assert.isFalse(breaks.canBreak(3));
-        Assert.isFalse(breaks.canBreak(4));
-
-        Assert.isFalse(breaks.isMandatory(0));
-        Assert.isFalse(breaks.isMandatory(1));
-        Assert.isTrue(breaks.isMandatory(2));
-        Assert.isFalse(breaks.isMandatory(3));
-        Assert.isFalse(breaks.isMandatory(4));
+        Assert.equals(Prohibited, breaks[0]);
+        Assert.equals(Unspecified, breaks[1]);
+        Assert.equals(Mandatory, breaks[2]);
+        Assert.equals(Unspecified, breaks[3]);
+        Assert.equals(Unspecified, breaks[4]);
     }
 
     public function testSpace() {
         var breaker = new SimpleLineBreaker();
-        var breaks = breaker.getBreaks("01 34");
+        var breaks = breaker.getBreaks("01 34".toCodePoints(), true);
 
-        Assert.isFalse(breaks.canBreak(0));
-        Assert.isFalse(breaks.canBreak(1));
-        Assert.isFalse(breaks.canBreak(2));
-        Assert.isTrue(breaks.canBreak(3));
-        Assert.isFalse(breaks.canBreak(4));
-
-        for (index in 0...breaks.count()) {
-            Assert.isFalse(breaks.isMandatory(index));
-        }
+        Assert.equals(Prohibited, breaks[0]);
+        Assert.equals(Unspecified, breaks[1]);
+        Assert.equals(Unspecified, breaks[2]);
+        Assert.equals(Opportunity, breaks[3]);
+        Assert.equals(Unspecified, breaks[4]);
     }
 
     public function testCJK() {
         var breaker = new SimpleLineBreaker();
-        var breaks = breaker.getBreaks("一二三");
+        var breaks = breaker.getBreaks("一二三".toCodePoints(), true);
 
-        Assert.isFalse(breaks.canBreak(0));
-        Assert.isTrue(breaks.canBreak(1));
-        Assert.isTrue(breaks.canBreak(2));
-
-        for (index in 0...breaks.count()) {
-            Assert.isFalse(breaks.isMandatory(index));
-        }
+        Assert.equals(Prohibited, breaks[0]);
+        Assert.equals(Opportunity, breaks[1]);
+        Assert.equals(Opportunity, breaks[2]);
     }
 }

@@ -22,7 +22,8 @@ function cobbles_bind() {
     cobbles.shaper_destroy = Module.cwrap('cobbles_shaper_destroy', null, ['number']);
     cobbles.shaper_get_error = Module.cwrap('cobbles_shaper_get_error', 'number', ['number']);
     cobbles.shaper_set_font = Module.cwrap('cobbles_shaper_set_font', null, ['number', 'number']);
-    cobbles.shaper_set_text = Module.cwrap('cobbles_shaper_set_text', null, ['number', 'string']);
+    cobbles.shaper_set_text = Module.cwrap('cobbles_shaper_set_text', null, ['number', 'string', 'number']);
+    cobbles.shaper_set_text_binary = Module.cwrap('cobbles_shaper_set_text', null, ['number', 'number', 'number']);
     cobbles.shaper_guess_text_properties = Module.cwrap('cobbles_shaper_guess_text_properties', null, ['number']);
     cobbles.shaper_set_direction = Module.cwrap('cobbles_shaper_set_direction', null, ['number', 'string']);
     cobbles.shaper_set_script = Module.cwrap('cobbles_shaper_set_script', null, ['number', 'string']);

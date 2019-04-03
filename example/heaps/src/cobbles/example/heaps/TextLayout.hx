@@ -30,10 +30,12 @@ class TextLayout {
         for (font in fonts) {
             var fontKey;
 
+            trace('Load ${font.name}');
+
             if (font.data != null) {
-                fontKey = cobbles.addFontBytes(font.data);
+                fontKey = Cobbles.fontTable.openBytes(font.data);
             } else {
-                fontKey = cobbles.addFontFile(font.name);
+                fontKey = Cobbles.fontTable.openFile(font.name);
             }
 
             if (defaultFont == null) {
@@ -46,7 +48,7 @@ class TextLayout {
         cobbles.fontSize = 24;
         cobbles.color = 0xffffffff;
 
-        renderer = new TileGroupRenderer(cobbles.fontTable);
+        renderer = new TileGroupRenderer(Cobbles.fontTable);
         tileGroup = renderer.newTileGroup();
 
         texture = renderer.textureAtlas.texture;
@@ -59,7 +61,7 @@ class TextLayout {
         cobbles.addLineBreak();
 
         cobbles.addText("The quick brown fox jumps over the lazy dog. ");
-        cobbles.addText("Hel͜lo wo̎rld! ")
+        cobbles.addText("Hel͜lo\nwo̎rld! ")
             .fontSize(40)
             .color(0xffff3333);
 

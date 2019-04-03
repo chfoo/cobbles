@@ -1,39 +1,10 @@
 package cobbles.algorithm;
 
 import unifill.CodePoint;
-import haxe.ds.Vector;
 import cobbles.algorithm.LineBreakingAlgorithm;
 import haxe.EnumFlags;
 
-using unifill.Unifill;
 using cobbles.algorithm.CharTools;
-
-private enum BreakProperty {
-    Breakable;
-    Mandatory;
-}
-
-private typedef BreakFlags = EnumFlags<BreakProperty>;
-
-private class BreakInfo implements LineBreakInfo {
-    var flags:Vector<BreakFlags>;
-
-    public function new(flags:Vector<BreakFlags>) {
-        this.flags = flags;
-    }
-
-    public function count():Int {
-        return flags.length;
-    }
-
-    public function canBreak(index:Int):Bool {
-         return flags[index].has(Breakable);
-    }
-
-    public function isMandatory(index:Int):Bool {
-        return flags[index].has(Mandatory);
-    }
-}
 
 /**
  * Simple line breaking algorithm.
@@ -46,38 +17,36 @@ class SimpleLineBreaker implements LineBreakingAlgorithm {
     public function new() {
     }
 
-    public function getBreaks(text:String):BreakInfo {
-        #if hl @:nullSafety(Off) #end // bug
-        var flagsVector = new Vector<BreakFlags>(text.uLength());
+    public function getBreaks(codePoints:Iterable<CodePoint>, sot:Bool):Array<LineBreakRule> {
+        var flagsList = [];
 
         var index = 0;
         var previousCodePoint:CodePoint = 0;
         var breakableBeforeNext = false;
 
-        for (codePoint in text.uIterator()) {
-            if (index == 0) {
+        for (codePoint in codePoints) {
+            if (index == 0 && sot) {
+                flagsList.push(Prohibited);
                 index += 1;
                 continue;
             }
 
-            var flags = new BreakFlags();
-
             if (isMandatory(codePoint, previousCodePoint)) {
-                flags.set(Mandatory);
-                flags.set(Breakable);
-
+                flagsList.push(Mandatory);
             } else if (isSpace(codePoint)) {
+                flagsList.push(Unspecified);
                 breakableBeforeNext = true;
             } else if (breakableBeforeNext || isCJK(codePoint)) {
-                flags.set(Breakable);
+                flagsList.push(Opportunity);
                 breakableBeforeNext = false;
+            } else {
+                flagsList.push(Unspecified);
             }
 
-            flagsVector[index] = flags;
             index += 1;
         }
 
-        return new BreakInfo(flagsVector);
+        return flagsList;
     }
 
     function isMandatory(codePoint:CodePoint, previous:CodePoint):Bool {

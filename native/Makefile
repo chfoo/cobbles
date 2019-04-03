@@ -12,7 +12,7 @@ FILES = cobbles.c cobbles_font.c cobbles_shaper.c
 
 all: hdll js
 
-.PHONY: all hdll js libunistring.bc
+.PHONY: all hdll js
 
 hdll:
 	$(GCC) $(OPTIMIZE_FLAGS) -D LIBHL_EXPORTS -fPIC -shared -std=c11 \

@@ -3,6 +3,7 @@ package cobbles.layout;
 import haxe.ds.Vector;
 import cobbles.font.FontTable.FontKey;
 import cobbles.shaping.GlyphShape;
+import unifill.CodePoint;
 
 using unifill.Unifill;
 
@@ -13,22 +14,22 @@ using unifill.Unifill;
  */
 @:structInit
 class PenRun {
-    public var text:String;
     public var fontKey:FontKey;
     public var fontSize:Int;
     public var script:String;
     public var color:Int;
     public var glyphShapes:Vector<GlyphShape>;
+    public var textOffset:Int;
     public var width(get, never):Int;
     public var height(get, never):Int;
 
-    public function new(text, fontKey, fontSize, script, color, glyphShapes) {
-        this.text = text;
+    public function new(fontKey, fontSize, script, color, glyphShapes, textOffset) {
         this.fontKey = fontKey;
         this.fontSize = fontSize;
         this.script = script;
         this.color = color;
         this.glyphShapes = glyphShapes;
+        this.textOffset = textOffset;
     }
 
     function get_width():Int {
@@ -70,14 +71,12 @@ class PenRun {
             newGlyphShapes, 0, newGlyphShapes.length);
 
         return {
-            text: text.uSubstring(
-                glyphShapes[glyphBeginIndex].textIndex,
-                glyphShapes[glyphEndIndex - 1].textIndex + 1),
             fontKey: fontKey,
             fontSize: fontSize,
             script: script,
             color: color,
-            glyphShapes: newGlyphShapes
+            glyphShapes: newGlyphShapes,
+            textOffset: textOffset
         };
     }
 }
