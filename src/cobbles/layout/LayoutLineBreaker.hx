@@ -1,7 +1,6 @@
 package cobbles.layout;
 
 import cobbles.shaping.GlyphShape;
-import cobbles.algorithm.LineBreakingAlgorithm;
 import cobbles.layout.Layout.ShapedItem;
 
 using Safety;
@@ -29,15 +28,14 @@ private class ItemBreakInfo {
 
 class LayoutLineBreaker {
     var layout:Layout;
-    var lineBreaker:LineBreakingAlgorithm;
 
     var lineBuffer:Array<ShapedItem>;
     var lineLength:Int = 0;
     var breakOpportunity:ItemBreakInfo;
 
-    public function new(layout:Layout, lineBreaker:LineBreakingAlgorithm) {
+    public function new(layout:Layout) {
         this.layout = layout;
-        this.lineBreaker = lineBreaker;
+
         lineBuffer = [];
         breakOpportunity = new ItemBreakInfo();
     }
@@ -86,38 +84,8 @@ class LayoutLineBreaker {
     }
 
     public function pushPenRun(penRun:PenRun) {
-        var runLength = processPenRunBreakOpportunity(penRun);
-        lineLength += runLength;
         lineBuffer.push(PenRunItem(penRun));
-    }
-
-    function processPenRunBreakOpportunity(penRun:PenRun):Int {
-        var runLength = 0;
-        var lineBreakRules = layout.lineBreakRules.sure();
-
-        if (penRun.glyphShapes.length > 0) {
-            breakOpportunity.emergencyPenRunItemIndex = lineBuffer.length;
-            breakOpportunity.emergencyGlyphIndex = 1;
-        }
-
-        for (glyphIndex in 0...penRun.glyphShapes.length) {
-            var glyphShape = penRun.glyphShapes[glyphIndex];
-            var glyphAdvance = getGlyphAdvance(glyphShape);
-            var codePointIndex = glyphShape.textIndex + penRun.textOffset;
-
-            if (lineLength + glyphAdvance < layout.lineBreakLength) {
-                if (lineBreakRules[codePointIndex] == Opportunity) {
-                    breakOpportunity.glyphIndex = glyphIndex;
-                }
-
-                breakOpportunity.emergencyGlyphIndex = glyphIndex;
-                breakOpportunity.penRunItemIndex = lineBuffer.length;
-            }
-
-            runLength += glyphAdvance;
-        }
-
-        return runLength;
+        lineLength += getPenRunLength(penRun);
     }
 
     function getGlyphAdvance(glyphShape:GlyphShape):Int {
@@ -129,12 +97,13 @@ class LayoutLineBreaker {
     }
 
     public function pushInlineObject(inlineObject:InlineObject) {
-        breakOpportunity.emergencyPenRunItemIndex = lineBuffer.length;
         lineBuffer.push(InlineObjectItem(inlineObject));
         lineLength += getInlineObjectLength(inlineObject);
     }
 
     public function popOverflowedItems(rejectItems:Array<ShapedItem>) {
+        scanForBreakOpportunities();
+
         if (breakOpportunity.penRunItemIndex >= 0 || breakOpportunity.inlineObjectItemIndex >= 0) {
             if (breakOpportunity.penRunItemIndex > breakOpportunity.inlineObjectItemIndex) {
                 popOverflowAtPenRunGlyph(
@@ -156,10 +125,64 @@ class LayoutLineBreaker {
         }
     }
 
+    function scanForBreakOpportunities() {
+        breakOpportunity.reset();
+
+        var scannedLineLength = 0;
+        var lineBreakRules = layout.textSource.lineBreakRules;
+
+        function scanPenRun(itemIndex:Int, penRun:PenRun) {
+            for (glyphIndex in 0...penRun.glyphShapes.length) {
+                var glyphShape = penRun.glyphShapes[glyphIndex];
+                var glyphAdvance = getGlyphAdvance(glyphShape);
+                var codePointIndex = glyphShape.textIndex + penRun.textOffset;
+                var isInBounds = scannedLineLength + glyphAdvance < layout.lineBreakLength;
+
+                if (isInBounds) {
+                    if (lineBreakRules[codePointIndex] == Opportunity) {
+                        breakOpportunity.penRunItemIndex = itemIndex;
+                        breakOpportunity.glyphIndex = glyphIndex;
+                    }
+
+                    breakOpportunity.emergencyPenRunItemIndex = itemIndex;
+                    breakOpportunity.emergencyGlyphIndex = glyphIndex;
+                } else if (breakOpportunity.emergencyPenRunItemIndex < 0) {
+                    breakOpportunity.emergencyPenRunItemIndex = itemIndex;
+                    breakOpportunity.emergencyGlyphIndex = glyphIndex;
+                }
+
+                scannedLineLength += glyphAdvance;
+            }
+        }
+
+        for (itemIndex in 0...lineBuffer.length) {
+            var item = lineBuffer[itemIndex];
+
+            switch item {
+                case PenRunItem(penRun):
+                    scanPenRun(itemIndex, penRun);
+                case InlineObjectItem(inlineObject):
+                    breakOpportunity.inlineObjectItemIndex = itemIndex;
+                default:
+                    // pass
+            }
+        }
+
+        // Don't allow a break at the start of the line
+        if (breakOpportunity.penRunItemIndex >= 0 && breakOpportunity.glyphIndex == 0) {
+            breakOpportunity.penRunItemIndex = -1;
+            breakOpportunity.glyphIndex = -1;
+        }
+        if (breakOpportunity.emergencyPenRunItemIndex >= 0 && breakOpportunity.emergencyGlyphIndex == 0) {
+            breakOpportunity.emergencyPenRunItemIndex = -1;
+            breakOpportunity.emergencyGlyphIndex = -1;
+        }
+    }
+
     function popOverflowAtPenRunGlyph(penRunItemIndex:Int, glyphIndex:Int, rejectItems:Array<ShapedItem>) {
         popLineBufferUntilIndex(penRunItemIndex, rejectItems);
         var rejectPenRun = splitPenRunInBuffer(glyphIndex);
-        rejectItems.push(PenRunItem(rejectPenRun));
+        rejectItems.unshift(PenRunItem(rejectPenRun));
     }
 
     function popLineBufferUntilIndex(untilIndex:Int, rejectItems:Array<ShapedItem>) {
@@ -167,6 +190,7 @@ class LayoutLineBreaker {
 
         while (itemIndex > untilIndex) {
             rejectItems.unshift(lineBuffer.pop().sure());
+            itemIndex -= 1;
         }
     }
 

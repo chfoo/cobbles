@@ -9,7 +9,7 @@ import cobbles.font.FontTable;
 import cobbles.shaping.Shaper;
 import utest.Test;
 
-class MyInlineObject implements InlineObject {
+private class MyInlineObject implements InlineObject {
     public function new() {
 
     }
@@ -34,12 +34,12 @@ class TestLayout extends Test {
         textSource.defaultTextProperties.fontPointSize = 24;
         textSource.addText("ABC 一二三 😂");
         textSource.addLineBreak();
-        textSource.addText("The quick brown fox");
+        textSource.addText("The quick brown fox ");
         textSource.addInlineObject(new MyInlineObject());
-        textSource.addText(" jumps over the lazy dog.");
+        textSource.addText("jumps over the lazy dog.");
 
         var shaper = new Shaper();
-        var layout = new Layout(fontTable, textSource, shaper, lineBreaker);
+        var layout = new Layout(fontTable, textSource, shaper);
         // layout.alignment = Alignment.Center;
         layout.lineBreakLength = layout.pixelToPoint64(200);
         // Harfbuzz doesn't use dpi apparently
@@ -75,5 +75,20 @@ class TestLayout extends Test {
         }
 
         Assert.equals(1, inlineObjectCount);
+    }
+
+    public function testClearLines() {
+        var fontTable = new FontTable();
+        var textSource = new TextSource();
+        var shaper = new Shaper();
+        var layout = new Layout(fontTable, textSource, shaper);
+
+        textSource.addText("abc");
+
+        layout.layout();
+        layout.clearLines();
+
+        Assert.equals(1, layout.lines.length);
+        Assert.equals(0, layout.lines[0].items.length);
     }
 }

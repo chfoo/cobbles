@@ -11,6 +11,7 @@ enum DemoMode {
     LeftText;
     CenterText;
     RightText;
+    RightToLeftMode;
 }
 
 class TextLayout {
@@ -109,27 +110,44 @@ class TextLayout {
         cobbles.layoutText();
 
         renderer.renderTileGroup(cobbles.layout, tileGroup);
-        counter += 1;
 
-        cobbles.lineBreakLength += 1;
+        var windowWidth = hxd.Window.getInstance().width;
 
-        if (cobbles.lineBreakLength > 640) {
-            cobbles.lineBreakLength = 100;
-
-            switch demoMode {
-                case LeftText:
-                    cobbles.alignment = Alignment.Center;
-                    demoMode = CenterText;
-                    tileGroup.x = 320;
-                case CenterText:
-                    cobbles.alignment = Alignment.End;
-                    demoMode = RightText;
-                    tileGroup.x = 640;
-                case RightText:
-                    cobbles.alignment = Alignment.Start;
-                    demoMode = LeftText;
-                    tileGroup.x = 0;
-            }
+        switch demoMode {
+            case LeftText:
+                tileGroup.x = 0;
+            case CenterText:
+                tileGroup.x = Math.round((windowWidth - cobbles.layout.point64ToPixel(cobbles.layout.boundingWidth)) / 2);
+            case RightText | RightToLeftMode:
+                tileGroup.x = windowWidth - cobbles.layout.point64ToPixel(cobbles.layout.boundingWidth);
         }
+
+        counter += 1;
+    }
+
+    public function switchMode() {
+        switch demoMode {
+            case LeftText:
+                cobbles.alignment = Alignment.Center;
+                demoMode = CenterText;
+            case CenterText:
+                cobbles.alignment = Alignment.End;
+                demoMode = RightText;
+            case RightText:
+                cobbles.alignment = Alignment.End;
+                cobbles.lineDirection = RightToLeft;
+                cobbles.textDirection = RightToLeft;
+                demoMode = RightToLeftMode;
+            case RightToLeftMode:
+                cobbles.alignment = Alignment.Start;
+                cobbles.lineDirection = LeftToRight;
+                cobbles.textDirection = LeftToRight;
+                demoMode = LeftText;
+
+        }
+    }
+
+    public function setWidth(width:Int) {
+        cobbles.lineBreakLength = width;
     }
 }

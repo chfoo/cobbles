@@ -118,7 +118,7 @@ class Cobbles {
 
         textSource = new TextSource(lineBreaker);
         shaper = new Shaper();
-        layout = new Layout(fontTable, textSource, shaper, lineBreaker);
+        layout = new Layout(fontTable, textSource, shaper);
     }
 
     static function get_fontTable():FontTable {

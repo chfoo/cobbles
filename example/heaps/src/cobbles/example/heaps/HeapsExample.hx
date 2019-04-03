@@ -1,5 +1,6 @@
 package cobbles.example.heaps;
 
+import hxd.Event.EventKind;
 import hxd.net.BinaryLoader;
 import haxe.io.Bytes;
 
@@ -25,6 +26,11 @@ class HeapsExample extends hxd.App {
         var font = hxd.res.DefaultFont.get();
         fpsText = new h2d.Text(font, s2d);
         fpsText.scale(2);
+
+        hxd.Window.getInstance().addResizeEvent(resizeCallback);
+        hxd.Window.getInstance().addEventTarget(eventCallback);
+
+        textLayout.setWidth(s2d.width);
     }
 
     public static function main() {
@@ -51,7 +57,7 @@ class HeapsExample extends hxd.App {
             pendingFonts = [
                 'resource/fonts/noto/NotoSans-Regular.ttf',
                 'resource/fonts/noto/NotoSansArabic-Regular.ttf',
-                'resource/fonts/noto/NotoSansCJKjp-Regular.otf',
+                'resource/fonts/noto/NotoSansCJKsc-Regular.otf',
             ];
         }
 
@@ -93,6 +99,16 @@ class HeapsExample extends hxd.App {
 
     override function update(dt:Float) {
         textLayout.update();
-        fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}';
-	}
+        fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}. Resize window for layout. Click to change text alignment.';
+    }
+
+    function resizeCallback() {
+        textLayout.setWidth(hxd.Window.getInstance().width);
+    }
+
+    function eventCallback(event:hxd.Event) {
+        if (event.kind == EventKind.EPush) {
+            textLayout.switchMode();
+        }
+    }
 }

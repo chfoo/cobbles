@@ -1,13 +1,11 @@
 package cobbles.layout;
 
-import haxe.ds.Vector;
 import unifill.CodePoint;
 import cobbles.algorithm.LineBreakingAlgorithm;
 import haxe.ds.Option;
 import cobbles.font.FontTable.FontKey;
 import cobbles.algorithm.BidiAlgorithm;
 
-using unifill.Unifill;
 using cobbles.util.MoreUnicodeTools;
 
 /**
@@ -46,30 +44,45 @@ enum TextSourceItem {
 }
 
 /**
- * Formatting of input text and properties.
+ * Collects and stores input text and properties.
  */
 class TextSource {
-    public var items(default, null):Array<TextSourceItem>;
-    public var codePoints(default, null):Array<CodePoint>;
-
     /**
      * Default text properties.
      */
     public var defaultTextProperties:TextProperties;
 
+    /**
+     * Input text items and objects.
+     */
+    public var items(default, null):Array<TextSourceItem>;
+
+    /**
+     * Unicode code points of the input text.
+     */
+    public var codePoints(default, null):Array<CodePoint>;
+
+    public var lineBreakRules(default, null):Array<LineBreakRule>;
     var bidiAlgorithm:Option<BidiAlgorithm>;
+    public var lineBreaker(default, null):Option<LineBreakingAlgorithm>;
 
     /**
      * @param bidiAlgorithm  Optional bidirectional algorithm.
      *  If provided, it is applied automatically to text. The text direction
      *  should be set to match the algorithm's output direction.
+     * @param lineBreakingAlgorithm Optional line breaking algorithm.
+     *  If provided, it is automatically used to break lines when the text
+     *  contains line breaking characters. Otherwise, use `addLineBreak()`
+     *  manually for line breaks.
      */
     public function new(?bidiAlgorithm:BidiAlgorithm,
-    ?lineBreaker:LineBreakingAlgorithm) {
+    ?lineBreakingAlgorithm:LineBreakingAlgorithm) {
         this.bidiAlgorithm = bidiAlgorithm != null ? Some(bidiAlgorithm) : None;
+        this.lineBreaker = lineBreakingAlgorithm != null ? Some(lineBreakingAlgorithm) : None;
 
         items = [];
         codePoints = [];
+        lineBreakRules = [];
 
         defaultTextProperties = new TextProperties();
     }
@@ -100,7 +113,14 @@ class TextSource {
                 // pass
         }
 
-        addRunFromProperties(text.toCodePoints(), properties);
+        var runCodePoints = text.toCodePoints();
+
+        switch lineBreaker {
+            case Some(lineBreaker_):
+                addWithMandatoryBreaks(lineBreaker_, runCodePoints, properties);
+            case None:
+                addRunFromProperties(runCodePoints, properties);
+        }
     }
 
     function addRunFromProperties(codePoints:Array<CodePoint>,
@@ -123,6 +143,33 @@ class TextSource {
         }
     }
 
+    function addWithMandatoryBreaks(lineBreaker:LineBreakingAlgorithm,
+    codePoints:Array<CodePoint>, properties:TextProperties) {
+        var runBreakRules = lineBreaker.getBreaks(codePoints, false);
+        var lastBreakIndex = 0;
+
+        for (index in 0...runBreakRules.length) {
+            if (runBreakRules[index] == Mandatory) {
+                var newRunCodePoints = codePoints.slice(lastBreakIndex, index);
+                addRunFromProperties(newRunCodePoints, properties);
+                addLineBreak();
+
+                // + 1 to not include the line break character
+                // lastBreakIndex = index + 1;
+                lastBreakIndex = index;
+            }
+
+            lineBreakRules.push(runBreakRules[index]);
+        }
+
+        if (lastBreakIndex == 0) {
+            addRunFromProperties(codePoints, properties);
+        } else {
+            var newRunCodePoints = codePoints.slice(lastBreakIndex, runBreakRules.length);
+            addRunFromProperties(newRunCodePoints, properties);
+        }
+    }
+
     /**
      * Adds an explicit line break.
      *
@@ -139,5 +186,6 @@ class TextSource {
     public function clear() {
         items = [];
         codePoints = [];
+        lineBreakRules = [];
     }
 }

@@ -1,13 +1,9 @@
 package cobbles.layout;
 
-import cobbles.shaping.GlyphShape;
-import haxe.ds.Option;
 import cobbles.font.FontTable;
-import cobbles.algorithm.LineBreakingAlgorithm;
 import cobbles.shaping.Shaper;
 import cobbles.layout.TextSource;
 
-using Safety;
 
 enum ShapedItem {
     PenRunItem(penRun:PenRun);
@@ -24,7 +20,8 @@ class Layout {
      *
      * This is used for line breaking (also known as word wrapping).
      *
-     * If 0 or negative, there is no automatic line breaking.
+     * If 0 or negative or line breaking rules is not provided in the text
+     * source, there is no automatic line breaking.
      */
     public var lineBreakLength:Int = 0;
 
@@ -76,7 +73,6 @@ class Layout {
     var fontTable:FontTable;
     public var textSource(default, null):TextSource;
     var shaper:Shaper;
-    var lineBreaker:Option<LineBreakingAlgorithm>;
 
     /**
      * The text processed into lines.
@@ -95,22 +91,16 @@ class Layout {
 
     var currentLine:LayoutLine;
 
-    @:allow(cobbles.layout.LayoutLineBreaker)
-    var lineBreakRules:Null<Array<LineBreakRule>>;
-
     /**
      * @param fontTable Font table
      * @param textSource Text source
      * @param shaper Shaper
-     * @param lineBreaker If `lineBreakLength` is not 0, `lineBreaker` will
-     *  be used to perform line breaking.
      */
     public function new(fontTable:FontTable, textSource:TextSource,
-    shaper:Shaper, ?lineBreaker:LineBreakingAlgorithm) {
+    shaper:Shaper) {
         this.fontTable = fontTable;
         this.textSource = textSource;
         this.shaper = shaper;
-        this.lineBreaker = lineBreaker != null ? Some(lineBreaker) : None;
 
         lines = [];
         currentLine = new LayoutLine();
@@ -157,28 +147,22 @@ class Layout {
      * The processed lines are appended to the array in the `lines` member.
      */
     public function layout() {
-        var textSourceItems;
+        var shapedItems = shapeTextRuns(textSource.items);
 
-        switch lineBreaker {
-            case Some(lineBreaker_):
-                lineBreakRules = lineBreaker_.getBreaks(textSource.codePoints, true);
-                textSourceItems = convertMandatoryBreaks(lineBreaker_);
-            case None:
-                textSourceItems = textSource.items;
-        }
-
-        var shapedItems = shapeTextRuns(textSourceItems);
-
-        switch lineBreaker {
-            case Some(lineBreaker_):
-                shapedItems = processLineBreaking(shapedItems, lineBreaker_);
-            case None:
-                // pass
+        if (lineBreakLength > 0 && textSource.lineBreakRules.length > 0) {
+            shapedItems = processLineBreaking(shapedItems);
         }
 
         convertShapedItemsToLines(shapedItems);
         calculateBoundingSize();
         alignLines();
+
+        switch textSource.defaultTextProperties.direction {
+            case RightToLeft | BottomToTop:
+                reverseLineRunOrder();
+            default:
+                // pass
+        }
     }
 
     /**
@@ -214,53 +198,6 @@ class Layout {
         return shapedItems;
     }
 
-    function convertMandatoryBreaks(lineBreaker:LineBreakingAlgorithm):Array<TextSourceItem> {
-        var items = [];
-        for (item in textSource.items) {
-            switch item {
-                case RunItem(textRun):
-                    convertMandatoryBreaksTextRun(lineBreaker, textRun, items);
-                default:
-                    items.push(item);
-            }
-        }
-        return items;
-    }
-
-    function convertMandatoryBreaksTextRun(lineBreaker:LineBreakingAlgorithm,
-    textRun:TextRun, output:Array<TextSourceItem>) {
-        var beginIndex = textRun.codePointIndex;
-        var length = textRun.codePointCount;
-        var lineBreakRules = lineBreakRules.sure();
-        var lastBreakIndex = 0;
-
-        for (index in beginIndex...beginIndex+length) {
-            if (index > 0 && lineBreakRules[index] == Mandatory) {
-                var newTextRun = textRun.copy();
-
-                newTextRun.codePointIndex = lastBreakIndex;
-                newTextRun.codePointCount = index - lastBreakIndex;
-
-                output.push(RunItem(newTextRun));
-                output.push(LineBreakItem(relativeLineSpacing));
-
-                // + 1 to not include the line break character
-                lastBreakIndex = index + 1;
-            }
-        }
-
-        if (lastBreakIndex == 0) {
-            output.push(RunItem(textRun));
-        } else {
-            var newTextRun = textRun.copy();
-
-            newTextRun.codePointIndex = lastBreakIndex;
-            newTextRun.codePointCount = length - lastBreakIndex;
-
-            output.push(RunItem(newTextRun));
-        }
-    }
-
     function shapeTextRun(textRun:TextRun):PenRun {
         var font = fontTable.getFont(textRun.fontKey);
         font.setSize(0, textRun.fontSize, 0, resolution);
@@ -287,8 +224,8 @@ class Layout {
         return penRun;
     }
 
-    function processLineBreaking(input:Array<ShapedItem>, lineBreaker:LineBreakingAlgorithm) {
-        var layoutLineBreaker = new LayoutLineBreaker(this, lineBreaker);
+    function processLineBreaking(input:Array<ShapedItem>) {
+        var layoutLineBreaker = new LayoutLineBreaker(this);
         var output = [];
 
         function flushAndAddNewLine() {
@@ -328,6 +265,8 @@ class Layout {
             }
         }
 
+        layoutLineBreaker.flush(output);
+
         return output;
     }
 
@@ -341,6 +280,7 @@ class Layout {
         }
 
         currentLine.items.push(LayoutLineItem.InlineObjectItem(inlineObject));
+        increaseCurrentLineLength(objectSize);
     }
 
     function addRunToCurrentLine(penRun:PenRun) {
@@ -467,4 +407,9 @@ class Layout {
         }
     }
 
+    function reverseLineRunOrder() {
+        for (line in lines) {
+            line.items.reverse();
+        }
+    }
 }
