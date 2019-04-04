@@ -4,3 +4,6 @@ libs.hxml
 -cp src
 -cp example/heaps/src
 -main cobbles.example.heaps.HeapsExample
+
+# this is in my heaps fork
+-D HEAPS_NO_GL_GET_ERROR
