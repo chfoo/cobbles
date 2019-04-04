@@ -15,7 +15,7 @@ enum DemoMode {
 }
 
 class TextLayout {
-    var cobbles:Cobbles;
+    var cobbles:LayoutFacade;
     var defaultFont:Null<FontKey>;
     var counter:Int = 0;
     var demoMode:DemoMode = LeftText;
@@ -26,7 +26,7 @@ class TextLayout {
     public var texture(default, null):Texture;
 
     public function new(fonts:Array<{name:String, data:Bytes}>) {
-        cobbles = new Cobbles();
+        cobbles = new LayoutFacade();
 
         for (font in fonts) {
             var fontKey;
@@ -34,9 +34,9 @@ class TextLayout {
             trace('Load ${font.name}');
 
             if (font.data != null) {
-                fontKey = Cobbles.fontTable.openBytes(font.data);
+                fontKey = LayoutFacade.fontTable.openBytes(font.data);
             } else {
-                fontKey = Cobbles.fontTable.openFile(font.name);
+                fontKey = LayoutFacade.fontTable.openFile(font.name);
             }
 
             if (defaultFont == null) {
@@ -49,7 +49,7 @@ class TextLayout {
         cobbles.fontSize = 24;
         cobbles.color = 0xffffffff;
 
-        renderer = new TileGroupRenderer(Cobbles.fontTable);
+        renderer = new TileGroupRenderer(LayoutFacade.fontTable);
         tileGroup = renderer.newTileGroup();
 
         texture = renderer.textureAtlas.texture;

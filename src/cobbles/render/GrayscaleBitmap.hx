@@ -1,6 +1,5 @@
 package cobbles.render;
 
-import sys.io.File;
 import haxe.io.Bytes;
 
 /**
@@ -22,14 +21,16 @@ class GrayscaleBitmap extends BaseBitmap {
         data.set(y * width + x, value);
     }
 
+    #if sys
     /**
      * Saves the bitmap to a PGM file.
      */
     public function savePGM(filename:String) {
-        var file = File.write(filename);
+        var file = sys.io.File.write(filename);
 
         file.writeString('P5 $width $height 255\n');
         file.writeFullBytes(data, 0, data.length);
         file.close();
     }
+    #end
 }

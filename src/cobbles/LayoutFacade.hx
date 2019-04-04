@@ -1,8 +1,6 @@
 package cobbles;
 
 import cobbles.layout.TextProperties;
-import cobbles.layout.LayoutLine;
-import haxe.io.Bytes;
 import cobbles.algorithm.SimpleLineBreaker;
 import cobbles.shaping.Shaper;
 import cobbles.layout.Layout;
@@ -12,9 +10,9 @@ import cobbles.font.FontTable;
 using unifill.Unifill;
 
 /**
- * Simple interface for text layout,
+ * Unified interface for building text layout by runs of text.
  */
-class Cobbles {
+class LayoutFacade {
     /**
      * Font table singleton.
      */
@@ -111,7 +109,7 @@ class Cobbles {
     //  */
     // public var resolution(get, set):Int;
 
-    var _pendingText:Null<CobblesText>;
+    var _pendingText:Null<LayoutFacadeTextFI>;
 
     public function new() {
         var lineBreaker = new SimpleLineBreaker();
@@ -247,17 +245,17 @@ class Cobbles {
      * Add a segment of text containing the same properties.
      *
      * @param text Text.
-     * @return CobblesText A fluent interface for applying text properties
+     * @return A fluent interface for applying text properties
      *  that different from the default.
      */
-    public function addText(text:String):CobblesText {
+    public function addText(text:String):LayoutFacadeTextFI {
         if (_pendingText != null) {
             textSource.addText(_pendingText.text, _pendingText.textProperties);
         }
 
         var textProperties = textSource.defaultTextProperties.copy();
 
-        _pendingText = new CobblesText(text, textProperties, fontTable);
+        _pendingText = new LayoutFacadeTextFI(text, textProperties, fontTable);
         return _pendingText;
     }
 
@@ -278,11 +276,11 @@ class Cobbles {
 
 
 /**
- * `Cobbles.addText` fluent interface.
+ * `LayoutFacade.addText` fluent interface.
  */
-class CobblesText {
-    @:allow(cobbles.Cobbles) var text:String;
-    @:allow(cobbles.Cobbles) var textProperties:TextProperties;
+class LayoutFacadeTextFI {
+    @:allow(cobbles) var text:String;
+    @:allow(cobbles) var textProperties:TextProperties;
     var fontTable:FontTable;
 
     public function new(text:String, textProperties:TextProperties,
@@ -295,7 +293,7 @@ class CobblesText {
     /**
      * Set font.
      */
-    public function font(font:FontKey):CobblesText {
+    public function font(font:FontKey):LayoutFacadeTextFI {
         textProperties.fontKey = font;
         return this;
     }
@@ -303,7 +301,7 @@ class CobblesText {
     /**
      * Find an appropriate font that can display the text and set that font.
      */
-    public function detectFont():CobblesText {
+    public function detectFont():LayoutFacadeTextFI {
         if (text != "") {
             textProperties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
         }
@@ -314,7 +312,7 @@ class CobblesText {
      * Set font size.
      * @param size Size in points.
      */
-    public function fontSize(size:Float):CobblesText {
+    public function fontSize(size:Float):LayoutFacadeTextFI {
         textProperties.fontPointSize = size;
         return this;
     }
@@ -323,7 +321,7 @@ class CobblesText {
      * Set text color.
      * @param color Color in ARGB format.
      */
-    public function color(color:Int):CobblesText {
+    public function color(color:Int):LayoutFacadeTextFI {
         textProperties.color = color;
         return this;
     }
@@ -333,7 +331,7 @@ class CobblesText {
      *
      * See `TextProperties`.
      */
-    public function direction(direction:Direction):CobblesText {
+    public function direction(direction:Direction):LayoutFacadeTextFI {
         textProperties.direction = direction;
         return this;
     }
@@ -345,7 +343,7 @@ class CobblesText {
      *
      * @param language A BCP 47 tag.
      */
-    public function language(language:String):CobblesText {
+    public function language(language:String):LayoutFacadeTextFI {
         textProperties.language = language;
         return this;
     }
@@ -357,7 +355,7 @@ class CobblesText {
      *
      * @param script A ISO 15924 tag
      */
-    public function script(script:String):CobblesText {
+    public function script(script:String):LayoutFacadeTextFI {
         textProperties.script = script;
         return this;
     }

@@ -4,6 +4,8 @@ import unifill.InternalEncoding;
 import cobbles.native.CobblesExtern;
 
 class NativeData {
+    public static var emscriptenModuleName:String = "CobblesModule";
+
     static var cobblesPointer:Null<CobblesExtern.CobblesPointer>;
 
     public static function getEncoding():NativeEncoding {

@@ -1,6 +1,6 @@
 var cobbles = {};
 
-function cobbles_bind() {
+function cobbles_bind(Module) {
     // cobbles.c
     cobbles.init = Module.cwrap('cobbles_init', 'number', ['number']);
     cobbles.destroy = Module.cwrap('cobbles_destroy', null, ['number']);

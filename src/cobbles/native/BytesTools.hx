@@ -18,8 +18,9 @@ class BytesTools {
         return (bytes.getData():hl.Bytes).sure();
 
         #elseif js
-        var pointer = js.Syntax.code("Module._malloc({0})", bytes.length);
-        var heap8:js.html.Uint8Array = js.Syntax.code("Module.HEAP8");
+        var module = Reflect.field(js.Browser.window, NativeData.emscriptenModuleName);
+        var pointer = js.Syntax.code("{0}._malloc({1})", module, bytes.length);
+        var heap8:js.html.Uint8Array = js.Syntax.code("{0}.HEAP8", module);
         heap8.set(new js.html.Uint8Array(bytes.getData()), pointer);
         return pointer;
 
@@ -30,11 +31,12 @@ class BytesTools {
 
     public static function releaseNativeBytes(bytes:Bytes, pointer:NativeBytes) {
         #if js
-        var heap8:js.html.Uint8Array = js.Syntax.code("Module.HEAP8");
+        var module = Reflect.field(js.Browser.window, NativeData.emscriptenModuleName);
+        var heap8:js.html.Uint8Array = js.Syntax.code("{0}.HEAP8", module);
         var view = heap8.slice(pointer, pointer + bytes.length);
 
         new js.html.Uint8Array(bytes.getData()).set(view);
-        js.Syntax.code("Module._free({0})", pointer);
+        js.Syntax.code("{0}._free({1})", module, pointer);
         #end
     }
 

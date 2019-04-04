@@ -1,0 +1,19 @@
+-cp src/
+libs.hxml
+-lib heaps
+-D doc-gen
+--macro include('cobbles')
+--no-output
+
+--each
+
+-xml out/xml/sys.xml
+-neko out/dummy.n
+
+--next
+
+-xml out/xml/js.xml
+-js out/dummy.js
+
+--next
+-cmd haxelib run dox -i out/xml/ -o out/docs/ --include "cobbles" --title "Cobbles API Documentation"
