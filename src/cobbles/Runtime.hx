@@ -1,6 +1,8 @@
 package cobbles;
 
+#if js
 import cobbles.native.NativeData;
+#end
 
 class Runtime {
 #if js

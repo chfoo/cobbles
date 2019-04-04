@@ -31,6 +31,8 @@ class FontTable implements Disposable {
     var fontKeys:Array<FontKey>;
     var _isDisposed = false;
 
+    static var __dummy:Null<Any> = { cobbles.MacroUtil.embedFontResources(); }
+
     public function new() {
         fonts = [];
         fontKeys = [];

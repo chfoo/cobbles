@@ -9,5 +9,8 @@
     "releasenote": "First release",
     "contributors": ["chfoo"],
     "dependencies": {
+        "exception": "",
+        "unifill": "",
+        "safety": ""
     }
 }
