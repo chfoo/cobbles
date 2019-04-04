@@ -115,9 +115,11 @@ class Cache<K,V> implements IMap<K,V> {
         return new CacheValueIterator(_map);
     }
 
+    #if haxe4
     public function keyValueIterator():KeyValueIterator<K, V> {
         return new CacheKeyValueIterator(_map);
     }
+    #end
 
     public function copy():IMap<K,V> {
         throw "not implemented";

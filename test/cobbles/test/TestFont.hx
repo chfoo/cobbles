@@ -18,9 +18,9 @@ class TestFont extends Test {
         var req = js.Browser.createXMLHttpRequest();
         req.responseType = js.html.XMLHttpRequestResponseType.ARRAYBUFFER;
 
-        return new js.Promise((resolve, reject) -> {
+        return new js.Promise(function(resolve, reject) {
             req.open("GET", SERIF_FONT_PATH);
-            req.onload = event -> {
+            req.onload = function (event) {
                 serifData = req.response;
 
                 trace("Fonts loaded.");

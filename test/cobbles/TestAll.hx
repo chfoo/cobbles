@@ -7,14 +7,14 @@ class TestAll {
     public static function main() {
         #if js
         cobbles.test.TestFont.preloadFonts()
-        .then((success:Bool) -> {
+        .then(function (success:Bool) {
             return cobbles.Runtime.loadEmscripten();
         })
-        .then((success:Bool) -> {
+        .then(function (success:Bool) {
             trace("Running tests...");
             runTests();
         })
-        .catchError(error -> trace(error));
+        .catchError(function (error) { trace(error); });
         #else
         runTests();
         #end

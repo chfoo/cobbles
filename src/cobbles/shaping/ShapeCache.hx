@@ -19,7 +19,8 @@ class ShapeCache {
     var _cache:Cache<Int64,Vector<GlyphShape>>;
 
     public function new (maxSize:Int = 128) {
-        _cache = new Cache(maxSize, new Int64Map());
+        var impl = new Int64Map();
+        _cache = new Cache(maxSize, #if !haxe4 cast #end impl);
     }
 
     public function getShapes(cacheKey:ShapeCacheKey):Option<Vector<GlyphShape>> {
