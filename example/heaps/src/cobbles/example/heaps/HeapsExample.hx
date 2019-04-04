@@ -99,7 +99,7 @@ class HeapsExample extends hxd.App {
 
     override function update(dt:Float) {
         textLayout.update();
-        fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}. Resize window for layout. Click to change text alignment.';
+        fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}. WIP. Resize window. Click to change mode.';
     }
 
     function resizeCallback() {

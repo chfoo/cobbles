@@ -1,0 +1,13 @@
+{
+    "name": "cobbles",
+    "url" : "https://github.com/chfoo/cobbles/",
+    "license": "MIT",
+    "tags": ["native"],
+    "description": "Text layout/rendering engine library for applications running under a 3D graphics API",
+    "version": "0.1.0",
+    "classPath": "src/",
+    "releasenote": "First release",
+    "contributors": ["chfoo"],
+    "dependencies": {
+    }
+}
