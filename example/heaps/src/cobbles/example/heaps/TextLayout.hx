@@ -69,14 +69,17 @@ class TextLayout {
         // Text samples from http://kermitproject.org/utf8.html
         cobbles.addText("我能吞下玻璃而不伤身体。")
             .script("Hans")
+            .language("zh-Hans")
             .detectFont();
 
         cobbles.addText("私はガラスを食べられます。それは私を傷つけません。")
             .script("Jpan")
+            .language("ja")
             .detectFont();
 
         cobbles.addText("나는 유리를 먹을 수 있어요. 그래도 아프지 않아요. ")
             .script("Kore")
+            .language("ko")
             .detectFont();
 
         cobbles.addText("Я могу есть стекло, оно мне не вредит. ")

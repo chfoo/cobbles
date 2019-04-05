@@ -41,12 +41,17 @@ class TextProperties {
     /**
      * Language as a BCP 47 tag.
      *
-     * It is usually two characters. See
-     * https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-     * for a full list.
+     * It is usually two characters, sometimes with a two character region
+     * such as "en" or "en-US". See
+     * https://www.w3.org/International/articles/language-tags/
+     * for details.
      *
      * This field is used for OpenType fonts for enhanced context where
      * the script tag is not enough information to determine how to shape text.
+     * Otherwise, it is not used.
+     *
+     * For CJK fonts that make use of the "locl" GSUB feature, which
+     * contain variant of glyphs, this field is required.
      */
     public var language:String = "en";
 
@@ -55,6 +60,7 @@ class TextProperties {
      *
      * It should be a 4 character string, such as "Latn". See
      * https://unicode.org/iso15924/codelists.html for a full list.
+     * Typically specifying this tag is sufficient.
      */
     public var script:String = "Latn";
 

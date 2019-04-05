@@ -130,6 +130,8 @@ renderer.renderTileGroup(cobbles.layout, tileGroup);
 
 A texture atlas contains all the glyphs required to display the text. The renderer will automatically build the texture atlas as needed. Remember that a single texture atlas is intended to be shared for all your text blocks. If you create more than one renderer, provide it with the texture atlas in the arguments. Otherwise, it will create new texture atlas by default.
 
+For details, see the example in the `example/heaps` directory and the API docs.
+
 ## Native library and dependencies
 
 The native library (cobbles.xdll) is required in order for Haxe generated code to communicate with other libraries like Freetype and Harfbuzz.
