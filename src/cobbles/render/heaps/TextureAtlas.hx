@@ -18,6 +18,9 @@ class GlyphAtlasInfo {
     public var glyphBitmap:GlyphBitmap;
 }
 
+/**
+ * A texture builder that contains glyphs required to display text.
+ */
 class TextureAtlas {
     public var width(default, null):Int;
     public var height(default, null):Int;
@@ -26,6 +29,14 @@ class TextureAtlas {
 
     var glyphMap:GlyphMap<GlyphAtlasInfo>;
 
+    /**
+     * @param width Width in pixels of the texture. Should be a multiple of 2.
+     * @param height Height in pixels of the texture. Should be a multiple
+     *  of 2 and match `width`
+     * @param maxGlyphs If positive, maximum number of glyphs where
+     *  least recently used glyphs are removed before adding new ones. If 0,
+     *  glyphs are not automatically removed.
+     */
     public function new(width:Int, height:Int, maxGlyphs:Int = 1024) {
         this.width = width;
         this.height = height;
@@ -39,6 +50,9 @@ class TextureAtlas {
         }
     }
 
+    /**
+     * Draws the glyphs to the texture.
+     */
     public function buildTexture() {
         bitmap.pixels.clear(0);
 
@@ -96,10 +110,17 @@ class TextureAtlas {
         bitmap.drawDebugBox(width - size, height - size, size, size, true);
     }
 
+    /**
+     * Returns whether the texture atlas has the given glyph.
+     * @param glyphKey
+     */
     public function hasGlyph(glyphKey:GlyphRenderKey) {
         return glyphMap.exists(glyphKey);
     }
 
+    /**
+     * Adds a glyph to be drawn.
+     */
     public function addGlyph(glyphKey:GlyphRenderKey, glyphBitmap:GlyphBitmap) {
         glyphMap.set(
             glyphKey, {
@@ -111,6 +132,10 @@ class TextureAtlas {
             });
     }
 
+    /**
+     * Returns a new Tile instance that is positioned to a glyph in the
+     * texture.
+     */
     public function getGlyphTile(glyphKey:GlyphRenderKey):GlyphTile {
         var tile = Tile.fromTexture(texture);
         var glyphAtlasInfo = glyphMap.get(glyphKey);
@@ -138,6 +163,11 @@ class TextureAtlas {
 
     }
 
+    /**
+     * Removes all the glyphs.
+     *
+     * This does not affect the texture until it is rebuilt.
+     */
     public function clear() {
         glyphMap = new GlyphMap(new Int64Map());
     }

@@ -3,6 +3,9 @@ package cobbles.render.heaps;
 import hxd.PixelFormat;
 import hxd.Pixels;
 
+/**
+ * An adapter to write bitmaps to Heaps pixels.
+ */
 class PixelsBitmap extends BaseBitmap {
     public var pixels(default, null):Pixels;
 

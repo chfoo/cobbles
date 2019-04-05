@@ -8,24 +8,45 @@ import cobbles.font.GlyphBitmap;
 import cobbles.font.FontTable;
 import h2d.TileGroup;
 
+/**
+ * Renders glyphs by using TileGroup instances.
+ *
+ * A texture atlas is used to store glyphs and Tile instances are created
+ * whenever a glyph needs to be displayed on the screen.
+ */
 class TileGroupRenderer extends BaseRenderer {
     var fontTable:FontTable;
     var glyphBitmapCache:GlyphBitmapCache;
     public var textureAtlas(default, null):TextureAtlas;
     var tileGroup:TileGroup;
 
-    public function new(fontTable:FontTable, textureSize:Int = 512) {
+    /**
+     * @param fontTable Font table containing the required fonts.
+     * @param textureAtlas If given, it will be reused. Otherwise, a new
+     *  texture atlas is used.
+     * @param glyphCacheSize The cache size for the number of glyph bitmaps
+     *  cached from the glyph rasterizer.
+     */
+    public function new(fontTable:FontTable, ?textureAtlas:TextureAtlas,
+    glyphCacheSize:Int = 1024) {
         super();
 
         this.fontTable = fontTable;
-        glyphBitmapCache = new GlyphBitmapCache(fontTable);
-        textureAtlas = new TextureAtlas(textureSize, textureSize);
+        glyphBitmapCache = new GlyphBitmapCache(fontTable, glyphCacheSize);
+        this.textureAtlas = textureAtlas != null ?
+            textureAtlas : new TextureAtlas(512, 512);
     }
 
+    /**
+     * Returns a tile group that references the texture atlas.
+     */
     public function newTileGroup():TileGroup {
         return new TileGroup(Tile.fromTexture(textureAtlas.texture));
     }
 
+    /**
+     * Adds the Tile instances to the tile group required to display the text.
+     */
     public function renderTileGroup(layout:Layout, tileGroup:TileGroup) {
         var glyphsAdded = gatherRequiredGlyphs(layout);
 
@@ -98,7 +119,6 @@ class TileGroupRenderer extends BaseRenderer {
         var drawY = penPixelY - glyphTile.bitmapTop - point64ToPixel(glyphShape.offsetY);
 
         tileGroup.addColor(drawX, drawY, red, green, blue, 1.0, glyphTile.tile);
-        // tileGroup.add(drawX, drawY, glyphTile.tile);
     }
 
     override function renderInlineObject(inlineObject:InlineObject) {

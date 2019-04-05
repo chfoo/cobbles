@@ -114,10 +114,12 @@ To learn more, please see the [API documentation](https://chfoo.github.io/cobble
 There is a Heaps renderer included in the library. It is used like so:
 
 ```haxe
+import cobbles.render.heaps.TextureAtlas;
 import cobbles.render.heaps.TileGroupRenderer;
 
 var cobbles:LayoutFacade; // your instance here
-var renderer = new TileGroupRenderer(LayoutFacade.fontTable);
+var textureAtlas = new TextureAtlas(512, 512);
+var renderer = new TileGroupRenderer(LayoutFacade.fontTable, textureAtlas);
 var tileGroup = renderer.newTileGroup();
 
 s2d.addChild(tileGroup);
@@ -126,7 +128,7 @@ s2d.addChild(tileGroup);
 renderer.renderTileGroup(cobbles.layout, tileGroup);
 ```
 
-The renderer will automatically build a texture atlas as needed.
+A texture atlas contains all the glyphs required to display the text. The renderer will automatically build the texture atlas as needed. Remember that a single texture atlas is intended to be shared for all your text blocks. If you create more than one renderer, provide it with the texture atlas in the arguments. Otherwise, it will create new texture atlas by default.
 
 ## Native library and dependencies
 
