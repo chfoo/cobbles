@@ -218,7 +218,8 @@ class Layout {
             script: textRun.script,
             color: textRun.color,
             glyphShapes: glyphShapes,
-            textOffset: textRun.codePointIndex
+            textOffset: textRun.codePointIndex,
+            rtl: textRun.direction.match(RightToLeft | BottomToTop)
         };
 
         return penRun;

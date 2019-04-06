@@ -155,11 +155,10 @@ class TextSource {
                 addLineBreak();
 
                 // + 1 to not include the line break character
-                // lastBreakIndex = index + 1;
-                lastBreakIndex = index;
+                lastBreakIndex = index + 1;
+            } else {
+                lineBreakRules.push(runBreakRules[index]);
             }
-
-            lineBreakRules.push(runBreakRules[index]);
         }
 
         if (lastBreakIndex == 0) {

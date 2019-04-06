@@ -12,6 +12,8 @@ private class ItemBreakInfo {
     public var emergencyPenRunItemIndex:Int = -1;
     public var emergencyGlyphIndex:Int = -1;
 
+    public var penRunRtl:Bool = false;
+
     public var inlineObjectItemIndex:Int = -1;
 
     public function new() {
@@ -22,6 +24,7 @@ private class ItemBreakInfo {
         glyphIndex = -1;
         emergencyPenRunItemIndex = -1;
         emergencyGlyphIndex = -1;
+        penRunRtl = false;
         inlineObjectItemIndex = -1;
     }
 }
@@ -109,6 +112,7 @@ class LayoutLineBreaker {
                 popOverflowAtPenRunGlyph(
                     breakOpportunity.penRunItemIndex,
                     breakOpportunity.glyphIndex,
+                    breakOpportunity.penRunRtl,
                     rejectItems);
             } else {
                 popLineBufferUntilIndex(
@@ -119,7 +123,9 @@ class LayoutLineBreaker {
         } else if (breakOpportunity.emergencyPenRunItemIndex >= 0) {
             popOverflowAtPenRunGlyph(
                 breakOpportunity.emergencyPenRunItemIndex,
-                breakOpportunity.emergencyGlyphIndex, rejectItems);
+                breakOpportunity.emergencyGlyphIndex,
+                breakOpportunity.penRunRtl,
+                rejectItems);
         } else {
             // Impossible to not overflow
         }
@@ -132,7 +138,15 @@ class LayoutLineBreaker {
         var lineBreakRules = layout.textSource.lineBreakRules;
 
         function scanPenRun(itemIndex:Int, penRun:PenRun) {
-            for (glyphIndex in 0...penRun.glyphShapes.length) {
+            for (glyphIndex_ in 0...penRun.glyphShapes.length) {
+                var glyphIndex;
+
+                if (penRun.rtl) {
+                    glyphIndex = penRun.glyphShapes.length - 1 - glyphIndex_;
+                } else {
+                    glyphIndex = glyphIndex_;
+                }
+
                 var glyphShape = penRun.glyphShapes[glyphIndex];
                 var glyphAdvance = getGlyphAdvance(glyphShape);
                 var codePointIndex = glyphShape.textIndex + penRun.textOffset;
@@ -146,9 +160,11 @@ class LayoutLineBreaker {
 
                     breakOpportunity.emergencyPenRunItemIndex = itemIndex;
                     breakOpportunity.emergencyGlyphIndex = glyphIndex;
+                    breakOpportunity.penRunRtl = penRun.rtl;
                 } else if (breakOpportunity.emergencyPenRunItemIndex < 0) {
                     breakOpportunity.emergencyPenRunItemIndex = itemIndex;
                     breakOpportunity.emergencyGlyphIndex = glyphIndex;
+                    breakOpportunity.penRunRtl = penRun.rtl;
                 }
 
                 scannedLineLength += glyphAdvance;
@@ -179,9 +195,9 @@ class LayoutLineBreaker {
         }
     }
 
-    function popOverflowAtPenRunGlyph(penRunItemIndex:Int, glyphIndex:Int, rejectItems:Array<ShapedItem>) {
+    function popOverflowAtPenRunGlyph(penRunItemIndex:Int, glyphIndex:Int, rtl:Bool, rejectItems:Array<ShapedItem>) {
         popLineBufferUntilIndex(penRunItemIndex, rejectItems);
-        var rejectPenRun = splitPenRunInBuffer(glyphIndex);
+        var rejectPenRun = splitPenRunInBuffer(glyphIndex, rtl);
         rejectItems.unshift(PenRunItem(rejectPenRun));
     }
 
@@ -194,13 +210,20 @@ class LayoutLineBreaker {
         }
     }
 
-    function splitPenRunInBuffer(index:Int):PenRun {
+    function splitPenRunInBuffer(index:Int, rtl:Bool):PenRun {
         switch lineBuffer.pop().sure() {
             case PenRunItem(penRun):
                 lineLength -= getPenRunLength(penRun);
 
-                var keep = penRun.slice(0, index);
-                var reject = penRun.slice(index, penRun.glyphShapes.length);
+                var keep, reject;
+
+                if (!rtl) {
+                    keep = penRun.slice(0, index);
+                    reject = penRun.slice(index, penRun.glyphShapes.length);
+                } else {
+                    reject = penRun.slice(0, index);
+                    keep = penRun.slice(index, penRun.glyphShapes.length);
+                }
 
                 lineBuffer.push(PenRunItem(keep));
                 lineLength += getPenRunLength(keep);

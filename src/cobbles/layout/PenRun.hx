@@ -20,16 +20,18 @@ class PenRun {
     public var color:Int;
     public var glyphShapes:Vector<GlyphShape>;
     public var textOffset:Int;
+    public var rtl:Bool;
     public var width(get, never):Int;
     public var height(get, never):Int;
 
-    public function new(fontKey, fontSize, script, color, glyphShapes, textOffset) {
+    public function new(fontKey, fontSize, script, color, glyphShapes, textOffset, rtl) {
         this.fontKey = fontKey;
         this.fontSize = fontSize;
         this.script = script;
         this.color = color;
         this.glyphShapes = glyphShapes;
         this.textOffset = textOffset;
+        this.rtl = rtl;
     }
 
     function get_width():Int {
@@ -76,7 +78,8 @@ class PenRun {
             script: script,
             color: color,
             glyphShapes: newGlyphShapes,
-            textOffset: textOffset
+            textOffset: textOffset,
+            rtl: rtl
         };
     }
 }
