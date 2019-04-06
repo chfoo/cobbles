@@ -105,18 +105,22 @@ class FontTable implements Disposable {
     /**
      * Returns a font that contains the given code point.
      *
-     * Fonts are searched in the order that they were added to this
-     * instance.
-     *
      * If a font cannot be found, the `notdefFont` font is returned. You can
      * override this behavior by add your own fallback font last. Note that the
      * renderer you choose may use a different behavior such as drawing its
      * own fallback glyph.
+     *
+     * @param codePoint Unicode code point
+     * @param searchFonts If given, the font is selected from the given fonts.
+     *  Otherwise, fonts are searched in the order that they were added to this
+     *  instance.
      */
-    public function findByCodePoint(codePoint:Int):FontKey {
-        for (index in 0...fontKeys.length) {
-            var fontKey = fontKeys[index];
-            var font = fonts[index];
+    public function findByCodePoint(codePoint:Int, ?fonts:Array<FontKey>):FontKey {
+        var searchFonts = fonts != null ? fonts : fontKeys;
+
+        for (index in 0...searchFonts.length) {
+            var fontKey = searchFonts[index];
+            var font = this.fonts[index];
 
             if (font.getGlyphID(codePoint) != 0) {
                 return fontKey;
