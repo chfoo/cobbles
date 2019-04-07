@@ -2,8 +2,16 @@
 # For Linux, MacOS, and Windows with MingGW-w64 and Linux shell (such as Git Bash or Cygwin)
 
 GCC ?= gcc
-HL_INCLUDE ?= -I /usr/include -I hl-1.9.0-win/include
-INCLUDES ?= $(HL_INCLUDE) -I /usr/include/freetype2 -I /usr/include/harfbuzz
+WIN_PREFIX ?= c:/
+HL_INCLUDE ?= -I /usr/include -I $(WIN_PREFIX)hl-1.9.0-win/include
+INCLUDES ?= $(HL_INCLUDE) \
+	-I /usr/include/freetype2 \
+	-I $(WIN_PREFIX)freetype/include \
+	-I /usr/include/harfbuzz \
+	-I $(WIN_PREFIX)harfbuzz/src
+LINKER_FLAGS ?= -lfreetype -lharfbuzz -lc \
+	-L $(WIN_PREFIX)freetype \
+	-L $(WIN_PREFIX)harfbuzz
 EMCC ?= emcc
 EMCONFIGURE ?= emconfigure
 EMMAKE ?= emmake
@@ -15,14 +23,16 @@ all: hdll js
 .PHONY: all hdll js
 
 hdll:
+	mkdir -p ../out/hl/
 	$(GCC) $(OPTIMIZE_FLAGS) -D LIBHL_EXPORTS -fPIC -shared -std=c11 \
 		-o ../out/hl/cobbles.hdll \
 		$(FILES) $(INCLUDES) \
-		-lfreetype -lharfbuzz -lc
+		$(LINKER_FLAGS)
 	# I don't know how to tell gcc that it is not executable
 	chmod -x ../out/hl/cobbles.hdll
 
 js:
+	mkdir -p ../out/js/
 	$(EMCC) $(OPTIMIZE_FLAGS) -fPIC -std=c11 \
 		-o ../out/js/cobbles.js $(FILES) \
 		-s USE_FREETYPE=1 -s USE_HARFBUZZ=1 \
