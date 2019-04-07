@@ -1,6 +1,6 @@
 #include "cobbles.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 
 CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * path, int face_index) {
     CobblesFont * font = calloc(1, sizeof(CobblesFont));

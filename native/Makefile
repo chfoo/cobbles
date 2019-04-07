@@ -5,14 +5,18 @@ GCC ?= gcc
 WIN_PREFIX ?= c:/
 HL_INCLUDE ?= -I $(WIN_PREFIX)hl-1.9.0-win/include
 INCLUDES ?= $(HL_INCLUDE) \
+ 	-I /usr/local/include \
  	-I /usr/include \
 	-I $(WIN_PREFIX)include \
+	-I /usr/local/include/freetype2 \
 	-I /usr/include/freetype2 \
 	-I $(WIN_PREFIX)include/freetype \
+	-I /usr/local/include/harfbuzz \
 	-I /usr/include/harfbuzz \
 	-I $(WIN_PREFIX)include/harfbuzz
-LINK_ICONV ?= -lc
-LINKER_FLAGS ?= -lfreetype -lharfbuzz \
+LINK_ICONV ?=
+LINKER_FLAGS ?= -lfreetype -lharfbuzz $(LINK_ICONV) \
+	-L /usr/local/lib \
 	-L $(WIN_PREFIX)bin
 EMCC ?= emcc
 EMCONFIGURE ?= emconfigure
