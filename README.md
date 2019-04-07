@@ -134,8 +134,6 @@ For details, see the example in the `example/heaps` directory and the API docs.
 
 ## Native library and dependencies
 
-*This section is a work-in-progress.*
-
 The native library (cobbles.hdll/cobbles.wasm) is required in order for Haxe generated code to communicate with other libraries like Freetype and Harfbuzz.
 
 Prebuilt libraries may be bundled in the zip file under the "bin" folder which can be distributed along with your application. Or you can build them yourself.
@@ -177,8 +175,6 @@ If prebuilt dlls are not available or you want to build them yourself, you can u
 This will create a zip file containing the libraries and the dependent libraries. Dig into the "x64-windows" folder and the libraries will be in the "bin" folder and header files in the "include" folder.
 
 #### Mac OS
-
-Freetype is likely installed, but Harfbuzz may not.
 
 If prebuilt libraries are not available or you want to build them yourself, you can use Homebrew:
 
@@ -223,7 +219,7 @@ Generate the Javascript by running the makefile:
     cd native/
     make js
 
-The output will be placed in out/js/.
+The output will be placed in the `out/js/` directory.
 
 Next in your Haxe application, load the Emscripten library with
 
@@ -236,6 +232,12 @@ Then load or package `cobbles.js`, followed by `cobbles_binding.js`, and then yo
 ## Contributing
 
 Use the GitHub issues or pull requests section for bug reports and features.
+
+To run the unit tests, use the hxml files in the `hxml/` directory. For example:
+
+    haxe hxml/test.hl.hxml
+
+Output is placed in the `out/` directory.
 
 ## License
 

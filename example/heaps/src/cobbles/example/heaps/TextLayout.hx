@@ -1,5 +1,6 @@
 package cobbles.example.heaps;
 
+import cobbles.render.heaps.TextureAtlas;
 import haxe.io.Bytes;
 import h3d.mat.Texture;
 import haxe.Resource;
@@ -44,19 +45,34 @@ class TextLayout {
             }
         }
 
+        // Setting the default text properties
         cobbles.lineBreakLength = 0;
         cobbles.font = defaultFont;
         cobbles.fontSize = 24;
         cobbles.color = 0xffffffff;
 
-        renderer = new TileGroupRenderer(LayoutFacade.fontTable);
+        // The tile group renderer handles positioning of the tiles to match
+        // the glyphs in the texture.
+        var textureAtlas = new TextureAtlas(512, 512);
+        renderer = new TileGroupRenderer(LayoutFacade.fontTable, textureAtlas);
         tileGroup = renderer.newTileGroup();
 
+        // Note in your application, you should reuse the same texture atlas
+        // such that all your text will be rasterized onto to it. It will
+        // handle rebuilding the texture and discarding unused glyphs
+        // automatically.
+        // You can do this by ensuring that you obtain tile groups from
+        // a single renderer or by passing the same texture atlas to the
+        // renderer.
+
+        // Expose the texture so outside caller can use it to show
+        // for debugging
         texture = renderer.textureAtlas.texture;
     }
 
     function addDefaultText() {
-
+        // We only have one large layout as a demo. You should split out
+        // your text into multiple layouts as you see fit in your application.
         var dateStr = Date.now().toString();
         cobbles.addText('$dateStr $counter');
         cobbles.addLineBreak();
@@ -106,14 +122,20 @@ class TextLayout {
     }
 
     public function update() {
+        // Normally you wouldn't be clearing and rendering all your text on
+        // every frame. You should build a wrapper class that integrates with
+        // your application and layout the text only when the text is changed.
+        // For this demo, we layout on each frame to test the performance
+        // of rendering a paragraph of text.
         cobbles.clearText();
         addDefaultText();
         cobbles.addText(extraText);
-
         cobbles.layoutText();
-
         renderer.renderTileGroup(cobbles.layout, tileGroup);
 
+        // This shows how to align your text. The output of the layout is based
+        // on the bounding box of glyphs such that (0, 0) is the top-left of
+        // the bounding box.
         var windowWidth = hxd.Window.getInstance().width;
 
         switch demoMode {
@@ -128,6 +150,7 @@ class TextLayout {
         counter += 1;
     }
 
+    // Some bookkeeping when changing state in the demo
     public function switchMode() {
         switch demoMode {
             case LeftText:
@@ -146,7 +169,6 @@ class TextLayout {
                 cobbles.lineDirection = LeftToRight;
                 cobbles.textDirection = LeftToRight;
                 demoMode = LeftText;
-
         }
     }
 

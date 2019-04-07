@@ -3,3 +3,9 @@ out/
 
 # Visual Studio Code
 .vscode/
+
+# Too large
+resource/fonts/noto/LICENSE_OFL.txt
+resource/fonts/noto/NotoSans-Regular.ttf
+resource/fonts/noto/NotoSansArabic-Regular.ttf
+resource/fonts/noto/NotoSansCJKsc-Regular.otf

@@ -14,15 +14,18 @@ class HeapsExample extends hxd.App {
 
         textLayout = new TextLayout(loadedFonts);
 
+        // Show the texture atlas to see how well the library laid out the glyphs
         var atlasBitmap = new h2d.Bitmap(
             h2d.Tile.fromTexture(textLayout.texture), s2d);
         atlasBitmap.y = 30;
         atlasBitmap.alpha = 0.5;
 
+        // Add and position the tile group used for the glyphs
         textLayout.tileGroup.y = 30;
         s2d.addChild(textLayout.tileGroup);
         textLayout.update();
 
+        // Text label for showing the FPS
         var font = hxd.res.DefaultFont.get();
         fpsText = new h2d.Text(font, s2d);
         fpsText.scale(2);
@@ -30,11 +33,15 @@ class HeapsExample extends hxd.App {
         hxd.Window.getInstance().addResizeEvent(resizeCallback);
         hxd.Window.getInstance().addEventTarget(eventCallback);
 
+        // The text will be wrapped to the window width and properly updated
+        // using the above callbacks.
         textLayout.setWidth(s2d.width);
     }
 
     public static function main() {
         #if js
+        // The Emscripten library is compiled into a module so it won't
+        // conflict with the window namespace.
         cobbles.Runtime.loadEmscripten().then(success -> {
             trace("Starting Heaps");
             new HeapsExample();
@@ -45,6 +52,8 @@ class HeapsExample extends hxd.App {
     }
 
     override function loadAssets(onLoaded:Void->Void) {
+        // We choose to selectively load the fonts in case the user
+        // does not want to download all the fonts.
         #if js
         var loadAllFonts:Bool = untyped js.Browser.window.demoLoadAllFonts;
         #else
@@ -61,11 +70,11 @@ class HeapsExample extends hxd.App {
             ];
         }
 
+        // This is the default font we'll want to use unconditionally.
         pendingFonts.push('resource/fonts/liberation/LiberationSerif-Regular.ttf');
         loadedFonts = new Array<{name:String, data:Bytes}>();
 
         #if js
-
         var loadNext;
 
         loadNext = function() {
