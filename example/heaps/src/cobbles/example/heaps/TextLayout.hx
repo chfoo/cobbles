@@ -75,7 +75,7 @@ class TextLayout {
         // your text into multiple layouts as you see fit in your application.
         var dateStr = Date.now().toString();
         cobbles.addText('$dateStr $counter');
-        cobbles.addLineBreak();
+        cobbles.addLineBreak(2.0);
 
         cobbles.addText("The quick brown fox jumps over the lazy dog. ");
         cobbles.addText("Hel͜lo\nwo̎rld! ")

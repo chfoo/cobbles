@@ -238,6 +238,7 @@ class LayoutFacade {
      * @param spacing Multiplier of the default font size.
      */
     public function addLineBreak(spacing:Float = 1.2) {
+        flushPendingText();
         textSource.addLineBreak(spacing);
     }
 
@@ -249,14 +250,19 @@ class LayoutFacade {
      *  that different from the default.
      */
     public function addText(text:String):LayoutFacadeTextFI {
-        if (_pendingText != null) {
-            textSource.addText(_pendingText.text, _pendingText.textProperties);
-        }
+        flushPendingText();
 
         var textProperties = textSource.defaultTextProperties.copy();
 
         _pendingText = new LayoutFacadeTextFI(text, textProperties, fontTable);
         return _pendingText;
+    }
+
+    function flushPendingText() {
+        if (_pendingText != null) {
+            textSource.addText(_pendingText.text, _pendingText.textProperties);
+            _pendingText = null;
+        }
     }
 
     /**
