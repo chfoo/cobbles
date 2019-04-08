@@ -85,12 +85,12 @@ class Font implements Disposable {
         CobblesExtern.font_close(fontPointer);
 
         if (_bytes != null && _bytesPointer != null) {
-            _bytes.releaseNativeBytes(_bytesPointer);
+            _bytes.releaseNativeBytes(_bytesPointer, false);
             _bytes = null;
             _bytesPointer = null;
         } else if(_bytesPointer != null) {
             var dummy = Bytes.alloc(0);
-            dummy.releaseNativeBytes(_bytesPointer);
+            dummy.releaseNativeBytes(_bytesPointer, false);
             _bytesPointer = null;
         }
     }
@@ -163,7 +163,7 @@ class Font implements Disposable {
         }
 
         var buffer = Bytes.alloc(16);
-        var bytesPointer = buffer.toNativeBytes();
+        var bytesPointer = buffer.toNativeBytes(false);
 
         CobblesExtern.font_get_glyph_info(pointer, bytesPointer);
         buffer.releaseNativeBytes(bytesPointer);
@@ -174,7 +174,7 @@ class Font implements Disposable {
 
         // Check length because HashLink allocation failure on 0 bytes.
         if (bitmap.length > 0) {
-            bytesPointer = bitmap.toNativeBytes();
+            bytesPointer = bitmap.toNativeBytes(false);
 
             CobblesExtern.font_get_glyph_bitmap(pointer, bytesPointer);
             bitmap.releaseNativeBytes(bytesPointer);

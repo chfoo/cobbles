@@ -79,7 +79,7 @@ class Shaper implements Disposable {
         var bufferPointer = buffer.toNativeBytes();
 
         CobblesExtern.shaper_set_text_binary(shaperPointer, bufferPointer, NativeEncoding.Utf32);
-        buffer.releaseNativeBytes(bufferPointer);
+        buffer.releaseNativeBytes(bufferPointer, false);
 
         cacheKey.setCodePoints(codePoints);
     }
@@ -167,7 +167,7 @@ class Shaper implements Disposable {
     }
 
     function getGlyphInfo(shaper:CobblesShaperPointer, index:Int, buffer:Bytes):GlyphShape {
-        var bufferPointer = buffer.toNativeBytes();
+        var bufferPointer = buffer.toNativeBytes(false);
         CobblesExtern.shaper_get_glyph_info(shaper, index, bufferPointer);
         buffer.releaseNativeBytes(bufferPointer);
 
