@@ -86,6 +86,7 @@ FUNC void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper);
 FUNC int FUNC_NAME(cobbles_shaper_get_error)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * font);
 FUNC void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding);
+void cobbles_shaper_set_text_binary(CobblesShaper * shaper, const uint8_t * text, int encoding); // CPP: text param type
 FUNC void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper);
 FUNC void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction);
 FUNC void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script);

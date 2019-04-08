@@ -1,0 +1,16 @@
+language: haxe
+haxe:
+  - "4.0.0-rc.2"
+
+before_install:
+  - sudo apt-get install -y libfreetype6 libharfbuzz0b libc6 libfreetype6-dev libharfbuzz-dev libc6-dev
+
+install:
+  - yes | haxelib install hxcpp
+  - yes | haxelib install test.hxml
+
+script:
+  - haxe hxml/test.js.hxml
+  - haxe hxml/test.cpp.hxml
+  - haxe hxml/test.hl.hxml
+  - out/cpp/TestAll-debug

@@ -136,7 +136,10 @@ extern class CobblesExtern {
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_set_text") #end
     public static function shaper_set_text(shaper:CobblesShaperPointer, text:NativeString, encoding:NativeEncoding):Void;
 
-    #if cpp @:native("cobbles_shaper_set_text")
+    // This method points to cobbles_shaper_set_text for cases that treat
+    // pointers as numbers, except for CPP which is stricter on typing.
+    // In any case, we treat it as a pointer to a block of bytes.
+    #if cpp @:native("cobbles_shaper_set_text_binary")
     #elseif hl @:hlNative("cobbles", "cobbles_shaper_set_text") #end
     public static function shaper_set_text_binary(shaper:CobblesShaperPointer, text:NativeBytes, encoding:NativeEncoding):Void;
 
