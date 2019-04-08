@@ -14,6 +14,3 @@ libs.hxml
 
 -xml out/xml/js.xml
 -js out/dummy.js
-
---next
--cmd haxelib run dox -i out/xml/ -o out/docs/ --include "cobbles" --title "Cobbles API Documentation"
