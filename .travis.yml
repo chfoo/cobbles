@@ -6,6 +6,9 @@ haxe:
   - "4.0.0-rc.2"
 
 before_install:
+  # this is an untrusted, unoffical backport which has xenial builds
+  - sudo add-apt-repository ppa:jonathonf/font-rendering -y
+  - sudo apt-get update -q
   - sudo apt-get install -y libfreetype6 libharfbuzz0b libc6 libfreetype6-dev libharfbuzz-dev libc6-dev
 
 install:
