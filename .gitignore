@@ -1,6 +1,9 @@
 # compiled output files
 out/
 
+# Binaries meant for release zip files
+bin/
+
 # Visual Studio Code
 .vscode/
 

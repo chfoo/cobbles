@@ -44,7 +44,14 @@ def add_bin(zip_filename: str, project_dir: str):
     print('Adding binaries')
 
     filenames = (
-
+        'bin/win32/bz2.dll',
+        'bin/win32/cobbles.hdll',
+        'bin/win32/freetype.dll',
+        'bin/win32/harfbuzz.dll',
+        'bin/win32/libcharset.dll',
+        'bin/win32/libiconv.dll',
+        'bin/win32/libpng16.dll',
+        'bin/win32/zlib1.dll',
     )
 
     zip_file = zipfile.ZipFile(zip_filename, mode='a')
