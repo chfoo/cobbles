@@ -44,6 +44,9 @@ def add_bin(zip_filename: str, project_dir: str):
     print('Adding binaries')
 
     filenames = (
+        'bin/js/cobbles_binding.min.js',
+        'bin/js/cobbles.min.js',
+        'bin/js/cobbles.wasm',
         'bin/win32/bz2.dll',
         'bin/win32/cobbles.hdll',
         'bin/win32/freetype.dll',
