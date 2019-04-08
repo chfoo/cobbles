@@ -27,7 +27,9 @@ class NativeData {
     public static function getCobblesPointer():CobblesExtern.CobblesPointer {
         if (cobblesPointer == null) {
             var encoding = getEncoding();
+            #if debug
             trace('Target native encoding is $encoding');
+            #end
 
             cobblesPointer = CobblesExtern.init(encoding);
 
