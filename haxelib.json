@@ -4,9 +4,9 @@
     "license": "MIT",
     "tags": ["native"],
     "description": "Text layout/rendering engine library for applications running under a 3D graphics API",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "classPath": "src/",
-    "releasenote": "First release",
+    "releasenote": "Line breaking improvements (see changelog for details)",
     "contributors": ["chfoo"],
     "dependencies": {
         "exception": "",

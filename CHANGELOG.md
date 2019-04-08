@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+0.2.0 (2019-04-07)
+------------------
 
 * Fixed missing dependencies in haxelib.json.
 * Fixed missing embedding default font resource.
