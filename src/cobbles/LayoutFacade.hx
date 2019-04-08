@@ -306,6 +306,9 @@ class LayoutFacadeTextFI {
 
     /**
      * Find an appropriate font that can display the text and set that font.
+     *
+     * Note: this only uses the first code point in the text to find the first
+     * font that can display it. This method is only provided as a convenience.
      */
     public function detectFont():LayoutFacadeTextFI {
         if (text != "") {

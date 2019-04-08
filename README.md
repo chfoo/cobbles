@@ -6,23 +6,20 @@ Cobbles is a text layout/rendering engine library for Haxe. It uses Freetype and
 
 *It is currently a work in progress.*
 
-What currently works:
+What is supported:
 
 * Left-to-right text
 * Right-to-left text with manual direction and script specified
-* Manually specified line breaks
+* Automatic and manual line breaking
 * Rendering text using Heaps.io
-
-What is work-in-progress:
-
-* Automatic line breaking
 
 What is not yet supported:
 
+* Direction and script detection
+* Automatic bidirectional support
+* Format text by arbitrary ranges and deriving the text runs
+* Markup language using said above feature
 * Vertical text
-* Formatting text by ranges and deriving the text runs
-* Markup language
-* Bidirectional support
 
 ## Getting started
 

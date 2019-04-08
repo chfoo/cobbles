@@ -47,7 +47,9 @@ class TestTextSource extends Test {
         textSource.addText("hello\nworld!");
 
         Assert.equals(3, textSource.items.length);
-        Assert.equals(12, textSource.codePoints.length);
+
+        // Length of text less breaking characters
+        Assert.equals(11, textSource.codePoints.length);
 
         Assert.isTrue(textSource.items[0].match(RunItem(_)));
         Assert.isTrue(textSource.items[1].match(LineBreakItem(_)));

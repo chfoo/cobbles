@@ -6,26 +6,15 @@ import cobbles.layout.Layout.ShapedItem;
 using Safety;
 
 private class ItemBreakInfo {
-    public var penRunItemIndex:Int = -1;
-    public var glyphIndex:Int = -1;
-
-    public var emergencyPenRunItemIndex:Int = -1;
-    public var emergencyGlyphIndex:Int = -1;
-
-    public var penRunRtl:Bool = false;
-
-    public var inlineObjectItemIndex:Int = -1;
+    public var index:Int = -1;
+    public var emergencyIndex:Int = -1;
 
     public function new() {
     }
 
     public function reset() {
-        penRunItemIndex = -1;
-        glyphIndex = -1;
-        emergencyPenRunItemIndex = -1;
-        emergencyGlyphIndex = -1;
-        penRunRtl = false;
-        inlineObjectItemIndex = -1;
+        index = -1;
+        emergencyIndex = -1;
     }
 }
 
@@ -107,28 +96,79 @@ class LayoutLineBreaker {
     public function popOverflowedItems(rejectItems:Array<ShapedItem>) {
         scanForBreakOpportunities();
 
-        if (breakOpportunity.penRunItemIndex >= 0 || breakOpportunity.inlineObjectItemIndex >= 0) {
-            if (breakOpportunity.penRunItemIndex > breakOpportunity.inlineObjectItemIndex) {
-                popOverflowAtPenRunGlyph(
-                    breakOpportunity.penRunItemIndex,
-                    breakOpportunity.glyphIndex,
-                    breakOpportunity.penRunRtl,
-                    rejectItems);
-            } else {
-                popLineBufferUntilIndex(
-                    breakOpportunity.inlineObjectItemIndex,
-                    rejectItems);
+        var pendingAcceptItems = [];
+        var pendingRejectItems = [];
+        var globalIndex = 0;
+        var breakIndex;
+
+        if (breakOpportunity.index >= 0) {
+            breakIndex = breakOpportunity.index;
+        } else if (breakOpportunity.emergencyIndex >= 0) {
+            breakIndex = breakOpportunity.emergencyIndex;
+        } else {
+            // No breaks possible
+            return;
+        }
+
+        function scanPenRun(penRun:PenRun) {
+            var glyphBreakIndex = -1;
+
+            for (glyphIndex_ in 0...penRun.glyphShapes.length) {
+                var glyphIndex;
+
+                if (penRun.rtl) {
+                    glyphIndex = penRun.glyphShapes.length - 1 - glyphIndex_;
+                } else {
+                    glyphIndex = glyphIndex_;
+                }
+
+                if (globalIndex == breakIndex) {
+                    glyphBreakIndex = glyphIndex;
+                }
+
+                globalIndex += 1;
             }
 
-        } else if (breakOpportunity.emergencyPenRunItemIndex >= 0) {
-            popOverflowAtPenRunGlyph(
-                breakOpportunity.emergencyPenRunItemIndex,
-                breakOpportunity.emergencyGlyphIndex,
-                breakOpportunity.penRunRtl,
-                rejectItems);
-        } else {
-            // Impossible to not overflow
+            return glyphBreakIndex;
         }
+
+        for (item in lineBuffer) {
+            switch item {
+                case PenRunItem(penRun):
+                    var glyphBreakIndex = scanPenRun(penRun);
+
+                    if (glyphBreakIndex >= 0) {
+                        if (!penRun.rtl) {
+                            pendingAcceptItems.push(PenRunItem(penRun.slice(0, glyphBreakIndex)));
+                            pendingRejectItems.push(PenRunItem(penRun.slice(glyphBreakIndex, penRun.glyphShapes.length)));
+                        } else {
+                            pendingRejectItems.push(PenRunItem(penRun.slice(0, glyphBreakIndex + 1)));
+                            pendingAcceptItems.push(PenRunItem(penRun.slice(glyphBreakIndex + 1, penRun.glyphShapes.length)));
+                        }
+                    } else if (globalIndex > breakIndex) {
+                        pendingRejectItems.push(item);
+                    } else {
+                        pendingAcceptItems.push(item);
+                    }
+
+                case InlineObjectItem(inlineObject):
+                    if (globalIndex > breakIndex) {
+                        pendingRejectItems.push(item);
+                    } else {
+                        pendingAcceptItems.push(item);
+                    }
+                default:
+                    // pass
+            }
+        }
+
+        pendingRejectItems.reverse();
+
+        for (item in pendingRejectItems) {
+            rejectItems.unshift(item);
+        }
+
+        lineBuffer = pendingAcceptItems;
     }
 
     function scanForBreakOpportunities() {
@@ -136,8 +176,9 @@ class LayoutLineBreaker {
 
         var scannedLineLength = 0;
         var lineBreakRules = layout.textSource.lineBreakRules;
+        var globalIndex = 0;
 
-        function scanPenRun(itemIndex:Int, penRun:PenRun) {
+        function scanPenRun(penRun:PenRun) {
             for (glyphIndex_ in 0...penRun.glyphShapes.length) {
                 var glyphIndex;
 
@@ -150,89 +191,46 @@ class LayoutLineBreaker {
                 var glyphShape = penRun.glyphShapes[glyphIndex];
                 var glyphAdvance = getGlyphAdvance(glyphShape);
                 var codePointIndex = glyphShape.textIndex + penRun.textOffset;
-                var isInBounds = scannedLineLength + glyphAdvance < layout.lineBreakLength;
+                var isInBounds = scannedLineLength < layout.lineBreakLength;
 
                 if (isInBounds) {
                     if (lineBreakRules[codePointIndex] == Opportunity) {
-                        breakOpportunity.penRunItemIndex = itemIndex;
-                        breakOpportunity.glyphIndex = glyphIndex;
+                        breakOpportunity.index = globalIndex;
                     }
 
-                    breakOpportunity.emergencyPenRunItemIndex = itemIndex;
-                    breakOpportunity.emergencyGlyphIndex = glyphIndex;
-                    breakOpportunity.penRunRtl = penRun.rtl;
-                } else if (breakOpportunity.emergencyPenRunItemIndex < 0) {
-                    breakOpportunity.emergencyPenRunItemIndex = itemIndex;
-                    breakOpportunity.emergencyGlyphIndex = glyphIndex;
-                    breakOpportunity.penRunRtl = penRun.rtl;
+                    breakOpportunity.emergencyIndex = globalIndex;
+                } else if (breakOpportunity.emergencyIndex < 0) {
+                    breakOpportunity.emergencyIndex = globalIndex;
                 }
 
                 scannedLineLength += glyphAdvance;
+                globalIndex += 1;
             }
         }
 
-        for (itemIndex in 0...lineBuffer.length) {
-            var item = lineBuffer[itemIndex];
-
+        for (item in lineBuffer) {
             switch item {
                 case PenRunItem(penRun):
-                    scanPenRun(itemIndex, penRun);
+                    scanPenRun(penRun);
                 case InlineObjectItem(inlineObject):
-                    breakOpportunity.inlineObjectItemIndex = itemIndex;
+                    breakOpportunity.index = globalIndex;
                 default:
                     // pass
+            }
+
+            if (scannedLineLength > lineLength &&
+            breakOpportunity.index >= 0 &&
+            breakOpportunity.emergencyIndex >= 0) {
+                break;
             }
         }
 
         // Don't allow a break at the start of the line
-        if (breakOpportunity.penRunItemIndex >= 0 && breakOpportunity.glyphIndex == 0) {
-            breakOpportunity.penRunItemIndex = -1;
-            breakOpportunity.glyphIndex = -1;
+        if (breakOpportunity.index == 0) {
+            breakOpportunity.index = -1;
         }
-        if (breakOpportunity.emergencyPenRunItemIndex >= 0 && breakOpportunity.emergencyGlyphIndex == 0) {
-            breakOpportunity.emergencyPenRunItemIndex = -1;
-            breakOpportunity.emergencyGlyphIndex = -1;
+        if (breakOpportunity.emergencyIndex == 0) {
+            breakOpportunity.emergencyIndex = -1;
         }
-    }
-
-    function popOverflowAtPenRunGlyph(penRunItemIndex:Int, glyphIndex:Int, rtl:Bool, rejectItems:Array<ShapedItem>) {
-        popLineBufferUntilIndex(penRunItemIndex, rejectItems);
-        var rejectPenRun = splitPenRunInBuffer(glyphIndex, rtl);
-        rejectItems.unshift(PenRunItem(rejectPenRun));
-    }
-
-    function popLineBufferUntilIndex(untilIndex:Int, rejectItems:Array<ShapedItem>) {
-        var itemIndex = lineBuffer.length - 1;
-
-        while (itemIndex > untilIndex) {
-            rejectItems.unshift(lineBuffer.pop().sure());
-            itemIndex -= 1;
-        }
-    }
-
-    function splitPenRunInBuffer(index:Int, rtl:Bool):PenRun {
-        switch lineBuffer.pop().sure() {
-            case PenRunItem(penRun):
-                lineLength -= getPenRunLength(penRun);
-
-                var keep, reject;
-
-                if (!rtl) {
-                    keep = penRun.slice(0, index);
-                    reject = penRun.slice(index, penRun.glyphShapes.length);
-                } else {
-                    reject = penRun.slice(0, index);
-                    keep = penRun.slice(index, penRun.glyphShapes.length);
-                }
-
-                lineBuffer.push(PenRunItem(keep));
-                lineLength += getPenRunLength(keep);
-
-                return reject;
-
-            default:
-                throw "not pen run";
-        }
-
     }
 }

@@ -44,6 +44,9 @@ class Layout {
      *
      * Note this is different from the direction of a text run. Direction
      * on a text run controls the visual ordering of individual characters.
+     * In summary, layout direction and default text direction
+     * should be set for the current language, while text direction should
+     * be overridden for foreign text.
      */
     public var direction:Direction = Direction.LeftToRight;
 
