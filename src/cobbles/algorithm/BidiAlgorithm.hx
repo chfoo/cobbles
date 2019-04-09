@@ -1,15 +1,10 @@
 package cobbles.algorithm;
 
 /**
- * Determines the ordering of code points from a logical order
- * to a visual order.
+ * Determines the directionally of text.
  *
- * The bidirectional algorithm modifies text by reordering code points such
- * that they can be processed in a single direction.
+ * The bidirectional algorithm identifies the ordering of code points from
+ * a logical order to a visual order.
  */
 interface BidiAlgorithm {
-    /**
-     * Applies the algorithm using default rules and returns the new text.
-     */
-    public function reorderSimple(text:String):String;
 }

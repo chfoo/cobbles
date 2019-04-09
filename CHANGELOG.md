@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Removed bidi algorithm interface and its use until the rendering stack
+  is more defined in later versions.
+
 0.2.0 (2019-04-07)
 ------------------
 

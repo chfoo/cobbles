@@ -16,7 +16,9 @@ What is supported:
 What is not yet supported:
 
 * Direction and script detection
-* Automatic bidirectional support
+* Unicode bidirectional algorithm
+* Unicode line breaking algorithm
+* Text decoration
 * Format text by arbitrary ranges and deriving the text runs
 * Markup language using said above feature
 * Vertical text

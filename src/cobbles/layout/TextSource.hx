@@ -63,21 +63,15 @@ class TextSource {
     public var codePoints(default, null):Array<CodePoint>;
 
     public var lineBreakRules(default, null):Array<LineBreakRule>;
-    var bidiAlgorithm:Option<BidiAlgorithm>;
     public var lineBreaker(default, null):Option<LineBreakingAlgorithm>;
 
     /**
-     * @param bidiAlgorithm  Optional bidirectional algorithm.
-     *  If provided, it is applied automatically to text. The text direction
-     *  should be set to match the algorithm's output direction.
      * @param lineBreakingAlgorithm Optional line breaking algorithm.
      *  If provided, it is automatically used to break lines when the text
      *  contains line breaking characters. Otherwise, use `addLineBreak()`
      *  manually for line breaks.
      */
-    public function new(?bidiAlgorithm:BidiAlgorithm,
-    ?lineBreakingAlgorithm:LineBreakingAlgorithm) {
-        this.bidiAlgorithm = bidiAlgorithm != null ? Some(bidiAlgorithm) : None;
+    public function new(?lineBreakingAlgorithm:LineBreakingAlgorithm) {
         this.lineBreaker = lineBreakingAlgorithm != null ? Some(lineBreakingAlgorithm) : None;
 
         items = [];
@@ -104,13 +98,6 @@ class TextSource {
     public function addText(text:String, ?properties:TextProperties) {
         if (properties == null) {
             properties = defaultTextProperties;
-        }
-
-        switch bidiAlgorithm {
-            case Some(algorithm):
-                text = algorithm.reorderSimple(text);
-            case None:
-                // pass
         }
 
         var runCodePoints = text.toCodePoints();
