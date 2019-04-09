@@ -3,7 +3,7 @@ package cobbles.shaping;
 import unifill.CodePoint;
 import haxe.ds.Vector;
 import haxe.io.Bytes;
-import cobbles.ds.FNV1aHasher;
+import cobbles.ds.Hasher;
 import cobbles.font.Font;
 import haxe.Int64;
 import cobbles.ds.Cache;
@@ -43,7 +43,7 @@ class ShapeCache {
  * Represents a key for the cache
  */
 class ShapeCacheKey {
-    var hasher:FNV1aHasher;
+    var hasher:Hasher;
     var dirty:Bool = true;
     var font:Null<Font>;
     var text:Null<String>;
@@ -53,7 +53,7 @@ class ShapeCacheKey {
     var direction:Direction = Direction.LeftToRight;
 
     public function new() {
-        hasher = new FNV1aHasher();
+        hasher = new Hasher();
     }
 
     public function setFont(font:Font) {
@@ -104,7 +104,7 @@ class ShapeCacheKey {
         hasher.addInt(font.verticalResolution);
 
         if (text != null) {
-            hasher.addBytes(Bytes.ofString(text));
+            hasher.addString(text);
         }
 
         if (codePoints != null) {
@@ -113,8 +113,8 @@ class ShapeCacheKey {
             }
         }
 
-        hasher.addBytes(Bytes.ofString(language));
-        hasher.addBytes(Bytes.ofString(script));
+        hasher.addString(language);
+        hasher.addString(script);
 
         switch direction {
             case LeftToRight:

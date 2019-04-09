@@ -4,7 +4,7 @@ import haxe.Int64;
 import cobbles.native.CobblesExtern;
 import cobbles.native.NativeData;
 import haxe.io.Bytes;
-import cobbles.ds.FNV1aHasher;
+import cobbles.ds.Hasher;
 
 using Safety;
 using cobbles.native.BytesTools;
@@ -36,12 +36,12 @@ class Font implements Disposable {
      */
     public function new(?path:String, ?bytes:Bytes, faceIndex:Int = 0) {
         var fontPointer_;
-        var hasher = new FNV1aHasher();
+        var hasher = new Hasher();
 
         if (path != null) {
             fontPointer_ = CobblesExtern.open_font_file(
                 NativeData.getCobblesPointer(), path.toNativeString(), faceIndex);
-            hasher.addBytes(Bytes.ofString(path));
+            hasher.addString(path);
         } else if (bytes != null) {
             // Freetype requires bytes to be kept alive, so we keep
             // a reference to it

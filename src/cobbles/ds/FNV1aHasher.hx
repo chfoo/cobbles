@@ -1,14 +1,13 @@
 package cobbles.ds;
 
-import haxe.io.Bytes;
-import haxe.Int64;
-
 class FNV1aHasher {
+    // This class used to be Int64, but it impacted performance especially
+    // when used as cache keys.
     // https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
-    static var OFFSET_BASIS = Int64.make(0xcbf29ce4, 0x84222325);
-    static var PRIME = Int64.make(0x100, 0x000001b3);
+    static var OFFSET_BASIS = 0x811c9dc5;
+    static var PRIME = 16777619;
 
-    var hash:Int64;
+    var hash:Int = 0;
 
     public function new() {
         hash = OFFSET_BASIS;
@@ -20,13 +19,7 @@ class FNV1aHasher {
 
     public function addByte(byte:Int) {
         hash = hash ^ byte;
-        hash = hash * PRIME;
-    }
-
-    public function addBytes(bytes:Bytes) {
-        for (index in 0...bytes.length) {
-            addByte(bytes.get(index));
-        }
+        hash = (hash * PRIME) & 0xffffffff;
     }
 
     public function addInt(int:Int) {
@@ -36,12 +29,7 @@ class FNV1aHasher {
         addByte(int & 0xff);
     }
 
-    public function addInt64(int:Int64) {
-        addInt(int.high);
-        addInt(int.low);
-    }
-
-    public function get():Int64 {
+    public function get():Int {
         return hash;
     }
 }
