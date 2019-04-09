@@ -15,8 +15,8 @@ enum DemoMode {
     RightToLeftMode;
 }
 
-class TextLayout {
-    var cobbles:LayoutFacade;
+class DemoText {
+    var cobbles:TextInput;
     var defaultFont:Null<FontKey>;
     var counter:Int = 0;
     var demoMode:DemoMode = LeftText;
@@ -27,7 +27,7 @@ class TextLayout {
     public var texture(default, null):Texture;
 
     public function new(fonts:Array<{name:String, data:Bytes}>) {
-        cobbles = new LayoutFacade();
+        cobbles = new TextInput();
 
         for (font in fonts) {
             var fontKey;
@@ -35,9 +35,9 @@ class TextLayout {
             trace('Load ${font.name}');
 
             if (font.data != null) {
-                fontKey = LayoutFacade.fontTable.openBytes(font.data);
+                fontKey = TextInput.fontTable.openBytes(font.data);
             } else {
-                fontKey = LayoutFacade.fontTable.openFile(font.name);
+                fontKey = TextInput.fontTable.openFile(font.name);
             }
 
             if (defaultFont == null) {
@@ -54,7 +54,7 @@ class TextLayout {
         // The tile group renderer handles positioning of the tiles to match
         // the glyphs in the texture.
         var textureAtlas = new TextureAtlas(512, 512);
-        renderer = new TileGroupRenderer(LayoutFacade.fontTable, textureAtlas);
+        renderer = new TileGroupRenderer(TextInput.fontTable, textureAtlas);
         tileGroup = renderer.newTileGroup();
 
         // Note in your application, you should reuse the same texture atlas

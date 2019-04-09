@@ -12,7 +12,7 @@ using unifill.Unifill;
 /**
  * Unified interface for building text layout by runs of text.
  */
-class LayoutFacade {
+class TextInput {
     /**
      * Font table singleton.
      */
@@ -109,7 +109,7 @@ class LayoutFacade {
     //  */
     // public var resolution(get, set):Int;
 
-    var _pendingText:Null<LayoutFacadeTextFI>;
+    var _pendingText:Null<TextInputTextFI>;
 
     public function new() {
         var lineBreaker = new SimpleLineBreaker();
@@ -249,12 +249,12 @@ class LayoutFacade {
      * @return A fluent interface for applying text properties
      *  that different from the default.
      */
-    public function addText(text:String):LayoutFacadeTextFI {
+    public function addText(text:String):TextInputTextFI {
         flushPendingText();
 
         var textProperties = textSource.defaultTextProperties.copy();
 
-        _pendingText = new LayoutFacadeTextFI(text, textProperties, fontTable);
+        _pendingText = new TextInputTextFI(text, textProperties, fontTable);
         return _pendingText;
     }
 
@@ -282,9 +282,9 @@ class LayoutFacade {
 
 
 /**
- * `LayoutFacade.addText` fluent interface.
+ * `TextInput.addText` fluent interface.
  */
-class LayoutFacadeTextFI {
+class TextInputTextFI {
     @:allow(cobbles) var text:String;
     @:allow(cobbles) var textProperties:TextProperties;
     var fontTable:FontTable;
@@ -299,7 +299,7 @@ class LayoutFacadeTextFI {
     /**
      * Set font.
      */
-    public function font(font:FontKey):LayoutFacadeTextFI {
+    public function font(font:FontKey):TextInputTextFI {
         textProperties.fontKey = font;
         return this;
     }
@@ -310,7 +310,7 @@ class LayoutFacadeTextFI {
      * Note: this only uses the first code point in the text to find the first
      * font that can display it. This method is only provided as a convenience.
      */
-    public function detectFont():LayoutFacadeTextFI {
+    public function detectFont():TextInputTextFI {
         if (text != "") {
             textProperties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
         }
@@ -321,7 +321,7 @@ class LayoutFacadeTextFI {
      * Set font size.
      * @param size Size in points.
      */
-    public function fontSize(size:Float):LayoutFacadeTextFI {
+    public function fontSize(size:Float):TextInputTextFI {
         textProperties.fontPointSize = size;
         return this;
     }
@@ -330,7 +330,7 @@ class LayoutFacadeTextFI {
      * Set text color.
      * @param color Color in ARGB format.
      */
-    public function color(color:Int):LayoutFacadeTextFI {
+    public function color(color:Int):TextInputTextFI {
         textProperties.color = color;
         return this;
     }
@@ -340,7 +340,7 @@ class LayoutFacadeTextFI {
      *
      * See `TextProperties`.
      */
-    public function direction(direction:Direction):LayoutFacadeTextFI {
+    public function direction(direction:Direction):TextInputTextFI {
         textProperties.direction = direction;
         return this;
     }
@@ -352,7 +352,7 @@ class LayoutFacadeTextFI {
      *
      * @param language A BCP 47 tag.
      */
-    public function language(language:String):LayoutFacadeTextFI {
+    public function language(language:String):TextInputTextFI {
         textProperties.language = language;
         return this;
     }
@@ -364,7 +364,7 @@ class LayoutFacadeTextFI {
      *
      * @param script A ISO 15924 tag
      */
-    public function script(script:String):LayoutFacadeTextFI {
+    public function script(script:String):TextInputTextFI {
         textProperties.script = script;
         return this;
     }

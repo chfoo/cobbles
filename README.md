@@ -37,25 +37,25 @@ Or the latest from the repo:
 
 Next, you will need the native library and as well the dependencies installed. To do this, see the library section below. Once those are built or installed, continue here.
 
-The easiest entry to using the library is with the `LayoutFacade` class:
+The easiest entry to using the library is with the `TextInput` class:
 
 ```haxe
-import cobbles.LayoutFacade;
+import cobbles.TextInput;
 
-var cobbles = new LayoutFacade();
+var cobbles = new TextInput();
 ```
 
 In order to display anything meaningful, load a font from the filesystem:
 
 ```haxe
-var latinSans = LayoutFacade.fontTable.openFile("path/to/font.ttf");
+var latinSans = TextInput.fontTable.openFile("path/to/font.ttf");
 ```
 
 Or by the bytes directly:
 
 ```haxe
 var fontBytes:Bytes; // your font here
-var latinSans = LayoutFacade.fontTable.openBytes(fontBytes);
+var latinSans = TextInput.fontTable.openBytes(fontBytes);
 ```
 
 Next, we set the default font properties:
@@ -95,7 +95,7 @@ Next, we use a renderer that will draw each glyph onto the bitmap:
 ```haxe
 import cobbles.render.BitmapRenderer;
 
-var renderer = new BitmapRenderer(LayoutFacade.fontTable);
+var renderer = new BitmapRenderer(TextInput.fontTable);
 renderer.setBitmap(bitmap);
 renderer.render(layout);
 ```
@@ -116,9 +116,9 @@ There is a Heaps renderer included in the library. It is used like so:
 import cobbles.render.heaps.TextureAtlas;
 import cobbles.render.heaps.TileGroupRenderer;
 
-var cobbles:LayoutFacade; // your instance here
+var cobbles:TextInput; // your instance here
 var textureAtlas = new TextureAtlas(512, 512);
-var renderer = new TileGroupRenderer(LayoutFacade.fontTable, textureAtlas);
+var renderer = new TileGroupRenderer(TextInput.fontTable, textureAtlas);
 var tileGroup = renderer.newTileGroup();
 
 s2d.addChild(tileGroup);

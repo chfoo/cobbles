@@ -5,25 +5,25 @@ import hxd.net.BinaryLoader;
 import haxe.io.Bytes;
 
 class HeapsExample extends hxd.App {
-    var textLayout:TextLayout;
+    var demoText:DemoText;
     var fpsText:h2d.Text;
     var loadedFonts:Array<{name:String, data:Bytes}>;
 
     override function init() {
         super.init();
 
-        textLayout = new TextLayout(loadedFonts);
+        demoText = new DemoText(loadedFonts);
 
         // Show the texture atlas to see how well the library laid out the glyphs
         var atlasBitmap = new h2d.Bitmap(
-            h2d.Tile.fromTexture(textLayout.texture), s2d);
+            h2d.Tile.fromTexture(demoText.texture), s2d);
         atlasBitmap.y = 30;
         atlasBitmap.alpha = 0.5;
 
         // Add and position the tile group used for the glyphs
-        textLayout.tileGroup.y = 30;
-        s2d.addChild(textLayout.tileGroup);
-        textLayout.update();
+        demoText.tileGroup.y = 30;
+        s2d.addChild(demoText.tileGroup);
+        demoText.update();
 
         // Text label for showing the FPS
         var font = hxd.res.DefaultFont.get();
@@ -35,7 +35,7 @@ class HeapsExample extends hxd.App {
 
         // The text will be wrapped to the window width and properly updated
         // using the above callbacks.
-        textLayout.setWidth(s2d.width);
+        demoText.setWidth(s2d.width);
     }
 
     public static function main() {
@@ -107,17 +107,17 @@ class HeapsExample extends hxd.App {
     }
 
     override function update(dt:Float) {
-        textLayout.update();
+        demoText.update();
         fpsText.text = 'FPS ${Std.int(hxd.Timer.fps())}. WIP. Resize window. Click to change mode.';
     }
 
     function resizeCallback() {
-        textLayout.setWidth(hxd.Window.getInstance().width);
+        demoText.setWidth(hxd.Window.getInstance().width);
     }
 
     function eventCallback(event:hxd.Event) {
         if (event.kind == EventKind.EPush) {
-            textLayout.switchMode();
+            demoText.switchMode();
         }
     }
 }
