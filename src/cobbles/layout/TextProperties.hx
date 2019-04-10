@@ -2,6 +2,9 @@ package cobbles.layout;
 
 import cobbles.font.FontTable;
 import cobbles.font.FontTable.FontKey;
+import haxe.Constraints.IMap;
+
+using cobbles.ds.MapTools;
 
 /**
  * Properties that can be applied to a segment of text.
@@ -64,8 +67,14 @@ class TextProperties {
      */
     public var script:String = "Latn";
 
+    /**
+     * Custom properties.
+     */
+    public var data:IMap<String,String>;
+
     public function new() {
         this.fontKey = FontTable.notdefFont;
+        data = new Map<String,String>();
     }
 
     function get_fontPointSize():Float {
@@ -88,6 +97,7 @@ class TextProperties {
         newCopy.fontSize = fontSize;
         newCopy.fontKey = fontKey;
         newCopy.script = script;
+        newCopy.data = data.copy();
 
         return newCopy;
     }

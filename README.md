@@ -19,8 +19,9 @@ What is not yet supported:
 * Unicode bidirectional algorithm
 * Unicode line breaking algorithm
 * Text decoration
-* Format text by arbitrary ranges and deriving the text runs
-* Markup language using said above feature
+* Format text by arbitrary ranges
+* Markup language
+* Text cursor navigation (characters vs clusters)
 * Vertical text
 
 ## Getting started

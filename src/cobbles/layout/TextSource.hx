@@ -1,5 +1,6 @@
 package cobbles.layout;
 
+import haxe.Constraints.IMap;
 import unifill.CodePoint;
 import cobbles.algorithm.LineBreakingAlgorithm;
 import haxe.ds.Option;
@@ -21,6 +22,7 @@ class TextRun {
     public var direction:Direction;
     public var language:String;
     public var script:String;
+    public var data:IMap<String,String>;
 
     public function copy():TextRun {
         return {
@@ -31,7 +33,8 @@ class TextRun {
             color: color,
             direction: direction,
             language: language,
-            script: script
+            script: script,
+            data: data
         };
     }
 }
@@ -120,7 +123,8 @@ class TextSource {
             color: properties.color,
             direction: properties.direction,
             language: properties.language,
-            script: properties.script
+            script: properties.script,
+            data: properties.data
         };
 
         items.push(RunItem(run));

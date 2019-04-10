@@ -7,6 +7,7 @@ Unreleased
 * Changed: `LayoutFacade` renamed to `TextInput`.
 * Removed bidi algorithm interface and its use until the rendering stack
   is more defined in later versions.
+* Added text run custom property map.
 
 0.2.0 (2019-04-07)
 ------------------

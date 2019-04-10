@@ -1,5 +1,6 @@
 package cobbles.layout;
 
+import haxe.Constraints.IMap;
 import haxe.ds.Vector;
 import cobbles.font.FontTable.FontKey;
 import cobbles.shaping.GlyphShape;
@@ -21,10 +22,11 @@ class PenRun {
     public var glyphShapes:Vector<GlyphShape>;
     public var textOffset:Int;
     public var rtl:Bool;
+    public var data:IMap<String,String>;
     public var width(get, never):Int;
     public var height(get, never):Int;
 
-    public function new(fontKey, fontSize, script, color, glyphShapes, textOffset, rtl) {
+    public function new(fontKey, fontSize, script, color, glyphShapes, textOffset, rtl, data) {
         this.fontKey = fontKey;
         this.fontSize = fontSize;
         this.script = script;
@@ -32,6 +34,7 @@ class PenRun {
         this.glyphShapes = glyphShapes;
         this.textOffset = textOffset;
         this.rtl = rtl;
+        this.data = data;
     }
 
     function get_width():Int {
@@ -79,7 +82,8 @@ class PenRun {
             color: color,
             glyphShapes: newGlyphShapes,
             textOffset: textOffset,
-            rtl: rtl
+            rtl: rtl,
+            data: data
         };
     }
 }

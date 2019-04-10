@@ -222,7 +222,8 @@ class Layout {
             color: textRun.color,
             glyphShapes: glyphShapes,
             textOffset: textRun.codePointIndex,
-            rtl: textRun.direction.match(RightToLeft | BottomToTop)
+            rtl: textRun.direction.match(RightToLeft | BottomToTop),
+            data: textRun.data
         };
 
         return penRun;

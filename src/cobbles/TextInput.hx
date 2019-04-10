@@ -1,5 +1,6 @@
 package cobbles;
 
+import cobbles.layout.InlineObject;
 import cobbles.layout.TextProperties;
 import cobbles.algorithm.SimpleLineBreaker;
 import cobbles.shaping.Shaper;
@@ -233,7 +234,7 @@ class TextInput {
     }
 
     /**
-     * Add a line break.
+     * Appends a line break.
      *
      * @param spacing Multiplier of the default font size.
      */
@@ -243,7 +244,15 @@ class TextInput {
     }
 
     /**
-     * Add a segment of text containing the same properties.
+     * Appends an inline object.
+     */
+    public function addInlineObject(inlineObject:InlineObject) {
+        flushPendingText();
+        textSource.addInlineObject(inlineObject);
+    }
+
+    /**
+     * Appends a segment of text containing the same properties.
      *
      * @param text Text.
      * @return A fluent interface for applying text properties
@@ -260,7 +269,7 @@ class TextInput {
 
     function flushPendingText() {
         if (_pendingText != null) {
-            textSource.addText(_pendingText.text, _pendingText.textProperties);
+            textSource.addText(_pendingText.text, _pendingText.properties);
             _pendingText = null;
         }
     }
@@ -272,7 +281,7 @@ class TextInput {
      */
     public function layoutText() {
         if (_pendingText != null) {
-            textSource.addText(_pendingText.text, _pendingText.textProperties);
+            textSource.addText(_pendingText.text, _pendingText.properties);
             _pendingText = null;
         }
 
@@ -286,13 +295,13 @@ class TextInput {
  */
 class TextInputTextFI {
     @:allow(cobbles) var text:String;
-    @:allow(cobbles) var textProperties:TextProperties;
+    public var properties(default, null):TextProperties;
     var fontTable:FontTable;
 
     public function new(text:String, textProperties:TextProperties,
     fontTable:FontTable) {
         this.text = text;
-        this.textProperties = textProperties;
+        this.properties = textProperties;
         this.fontTable = fontTable;
     }
 
@@ -300,7 +309,7 @@ class TextInputTextFI {
      * Set font.
      */
     public function font(font:FontKey):TextInputTextFI {
-        textProperties.fontKey = font;
+        properties.fontKey = font;
         return this;
     }
 
@@ -312,7 +321,7 @@ class TextInputTextFI {
      */
     public function detectFont():TextInputTextFI {
         if (text != "") {
-            textProperties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
+            properties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
         }
         return this;
     }
@@ -322,7 +331,7 @@ class TextInputTextFI {
      * @param size Size in points.
      */
     public function fontSize(size:Float):TextInputTextFI {
-        textProperties.fontPointSize = size;
+        properties.fontPointSize = size;
         return this;
     }
 
@@ -331,7 +340,7 @@ class TextInputTextFI {
      * @param color Color in ARGB format.
      */
     public function color(color:Int):TextInputTextFI {
-        textProperties.color = color;
+        properties.color = color;
         return this;
     }
 
@@ -341,7 +350,7 @@ class TextInputTextFI {
      * See `TextProperties`.
      */
     public function direction(direction:Direction):TextInputTextFI {
-        textProperties.direction = direction;
+        properties.direction = direction;
         return this;
     }
 
@@ -353,7 +362,7 @@ class TextInputTextFI {
      * @param language A BCP 47 tag.
      */
     public function language(language:String):TextInputTextFI {
-        textProperties.language = language;
+        properties.language = language;
         return this;
     }
 
@@ -365,7 +374,17 @@ class TextInputTextFI {
      * @param script A ISO 15924 tag
      */
     public function script(script:String):TextInputTextFI {
-        textProperties.script = script;
+        properties.script = script;
+        return this;
+    }
+
+    /**
+     * Sets a custom property.
+     *
+     * See `TextProperties`.
+     */
+    public function data(key:String, value:String):TextInputTextFI {
+        properties.data.set(key, value);
         return this;
     }
 }
