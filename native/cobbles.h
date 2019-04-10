@@ -69,7 +69,7 @@ typedef uint8_t * CobblesShaperGlyphInfoArray;
 FUNC Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding);
 FUNC void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles);
 FUNC int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles);
-FUNC int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, char * text);
+FUNC int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, const char * text);
 
 FUNC CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * path, int face_index);
 FUNC CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * bytes, size_t length, int face_index);

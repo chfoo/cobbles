@@ -35,7 +35,7 @@ int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles) {
     return cobbles->error_code;
 }
 
-int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, char * text) {
+int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, const char * text) {
     hb_script_t script = HB_SCRIPT_UNKNOWN;
     hb_direction_t direction = HB_DIRECTION_LTR;
     char script_str[4];
