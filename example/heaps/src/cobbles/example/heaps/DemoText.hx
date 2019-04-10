@@ -83,6 +83,8 @@ class DemoText {
             .color(0xffff3333);
 
         // Text samples from http://kermitproject.org/utf8.html
+
+        // Setting the language and script manually
         cobbles.addText("我能吞下玻璃而不伤身体。")
             .script("Hans")
             .language("zh-Hans")
@@ -98,19 +100,21 @@ class DemoText {
             .language("ko")
             .detectFont();
 
+        // Automatic guessing of script
         cobbles.addText("Я могу есть стекло, оно мне не вредит. ")
-            .script("Cyrl")
+            .detectScript()
             .detectFont();
 
         cobbles.addText("Tôi có thể ăn thủy tinh mà không hại gì. ")
-            .script("Latn")
+            .detectScript()
             .detectFont();
 
+        // Some right to left text. Guessing script and direction.
         cobbles.addText("أنا قادر على أكل الزجاج و هذا لا يؤلمني. ")
-            .script("Arab")
-            .direction(Direction.RightToLeft)
+            .detectScript() // Arab and RTL
             .detectFont();
 
+        // Can set script and direction manually
         cobbles.addText("אני יכול לאכול זכוכית וזה לא מזיק לי. ")
             .script("Hebr")
             .direction(Direction.RightToLeft)
@@ -129,7 +133,7 @@ class DemoText {
         // of rendering a paragraph of text.
         cobbles.clearText();
         addDefaultText();
-        cobbles.addText(extraText);
+        cobbles.addText(extraText).detectFont().detectScript();
         cobbles.layoutText();
         renderer.renderTileGroup(cobbles.layout, tileGroup);
 

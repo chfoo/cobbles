@@ -108,8 +108,11 @@ class Shaper implements Disposable {
     }
 
     /**
-     * Sets the text's approximate script, language, and direction by
-     * analyzing the text.
+     * Sets the text's script and direction by analyzing the first code point
+     * in the text.
+     *
+     * This method is intended only for development and testing. To get
+     * anything useful in return, see the `UnicodeUtil` class.
      */
     public function guessScript() {
         CobblesExtern.shaper_guess_text_properties(shaperPointer);

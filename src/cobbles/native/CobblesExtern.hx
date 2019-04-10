@@ -78,6 +78,10 @@ extern class CobblesExtern {
     #elseif hl @:hlNative("cobbles", "cobbles_get_error") #end
     public static function get_error(cobbles:CobblesPointer):Int;
 
+    #if cpp @:native("cobbles_guess_string_script")
+    #elseif hl @:hlNative("cobbles", "cobbles_guess_string_script") #end
+    public static function guess_string_script(cobbles:CobblesPointer, text:NativeString):Int;
+
     // cobbles_font.c
     #if cpp @:native("cobbles_open_font_file")
     #elseif hl @:hlNative("cobbles", "cobbles_open_font_file") #end

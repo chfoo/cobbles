@@ -8,6 +8,7 @@ Unreleased
 * Removed bidi algorithm interface and its use until the rendering stack
   is more defined in later versions.
 * Added text run custom property map.
+* Added `detectScript()` to guess script and direction.
 
 0.2.0 (2019-04-07)
 ------------------

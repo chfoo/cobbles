@@ -7,6 +7,7 @@ import cobbles.shaping.Shaper;
 import cobbles.layout.Layout;
 import cobbles.layout.TextSource;
 import cobbles.font.FontTable;
+import cobbles.util.UnicodeUtil;
 
 using unifill.Unifill;
 
@@ -323,6 +324,19 @@ class TextInputTextFI {
         if (text != "") {
             properties.fontKey = fontTable.findByCodePoint(text.uCharCodeAt(0));
         }
+        return this;
+    }
+
+    /**
+     * Detect and automatically set the script and direction.
+     *
+     * Note: this only uses the first code point in the text to guess
+     * the script and direction. This method is only provided as a convenience.
+     */
+    public function detectScript():TextInputTextFI {
+        var result = UnicodeUtil.guessScript(text);
+        properties.script = result.script;
+        properties.direction = result.direction;
         return this;
     }
 

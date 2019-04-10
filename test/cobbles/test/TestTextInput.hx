@@ -39,6 +39,7 @@ class TestTextInput extends Test {
         cobbles.addText("world!")
             .color(0xff00ff00)
             .detectFont()
+            .detectScript()
             .direction(Direction.RightToLeft)
             .font(FontTable.notdefFont)
             .fontSize(22)

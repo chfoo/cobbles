@@ -31,6 +31,7 @@ typedef struct {
     FT_Library ft_library;
     CobblesEncoding encoding;
     char * encodingStringBuffer;
+    hb_unicode_funcs_t * hb_unicode_funcs;
 } Cobbles;
 
 typedef struct {
@@ -68,6 +69,7 @@ typedef uint8_t * CobblesShaperGlyphInfoArray;
 FUNC Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding);
 FUNC void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles);
 FUNC int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles);
+FUNC int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, char * text);
 
 FUNC CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * path, int face_index);
 FUNC CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * bytes, size_t length, int face_index);
@@ -102,6 +104,7 @@ void _cobbles_bytes_write_int(uint8_t * bytes, int index, int value);
 size_t _cobbles_string_length(Cobbles * cobbles, const char * input);
 const char* _cobbles_encode_string(Cobbles * cobbles, const char * inputEncoding, const char * outputEncoding, const char * input);
 const char* _cobbles_get_utf8_string(Cobbles * cobbles, const char * input);
+const uint32_t* _cobbles_get_code_points(Cobbles * cobbles, const char * input);
 
 #ifdef __cplusplus
 }

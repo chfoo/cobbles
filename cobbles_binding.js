@@ -5,6 +5,7 @@ function cobbles_bind(Module) {
     cobbles.init = Module.cwrap('cobbles_init', 'number', ['number']);
     cobbles.destroy = Module.cwrap('cobbles_destroy', null, ['number']);
     cobbles.get_error = Module.cwrap('cobbles_get_error', 'number', ['number']);
+    cobbles.guess_string_script = Module.cwrap('cobbles_guess_string_script', 'number', ['number', 'string']);
 
     // cobbles_font.c
     cobbles.open_font_file = Module.cwrap('cobbles_open_font_file', 'number', ['number', 'string', 'number']);

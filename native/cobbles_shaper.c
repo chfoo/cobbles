@@ -72,7 +72,7 @@ void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * tex
 }
 
 void cobbles_shaper_set_text_binary(CobblesShaper * shaper, const uint8_t * text, int encoding) {
-    cobbles_shaper_set_text(shaper, text, encoding);
+    FUNC_NAME(cobbles_shaper_set_text)(shaper, (const char *) text, encoding);
 }
 
 void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper) {
