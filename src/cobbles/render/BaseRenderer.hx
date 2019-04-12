@@ -21,10 +21,10 @@ class BaseRenderer {
     public function render(layout:Layout) {
         resolution = layout.resolution;
 
-        switch layout.direction {
-            case LeftToRight | RightToLeft:
+        switch layout.orientation {
+            case HorizontalTopBottom:
                 verticalOrientation = false;
-            case TopToBottom | BottomToTop:
+            case VerticalLeftRight | VerticalRightLeft:
                 verticalOrientation = true;
         }
 

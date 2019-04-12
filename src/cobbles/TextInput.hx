@@ -73,13 +73,6 @@ class TextInput {
     public var color(get, set):Int;
 
     /**
-     * The order in which text runs are placed in lines.
-     *
-     * See `Layout`.
-     */
-    public var lineDirection(get, set):Direction;
-
-    /**
      * The orientation and flow direction of lines.
      *
      * See `Layout`.
@@ -173,14 +166,6 @@ class TextInput {
 
     function set_color(value:Int):Int {
         return textSource.defaultTextProperties.color = value;
-    }
-
-    function get_lineDirection():Direction {
-        return layout.direction;
-    }
-
-    function set_lineDirection(value:Direction):Direction {
-        return layout.direction = value;
     }
 
     function get_orientation():Orientation {

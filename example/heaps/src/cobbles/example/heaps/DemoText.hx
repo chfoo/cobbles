@@ -166,12 +166,10 @@ class DemoText {
                 demoMode = RightText;
             case RightText:
                 cobbles.alignment = Alignment.End;
-                cobbles.lineDirection = RightToLeft;
                 cobbles.textDirection = RightToLeft;
                 demoMode = RightToLeftMode;
             case RightToLeftMode:
                 cobbles.alignment = Alignment.Start;
-                cobbles.lineDirection = LeftToRight;
                 cobbles.textDirection = LeftToRight;
                 demoMode = LeftText;
         }

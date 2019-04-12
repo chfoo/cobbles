@@ -36,21 +36,6 @@ class Layout {
     public var alignment:Alignment = Alignment.Start;
 
     /**
-     * The order in which runs are placed in lines.
-     *
-     * - For left-to-right or top-to-bottom, this has no effect.
-     * - For right-to-left or bottom-to-top, the order of the items in a line
-     *   is reversed for visual ordering.
-     *
-     * Note this is different from the direction of a text run. Direction
-     * on a text run controls the visual ordering of individual characters.
-     * In summary, layout direction and default text direction
-     * should be set for the current language, while text direction should
-     * be overridden for foreign text.
-     */
-    public var direction:Direction = Direction.LeftToRight;
-
-    /**
      * The orientation and flow direction of lines.
      *
      * - If horizontal, a line of text will flow from left to right and
