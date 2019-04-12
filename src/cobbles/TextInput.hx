@@ -113,9 +113,7 @@ class TextInput {
     public function new(?textConfig:TextConfig) {
         this.config = textConfig != null ? textConfig : TextConfig.instance();
 
-        var lineBreaker = new SimpleLineBreaker();
-
-        textSource = new TextSource(lineBreaker);
+        textSource = new TextSource(this.config.lineBreakingAlgorithm);
         shaper = new Shaper();
         layout = new Layout(this.config.fontTable, textSource, shaper);
     }
