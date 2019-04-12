@@ -41,22 +41,24 @@ Next, you will need the native library and as well the dependencies installed. T
 The easiest entry to using the library is with the `TextInput` class:
 
 ```haxe
+import cobbles.TextConfig;
 import cobbles.TextInput;
 
+var config = TextConfig.instance();
 var cobbles = new TextInput();
 ```
 
 In order to display anything meaningful, load a font from the filesystem:
 
 ```haxe
-var latinSans = TextInput.fontTable.openFile("path/to/font.ttf");
+var latinSans = config.fontTable.openFile("path/to/font.ttf");
 ```
 
 Or by the bytes directly:
 
 ```haxe
 var fontBytes:Bytes; // your font here
-var latinSans = TextInput.fontTable.openBytes(fontBytes);
+var latinSans = config.fontTable.openBytes(fontBytes);
 ```
 
 Next, we set the default font properties:
@@ -96,7 +98,7 @@ Next, we use a renderer that will draw each glyph onto the bitmap:
 ```haxe
 import cobbles.render.BitmapRenderer;
 
-var renderer = new BitmapRenderer(TextInput.fontTable);
+var renderer = new BitmapRenderer(config.fontTable);
 renderer.setBitmap(bitmap);
 renderer.render(layout);
 ```
@@ -119,7 +121,7 @@ import cobbles.render.heaps.TileGroupRenderer;
 
 var cobbles:TextInput; // your instance here
 var textureAtlas = new TextureAtlas(512, 512);
-var renderer = new TileGroupRenderer(TextInput.fontTable, textureAtlas);
+var renderer = new TileGroupRenderer(config.fontTable, textureAtlas);
 var tileGroup = renderer.newTileGroup();
 
 s2d.addChild(tileGroup);

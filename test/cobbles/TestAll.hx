@@ -6,7 +6,7 @@ import utest.ui.Report;
 class TestAll {
     public static function main() {
         #if js
-        cobbles.test.TestFont.preloadFonts()
+        cobbles.test.font.TestFont.preloadFonts()
         .then(function (success:Bool) {
             return cobbles.Runtime.loadEmscripten();
         })

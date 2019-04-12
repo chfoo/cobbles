@@ -16,10 +16,9 @@ using unifill.Unifill;
  */
 class TextInput {
     /**
-     * Font table singleton.
+     * Text config instance.
      */
-    public static var fontTable(get, never):FontTable;
-    static var _fontTableSingleton:Null<FontTable>;
+    public var config(default, null):TextConfig;
 
     /**
      * Input text source instance.
@@ -113,20 +112,18 @@ class TextInput {
 
     var _pendingText:Null<TextInputTextFI>;
 
-    public function new() {
+    /**
+     * @param textConfig Optional text config. If not provided, the singleton
+     * will be used.
+     */
+    public function new(?textConfig:TextConfig) {
+        this.config = textConfig != null ? textConfig : TextConfig.instance();
+
         var lineBreaker = new SimpleLineBreaker();
 
         textSource = new TextSource(lineBreaker);
         shaper = new Shaper();
-        layout = new Layout(fontTable, textSource, shaper);
-    }
-
-    static function get_fontTable():FontTable {
-        if (_fontTableSingleton == null) {
-            _fontTableSingleton = new FontTable();
-        }
-
-        return _fontTableSingleton;
+        layout = new Layout(this.config.fontTable, textSource, shaper);
     }
 
     function get_font():FontKey {
@@ -264,7 +261,7 @@ class TextInput {
 
         var textProperties = textSource.defaultTextProperties.copy();
 
-        _pendingText = new TextInputTextFI(text, textProperties, fontTable);
+        _pendingText = new TextInputTextFI(text, textProperties, this.config.fontTable);
         return _pendingText;
     }
 

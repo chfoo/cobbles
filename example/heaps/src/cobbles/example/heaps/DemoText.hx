@@ -35,9 +35,9 @@ class DemoText {
             trace('Load ${font.name}');
 
             if (font.data != null) {
-                fontKey = TextInput.fontTable.openBytes(font.data);
+                fontKey = TextConfig.instance().fontTable.openBytes(font.data);
             } else {
-                fontKey = TextInput.fontTable.openFile(font.name);
+                fontKey = TextConfig.instance().fontTable.openFile(font.name);
             }
 
             if (defaultFont == null) {
@@ -54,7 +54,7 @@ class DemoText {
         // The tile group renderer handles positioning of the tiles to match
         // the glyphs in the texture.
         var textureAtlas = new TextureAtlas(512, 512);
-        renderer = new TileGroupRenderer(TextInput.fontTable, textureAtlas);
+        renderer = new TileGroupRenderer(TextConfig.instance().fontTable, textureAtlas);
         tileGroup = renderer.newTileGroup();
 
         // Note in your application, you should reuse the same texture atlas
