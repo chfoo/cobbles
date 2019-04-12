@@ -10,6 +10,10 @@ class MoreUnicodeTools {
         var buffer = [];
 
         for (codePoint in text.uIterator()) {
+            if (codePoint == 0) {
+                continue;
+            }
+
             buffer.push(codePoint);
         }
 
