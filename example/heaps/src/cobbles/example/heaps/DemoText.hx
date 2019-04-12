@@ -78,9 +78,10 @@ class DemoText {
         cobbles.addLineBreak(2.0);
 
         cobbles.addText("The quick brown fox jumps over the lazy dog. ");
-        cobbles.addText("Hel͜lo\nwo̎rld! ")
-            .fontSize(40)
-            .color(0xffff3333);
+
+        // You can also use markup. This demo demonstrates the default
+        // markup langauge.
+        cobbles.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld!</span>");
 
         // Text samples from http://kermitproject.org/utf8.html
 

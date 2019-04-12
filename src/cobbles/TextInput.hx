@@ -1,12 +1,13 @@
 package cobbles;
 
-import cobbles.layout.InlineObject;
-import cobbles.layout.TextProperties;
 import cobbles.algorithm.SimpleLineBreaker;
-import cobbles.shaping.Shaper;
-import cobbles.layout.Layout;
-import cobbles.layout.TextSource;
 import cobbles.font.FontTable;
+import cobbles.layout.InlineObject;
+import cobbles.layout.Layout;
+import cobbles.layout.TextProperties;
+import cobbles.layout.TextSource;
+import cobbles.markup.TextContext;
+import cobbles.shaping.Shaper;
 import cobbles.util.UnicodeUtil;
 
 using unifill.Unifill;
@@ -270,6 +271,17 @@ class TextInput {
             textSource.addText(_pendingText.text, _pendingText.properties);
             _pendingText = null;
         }
+    }
+
+    /**
+     * Parses the markup and appends the text.
+     *
+     * The markup is parsed using the `MarkupParser` that is set on `config`.
+     *
+     * @param text Text containing markup.
+     */
+    public function addMarkup(text:String) {
+        config.markupParser.parse(new TextContext(this), text);
     }
 
     /**

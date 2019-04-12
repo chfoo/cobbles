@@ -11,6 +11,7 @@ What is supported:
 * Left-to-right text
 * Right-to-left text with manual direction and script specified
 * Automatic and manual line breaking
+* Markup language
 * Rendering text using Heaps.io
 
 What is not yet supported:
@@ -20,7 +21,6 @@ What is not yet supported:
 * Unicode line breaking algorithm
 * Text decoration
 * Format text by arbitrary ranges
-* Markup language
 * Text cursor navigation (characters vs clusters)
 * Vertical text
 
@@ -113,7 +113,7 @@ To learn more, please see the [API documentation](https://chfoo.github.io/cobble
 
 ## Heaps.io integration
 
-There is a Heaps renderer included in the library. It is used like so:
+There is a [Heaps](https://heaps.io/) renderer included in the library. It is used like so:
 
 ```haxe
 import cobbles.render.heaps.TextureAtlas;
@@ -133,6 +133,61 @@ renderer.renderTileGroup(cobbles.layout, tileGroup);
 A texture atlas contains all the glyphs required to display the text. The renderer will automatically build the texture atlas as needed. Remember that a single texture atlas is intended to be shared for all your text blocks. If you create more than one renderer, provide it with the texture atlas in the arguments. Otherwise, it will create new texture atlas by default.
 
 For details, see the example in the `example/heaps` directory and the API docs.
+
+## Markup language
+
+Cobbles also supports markup language. The following shows how to use the default tags that correspond to the methods on `TextInput`:
+
+```haxe
+cobbles.addMarkup("You can have things like <span color='#ff0000'>color</span> and<br/>line breaks.");
+```
+
+For the full details on the syntax, see the API doc on `MarkupParser`.
+
+### Customizing markup
+
+Markup languages such as HTML5 separate semantics and style. For example, you may want to display dialog expressing shouting. Instead of manually specifying the properties using a `<span>` element, you can define a `<shout>` element handler that sets the properties for you. The benefit is that you can customize the properties depending on the script. The text can be displayed in bold & italic in one script, while it can be displayed in red and large font size in another script.
+
+To add a custom handler, implement `ElementHandler`:
+
+```haxe
+class MyShoutHandler implements ElementHandler {
+    public function handleElementStart(context:TextContext, element:Xml) {
+        if (context.textInput.script == "Latn") {
+            context.pushFont(myBoldItalicFontKey);
+        } else {
+            context.pushFontSize(context.fontSize * 1.2);
+            context.pushColor(0xffff0000);
+        }
+    }
+
+    public function handleElementEnd(context:TextContext, element:Xml) {
+        if (context.textInput.script == "Latn") {
+            context.popFont();
+        } else {
+            context.popFontSize();
+            context.popColor();
+        }
+    }
+}
+```
+
+And add it to the markup parser:
+
+```haxe
+var parser = TextConfig.instance().markupParser;
+parser.elementHandlers.set("shout", new MyShoutHandler());
+```
+
+And use it like so:
+
+```haxe
+cobbles.addMarkup("I said it before and I'll say it again...<br/><shout>Nope! Nope! Nope!</shout>");
+```
+
+## Bidirectional text
+
+TODO: When it is implemented, this section will describe how to segment bidirectional text into runs. As well, it will describe how to override or isolate text segments in markup.
 
 ## Native library and dependencies
 

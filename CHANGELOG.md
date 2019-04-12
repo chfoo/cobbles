@@ -10,6 +10,7 @@ Unreleased
   is more defined in later versions.
 * Added text run custom property map.
 * Added `detectScript()` to guess script and direction.
+* Added markup language support.
 
 0.2.0 (2019-04-07)
 ------------------

@@ -1,5 +1,6 @@
 package cobbles;
 
+import cobbles.markup.MarkupParser;
 import cobbles.font.FontTable;
 
 /**
@@ -13,8 +14,14 @@ class TextConfig {
      */
     public var fontTable:FontTable;
 
+    /**
+     * Markup parser instance.
+     */
+    public var markupParser:MarkupParser;
+
     public function new() {
         fontTable = new FontTable();
+        markupParser = new MarkupParser();
     }
 
     /**
