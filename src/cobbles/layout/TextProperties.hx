@@ -28,8 +28,8 @@ class TextProperties {
     /**
      * Visual ordering of the characters in the text.
      *
-     * * For left-to-right or top-to-bottom, this has no effect.
-     * * For right-to-left or bottom-to-top, the characters in the text
+     * - For left-to-right or top-to-bottom, this has no effect.
+     * - For right-to-left or bottom-to-top, the characters in the text
      *   will be reversed for visual ordering. If a bidirectional algorithm
      *   has been applied, then do not use this direction as the bidi algorithm
      *   would have reversed the characters already.

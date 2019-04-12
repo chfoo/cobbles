@@ -28,9 +28,9 @@ class Layout {
     /**
      * Indicates the text alignment or justification.
      *
-     * * For horizontal orientation, this indicates flush left, centered, or
+     * - For horizontal orientation, this indicates flush left, centered, or
      *   flush right.
-     * * For vertical orientation, this indicates top alignment, middle
+     * - For vertical orientation, this indicates top alignment, middle
      *   alignment, or bottom alignment.
      */
     public var alignment:Alignment = Alignment.Start;
@@ -38,8 +38,8 @@ class Layout {
     /**
      * The order in which runs are placed in lines.
      *
-     * * For left-to-right or top-to-bottom, this has no effect.
-     * * For right-to-left or bottom-to-top, the order of the items in a line
+     * - For left-to-right or top-to-bottom, this has no effect.
+     * - For right-to-left or bottom-to-top, the order of the items in a line
      *   is reversed for visual ordering.
      *
      * Note this is different from the direction of a text run. Direction
@@ -53,11 +53,11 @@ class Layout {
     /**
      * The orientation and flow direction of lines.
      *
-     * * If horizontal, a line of text will flow from left to right and
+     * - If horizontal, a line of text will flow from left to right and
      *   subsequent lines will flow toward the bottom.
-     * * If vertical left-right, a line of text will flow from top to bottom
+     * - If vertical left-right, a line of text will flow from top to bottom
      *   and subsequent lines will flow toward the right.
-     * * If vertical right-left, a line of text will flow from top to bottom
+     * - If vertical right-left, a line of text will flow from top to bottom
      *   and subsequent lines will flow toward the left.
      */
     public var orientation:Orientation = HorizontalTopBottom;
