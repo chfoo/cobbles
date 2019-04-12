@@ -1,4 +1,4 @@
-package cobbles.test;
+package cobbles.test.util;
 
 import cobbles.Direction;
 import cobbles.util.UnicodeUtil;

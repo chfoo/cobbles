@@ -2,7 +2,7 @@ package cobbles.test.render;
 
 import utest.Assert;
 import utest.Test;
-import cobbles.test.TestLayout;
+import cobbles.test.layout.TestLayout;
 #if sys
 import sys.FileSystem;
 import cobbles.render.GrayscaleBitmap;

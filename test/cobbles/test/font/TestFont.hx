@@ -1,4 +1,4 @@
-package cobbles.test;
+package cobbles.test.font;
 
 import utest.Assert;
 import cobbles.font.Font;

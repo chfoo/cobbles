@@ -1,12 +1,13 @@
-package cobbles.test;
+package cobbles.test.layout;
 
-import utest.Assert;
-import cobbles.layout.InlineObject;
 import cobbles.algorithm.SimpleLineBreaker;
-import cobbles.layout.TextSource;
-import cobbles.layout.Layout;
 import cobbles.font.FontTable;
+import cobbles.layout.InlineObject;
+import cobbles.layout.Layout;
+import cobbles.layout.TextSource;
 import cobbles.shaping.Shaper;
+import cobbles.test.font.TestFont;
+import utest.Assert;
 import utest.Test;
 
 private class MyInlineObject implements InlineObject {

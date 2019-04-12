@@ -1,4 +1,4 @@
-package cobbles.test;
+package cobbles.test.layout;
 
 import cobbles.algorithm.SimpleLineBreaker;
 import utest.Assert;

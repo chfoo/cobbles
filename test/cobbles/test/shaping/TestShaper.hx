@@ -1,7 +1,8 @@
-package cobbles.test;
+package cobbles.test.shaping;
 
-import utest.Assert;
 import cobbles.shaping.Shaper;
+import cobbles.test.font.TestFont;
+import utest.Assert;
 import utest.Test;
 
 class TestShaper extends Test {
