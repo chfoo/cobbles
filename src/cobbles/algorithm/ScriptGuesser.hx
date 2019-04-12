@@ -1,4 +1,4 @@
-package cobbles.util;
+package cobbles.algorithm;
 
 import cobbles.native.CobblesExtern;
 import cobbles.native.NativeData;
@@ -11,7 +11,7 @@ class StringScriptResult {
     public var direction:Direction;
 }
 
-class UnicodeUtil {
+class ScriptGuesser {
     public static function guessScript(text:String):StringScriptResult {
         var pointer = NativeData.getCobblesPointer();
         var result = CobblesExtern.guess_string_script(

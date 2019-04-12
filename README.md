@@ -11,12 +11,12 @@ What is supported:
 * Left-to-right text
 * Right-to-left text with manual direction and script specified
 * Automatic and manual line breaking
-* Markup language
+* Markup language (including manual bidirectional support)
+* Simple script and direction detection
 * Rendering text using Heaps.io
 
 What is not yet supported:
 
-* Direction and script detection
 * Unicode bidirectional algorithm
 * Unicode line breaking algorithm
 * Text decoration
@@ -139,7 +139,12 @@ For details, see the example in the `example/heaps` directory and the API docs.
 Cobbles also supports markup language. The following shows how to use the default tags that correspond to the methods on `TextInput`:
 
 ```haxe
-cobbles.addMarkup("You can have things like <span color='#ff0000'>color</span> and<br/>line breaks.");
+cobbles.addMarkup(
+    "You can have things like " +
+    "<span color='#ff0000'>color</span> and<br/>line breaks." +
+    " And maybe an inline <object name='abc' width='10pt'/> too. " +
+    " Simplistic bidirectional text like this (Unicode/<sda>يونيكود</sda>) " +
+    " is also possible.");
 ```
 
 For the full details on the syntax, see the API doc on `MarkupParser`.

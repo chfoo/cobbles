@@ -1,5 +1,6 @@
 package cobbles;
 
+import cobbles.algorithm.ScriptGuesser;
 import cobbles.algorithm.SimpleLineBreaker;
 import cobbles.font.FontTable;
 import cobbles.layout.InlineObject;
@@ -8,7 +9,6 @@ import cobbles.layout.TextProperties;
 import cobbles.layout.TextSource;
 import cobbles.markup.TextContext;
 import cobbles.shaping.Shaper;
-import cobbles.util.UnicodeUtil;
 
 using unifill.Unifill;
 
@@ -326,7 +326,7 @@ class TextInputTextFI {
      * the script and direction. This method is only provided as a convenience.
      */
     public function detectScript():TextInputTextFI {
-        var result = UnicodeUtil.guessScript(text);
+        var result = ScriptGuesser.guessScript(text);
         properties.script = result.script;
         properties.direction = result.direction;
         return this;

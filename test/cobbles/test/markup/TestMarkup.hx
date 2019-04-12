@@ -86,4 +86,34 @@ class TestMarkup extends Test {
                 Assert.fail();
         }
     }
+
+    public function testScriptDirection() {
+        var cobbles = new TextInput();
+
+        cobbles.addMarkup('hello <sda>يونيكود</sda>!');
+        cobbles.layoutText();
+
+        Assert.equals(3, cobbles.textSource.items.length);
+
+        switch cobbles.textSource.items[0] {
+            case RunItem(textRun):
+                Assert.equals(Direction.LeftToRight, textRun.direction);
+            default:
+                Assert.fail();
+        }
+
+        switch cobbles.textSource.items[1] {
+            case RunItem(textRun):
+                Assert.equals(Direction.RightToLeft, textRun.direction);
+            default:
+                Assert.fail();
+        }
+
+        switch cobbles.textSource.items[2] {
+            case RunItem(textRun):
+                Assert.equals(Direction.LeftToRight, textRun.direction);
+            default:
+                Assert.fail();
+        }
+    }
 }

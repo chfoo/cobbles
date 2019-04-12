@@ -1,18 +1,18 @@
-package cobbles.test.util;
+package cobbles.test.algorithm;
 
 import cobbles.Direction;
-import cobbles.util.UnicodeUtil;
+import cobbles.algorithm.ScriptGuesser;
 import utest.Assert;
 import utest.Test;
 
-class TestUnicodeUtil extends Test {
+class TestScriptGuesser extends Test {
     public function testGuestScript() {
-        var result = UnicodeUtil.guessScript("hello");
+        var result = ScriptGuesser.guessScript("hello");
 
         Assert.equals("Latn", result.script);
         Assert.equals(LeftToRight, result.direction);
 
-        result = UnicodeUtil.guessScript("يونيكود");
+        result = ScriptGuesser.guessScript("يونيكود");
 
         Assert.equals("Arab", result.script);
         Assert.equals(RightToLeft, result.direction);
