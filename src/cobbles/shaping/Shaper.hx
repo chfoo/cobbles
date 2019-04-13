@@ -112,7 +112,7 @@ class Shaper implements Disposable {
      * in the text.
      *
      * This method is intended only for development and testing. To get
-     * anything useful in return, see the `UnicodeUtil` class.
+     * anything useful in return, see the `ScriptGuesser` class.
      */
     public function guessScript() {
         CobblesExtern.shaper_guess_text_properties(shaperPointer);

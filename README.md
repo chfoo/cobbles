@@ -190,9 +190,11 @@ And use it like so:
 cobbles.addMarkup("I said it before and I'll say it again...<br/><shout>Nope! Nope! Nope!</shout>");
 ```
 
-## Bidirectional text
+## Other text layout and typographic features
 
-TODO: When it is implemented, this section will describe how to segment bidirectional text into runs. As well, it will describe how to override or isolate text segments in markup.
+Cobbles only provides a minimal subset of [features](https://w3c.github.io/typography/) to get your OpenGL/WebGL/DirectX application looking fairly decent. (Text engines are hard to write.) If you need to render significant amounts of text, consider alternative solutions such as embedding a web view or adding a hyperlink to open a web browser in your application.
+
+If you would like to help getting a feature implemented (or make a feature run faster), see the Contributing section.
 
 ## Native library and dependencies
 
@@ -294,6 +296,14 @@ Then load or package `cobbles.js`, followed by `cobbles_binding.js`, and then yo
 ## Contributing
 
 Use the GitHub issues or pull requests section for bug reports and features.
+
+Optimizing and improving the general architecture (especially to match the best practices of "real" text engines) would be appreciated.
+
+If you want to implement a feature, please consider the guidelines:
+
+* The feature is likely to be used by at least 80% of users.
+* It does not cause library to run significantly slower. (The demo WebGL app takes about 2 milliseconds per frame on a 2015 mobile device.)
+* It does not significantly increase the library's size. (It should not rely on the full Unicode database.)
 
 To run the unit tests, use the hxml files in the `hxml/` directory. For example:
 
