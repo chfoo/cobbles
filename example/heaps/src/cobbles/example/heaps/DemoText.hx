@@ -81,7 +81,7 @@ class DemoText {
 
         // You can also use markup. This demo demonstrates the default
         // markup langauge.
-        cobbles.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld!</span>");
+        cobbles.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld! <sa>يونيكود</sa></span>");
 
         // Text samples from http://kermitproject.org/utf8.html
 

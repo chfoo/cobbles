@@ -90,7 +90,7 @@ class TestMarkup extends Test {
     public function testScriptDirection() {
         var cobbles = new TextInput();
 
-        cobbles.addMarkup('hello <sda>يونيكود</sda>!');
+        cobbles.addMarkup('hello <sa>يونيكود</sa>!');
         cobbles.layoutText();
 
         Assert.equals(3, cobbles.textSource.items.length);

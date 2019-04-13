@@ -8,7 +8,7 @@ package cobbles.markup;
  * your strings into a resource file, styled strings can be edited and
  * translated much easier.
  *
- * By default, the parser uses `ScriptDirectionHandler` for handling text.
+ * By default, the parser uses `ScriptAutoHandler` for handling text.
  * If you don't need it, `StandardTextNodeHandler` can be used instead for
  * slight performance improvement.
  *
@@ -16,7 +16,7 @@ package cobbles.markup;
  *
  * - `BRHandler`
  * - `ObjectHandler`
- * - `ScriptDirectionHandler`
+ * - `ScriptAutoHandler`
  * - `SpanHandler`
  *
  * As well, you can implement your own handlers. This is the recommended
@@ -31,13 +31,13 @@ class MarkupParser {
     public var elementHandlers(default, null):Map<String,ElementHandler>;
 
     public function new() {
-        var scriptDirectionHandler = new ScriptDirectionHandler();
+        var scriptAutoHandler = new ScriptAutoHandler();
 
-        textNodeHandler = scriptDirectionHandler;
+        textNodeHandler = scriptAutoHandler;
         elementHandlers = [
             "br" => new BRHandler(),
             "object" => new ObjectHandler(),
-            "sda" => scriptDirectionHandler,
+            "sa" => scriptAutoHandler,
             "span" => new SpanHandler()
         ];
     }
