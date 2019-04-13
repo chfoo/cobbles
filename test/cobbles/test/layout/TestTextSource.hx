@@ -32,7 +32,7 @@ class TestTextSource extends Test {
         textSource.addText("!!", customProperties);
 
         Assert.equals(4, textSource.items.length);
-        Assert.equals(5, textSource.codePoints.length);
+        Assert.equals(6, textSource.codePoints.length); // text + object replacement character
 
         Assert.isTrue(textSource.items[0].match(RunItem(_)));
         Assert.isTrue(textSource.items[1].match(LineBreakItem(_)));

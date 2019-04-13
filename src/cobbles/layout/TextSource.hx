@@ -89,6 +89,7 @@ class TextSource {
      */
     public function addInlineObject(inlineObject:InlineObject) {
         items.push(InlineObjectItem(inlineObject));
+        codePoints.push(0xFFFC);
     }
 
     /**
