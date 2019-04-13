@@ -49,7 +49,7 @@ class ParseUtil {
         if (text.endsWith("pt")) {
             var parseResult = Std.parseFloat(text.substr(0, -2));
 
-            if (parseResult != Math.NaN) {
+            if (!Math.isNaN(parseResult)) {
                 return Some(parseResult);
             }
         }
