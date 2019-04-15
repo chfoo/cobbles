@@ -58,6 +58,7 @@
 
                 for (var index = 0; index < urlsLength; index++) {
                     var scriptElement = document.createElement("script");
+                    scriptElement.async = false;
                     scriptElement.src = urls[index];
                     document.body.appendChild(scriptElement);
                 }
