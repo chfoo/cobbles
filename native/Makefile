@@ -21,7 +21,7 @@ LINKER_FLAGS ?= -lfreetype -lharfbuzz $(LINK_ICONV) \
 EMCC ?= emcc
 EMCONFIGURE ?= emconfigure
 EMMAKE ?= emmake
-OPTIMIZE_FLAGS ?= -O3
+OPTIMIZE_FLAGS ?= -O3 -DNDEBUG
 CFLAGS ?=
 FILES = cobbles.c cobbles_font.c cobbles_shaper.c
 

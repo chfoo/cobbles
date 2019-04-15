@@ -99,6 +99,7 @@ FUNC void FUNC_NAME(cobbles_shaper_get_glyph_info)(CobblesShaper * shaper, int g
 
 // Private
 
+void _cobbles_debug_print(char * message, ...);
 int _cobbles_bytes_read_int(uint8_t * bytes, int index);
 void _cobbles_bytes_write_int(uint8_t * bytes, int index, int value);
 size_t _cobbles_string_length(Cobbles * cobbles, const char * input);

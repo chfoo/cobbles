@@ -68,4 +68,27 @@ class TestTextInput extends Test {
                 Assert.fail();
         }
     }
+
+    public function testLongString() {
+        var cobbles = new TextInput();
+
+        var buf = new StringBuf();
+
+        for (dummy in 0...1000) {
+            buf.add("hello😄");
+        }
+
+        cobbles.addText(buf.toString()).detectScript();
+
+        cobbles.layoutText();
+
+        Assert.equals(1, cobbles.layout.lines.length);
+
+        switch cobbles.layout.lines[0].items[0] {
+            case PenRunItem(penRun):
+                Assert.equals(6 * 1000, penRun.glyphShapes.length);
+            default:
+                Assert.fail();
+        }
+    }
 }

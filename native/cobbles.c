@@ -1,9 +1,10 @@
 #include "cobbles.h"
-#include <stdlib.h>
-#include <iconv.h>
-#include <stdbool.h>
+#include <assert.h>
 #include <errno.h>
 #include <hb.h>
+#include <iconv.h>
+#include <stdbool.h>
+#include <stdlib.h>
 
 Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding) {
     Cobbles * cobbles = calloc(1, sizeof(Cobbles));
@@ -14,6 +15,10 @@ Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding) {
 
     int error = FT_Init_FreeType(&(cobbles->ft_library));
 
+    if (error != 0) {
+        _cobbles_debug_print("FT_Init_FreeType error %d\n", error);
+    }
+
     cobbles->error_code = error;
     cobbles->encoding = encoding;
     cobbles->hb_unicode_funcs = hb_unicode_funcs_get_default();
@@ -22,6 +27,7 @@ Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding) {
 }
 
 void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles) {
+    assert(cobbles != NULL);
     FT_Done_FreeType(cobbles->ft_library);
 
     if (cobbles->encodingStringBuffer != NULL) {
@@ -32,14 +38,20 @@ void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles) {
 }
 
 int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles) {
+    assert(cobbles != NULL);
     return cobbles->error_code;
 }
 
 int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, const char * text) {
+    assert(cobbles != NULL);
+    assert(text != NULL);
+
     hb_script_t script = HB_SCRIPT_UNKNOWN;
     hb_direction_t direction = HB_DIRECTION_LTR;
     char script_str[4];
     const uint32_t * code_points = _cobbles_get_code_points(cobbles, text);
+
+    assert(code_points != NULL);
 
     for (size_t index = 0; code_points[index] != 0; index++) {
         script = hb_unicode_script(
@@ -62,6 +74,14 @@ int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, const char * text)
         (direction == HB_DIRECTION_RTL ? 1 << 31 : 0);
 }
 
+void _cobbles_debug_print(char * message, ...) {
+    #ifndef NDEBUG
+    va_list argptr;
+    va_start(argptr, message);
+    vfprintf(stderr, message, argptr);
+    va_end(argptr);
+    #endif
+}
 
 int _cobbles_bytes_read_int(uint8_t * bytes, int index) {
     return bytes[index] |
@@ -78,6 +98,9 @@ void _cobbles_bytes_write_int(uint8_t * bytes, int index, int value) {
 }
 
 size_t _cobbles_string_length(Cobbles * cobbles, const char * input) {
+    assert(cobbles != NULL);
+    assert(input != NULL);
+
     if (cobbles->encoding == COBBLES_UTF8) {
         return strlen(input);
     }
@@ -109,10 +132,15 @@ size_t _cobbles_string_length(Cobbles * cobbles, const char * input) {
 const char* _cobbles_encode_string(Cobbles * cobbles,
         const char * inputEncoding,
         const char * outputEncoding, const char * input) {
+    assert(cobbles != NULL);
+    assert(inputEncoding != NULL);
+    assert(outputEncoding != NULL);
+    assert(input != NULL);
 
     iconv_t converter = iconv_open(outputEncoding, inputEncoding);
 
     if (converter == (iconv_t)(-1)) {
+        _cobbles_debug_print("iconv_open error %d\n", errno);
         return NULL;
     }
 
@@ -127,6 +155,7 @@ const char* _cobbles_encode_string(Cobbles * cobbles,
     char * bufferCursor = (char *) &buffer;
     const char * inputCursor = input;
     size_t inputBytesLeft = inputLength;
+    size_t prevInputBytesLeft = inputBytesLeft;
     size_t bufferBytesLeft = bufferSize;
 
     char * outputBuffer = malloc(bufferSize);
@@ -134,21 +163,35 @@ const char* _cobbles_encode_string(Cobbles * cobbles,
     size_t outputLength = bufferSize;
 
     if (outputBuffer == NULL) {
+        _cobbles_debug_print("outputBuffer malloc error %d\n", errno);
         return NULL;
     }
 
     while (inputBytesLeft > 0) {
         bufferBytesLeft = bufferSize;
         bufferCursor = (char *) &buffer;
+        bool full = false;
 
         size_t result = iconv(converter,
             (char **) &inputCursor, &inputBytesLeft,
             &bufferCursor, &bufferBytesLeft);
 
         if (result == (size_t)(-1)) {
-            if (errno == E2BIG) {
-                continue;
+            if (errno == 0) {
+                // Well, I guess we have the wrong library linked...
+                if (prevInputBytesLeft != inputBytesLeft) {
+                    // Probably stalled, so assume EINVAL
+                    inputBytesLeft = 0;
+                }
+            } else if (errno == E2BIG) {
+                // continue on with converting segments of bytes
+            } else if (errno == EILSEQ || errno == EINVAL) {
+                _cobbles_debug_print("iconv error %d\n", errno);
+                // FIXME: we should put a replacement character and skip the
+                // invalid sequence
+                inputBytesLeft = 0;
             } else {
+                _cobbles_debug_print("iconv unknown error %d\n", errno);
                 return NULL;
             }
         }
@@ -159,12 +202,14 @@ const char* _cobbles_encode_string(Cobbles * cobbles,
             outputBuffer = realloc(outputBuffer, outputLength);
 
             if (outputBuffer == NULL) {
+                _cobbles_debug_print("outputBuffer realloc error %d\n", errno);
                 return NULL;
             }
         }
 
         memcpy(&(outputBuffer[outputIndex]), buffer, bytesWritten);
         outputIndex += bytesWritten;
+        prevInputBytesLeft = inputBytesLeft;
     }
 
     outputBuffer[outputIndex + 1] = 0; // null terminator
