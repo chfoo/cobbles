@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding) {
+Cobbles * cobbles_init(CobblesEncoding encoding) {
     Cobbles * cobbles = calloc(1, sizeof(Cobbles));
 
     if (cobbles == NULL) {
@@ -26,7 +26,7 @@ Cobbles * FUNC_NAME(cobbles_init)(CobblesEncoding encoding) {
     return cobbles;
 }
 
-void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles) {
+void cobbles_destroy(Cobbles * cobbles) {
     assert(cobbles != NULL);
     FT_Done_FreeType(cobbles->ft_library);
 
@@ -37,12 +37,12 @@ void FUNC_NAME(cobbles_destroy)(Cobbles * cobbles) {
     free(cobbles);
 }
 
-int FUNC_NAME(cobbles_get_error)(Cobbles * cobbles) {
+int cobbles_get_error(Cobbles * cobbles) {
     assert(cobbles != NULL);
     return cobbles->error_code;
 }
 
-int FUNC_NAME(cobbles_guess_string_script)(Cobbles * cobbles, const char * text) {
+int cobbles_guess_string_script(Cobbles * cobbles, const char * text) {
     assert(cobbles != NULL);
     assert(text != NULL);
 
@@ -252,7 +252,7 @@ const uint32_t* _cobbles_get_code_points(Cobbles * cobbles, const char * input) 
 }
 
 
-#ifdef LIBHL_EXPORTS
+#ifdef COBBLES_HL
 DEFINE_PRIM(_ABSTRACT(Cobbles), cobbles_init, _I32);
 DEFINE_PRIM(_VOID, cobbles_destroy, _ABSTRACT(Cobbles));
 DEFINE_PRIM(_I32, cobbles_get_error, _ABSTRACT(Cobbles));

@@ -31,7 +31,7 @@ all: hdll js
 
 hdll:
 	mkdir -p ../out/hl/
-	$(GCC) $(OPTIMIZE_FLAGS) $(CFLAGS) -D LIBHL_EXPORTS -fPIC -shared -std=c11 \
+	$(GCC) $(OPTIMIZE_FLAGS) $(CFLAGS) -D COBBLES_HL -fPIC -shared -std=c11 \
 		-o ../out/hl/cobbles.hdll \
 		$(FILES) $(INCLUDES) \
 		$(LINKER_FLAGS)

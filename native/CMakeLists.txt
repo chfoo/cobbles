@@ -25,4 +25,4 @@ set_target_properties(cobbles_hdll PROPERTIES
     SUFFIX ".hdll"
     C_STANDARD 99
 )
-target_compile_definitions(cobbles_hdll PRIVATE LIBHL_EXPORTS)
+target_compile_definitions(cobbles_hdll PRIVATE COBBLES_HL)

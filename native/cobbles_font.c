@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * path, int face_index) {
+CobblesFont * cobbles_open_font_file(Cobbles * cobbles, const char * path, int face_index) {
     assert(cobbles != NULL);
     assert(path != NULL);
     CobblesFont * font = calloc(1, sizeof(CobblesFont));
@@ -29,7 +29,7 @@ CobblesFont * FUNC_NAME(cobbles_open_font_file)(Cobbles * cobbles, const char * 
     return font;
 }
 
-CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * bytes, size_t length, int face_index) {
+CobblesFont * cobbles_open_font_bytes(Cobbles * cobbles, uint8_t * bytes, size_t length, int face_index) {
     assert(cobbles != NULL);
     assert(bytes != NULL);
     CobblesFont * font = calloc(1, sizeof(CobblesFont));
@@ -53,7 +53,7 @@ CobblesFont * FUNC_NAME(cobbles_open_font_bytes)(Cobbles * cobbles, uint8_t * by
     return font;
 }
 
-void FUNC_NAME(cobbles_font_close)(CobblesFont * font) {
+void cobbles_font_close(CobblesFont * font) {
     assert(font != NULL);
 
     if (font->face != NULL) {
@@ -63,27 +63,27 @@ void FUNC_NAME(cobbles_font_close)(CobblesFont * font) {
     free(font);
 }
 
-int FUNC_NAME(cobbles_font_get_error)(CobblesFont * font) {
+int cobbles_font_get_error(CobblesFont * font) {
     assert(font != NULL);
     return font->ft_error_code;
 }
 
-void FUNC_NAME(cobbles_font_set_size)(CobblesFont * font, int width, int height, int horizontal_resolution, int vertical_resolution) {
+void cobbles_font_set_size(CobblesFont * font, int width, int height, int horizontal_resolution, int vertical_resolution) {
     assert(font != NULL);
     font->ft_error_code = FT_Set_Char_Size(font->face, width, height, horizontal_resolution, vertical_resolution);
 }
 
-int FUNC_NAME(cobbles_font_get_glyph_id)(CobblesFont * font, int code_point) {
+int cobbles_font_get_glyph_id(CobblesFont * font, int code_point) {
     assert(font != NULL);
     return FT_Get_Char_Index(font->face, code_point);
 }
 
-void FUNC_NAME(cobbles_font_load_glyph)(CobblesFont * font, int glyph_id) {
+void cobbles_font_load_glyph(CobblesFont * font, int glyph_id) {
     assert(font != NULL);
     font->ft_error_code = FT_Load_Glyph(font->face, glyph_id, FT_LOAD_RENDER);
 }
 
-void FUNC_NAME(cobbles_font_get_glyph_info)(CobblesFont * font, CobblesFontGlyphInfoArray info) {
+void cobbles_font_get_glyph_info(CobblesFont * font, CobblesFontGlyphInfoArray info) {
     assert(font != NULL);
     assert(info != NULL);
 
@@ -93,7 +93,7 @@ void FUNC_NAME(cobbles_font_get_glyph_info)(CobblesFont * font, CobblesFontGlyph
     _cobbles_bytes_write_int(info, 12, font->face->glyph->bitmap_top);
 }
 
-void FUNC_NAME(cobbles_font_get_glyph_bitmap)(CobblesFont * font, uint8_t * buffer) {
+void cobbles_font_get_glyph_bitmap(CobblesFont * font, uint8_t * buffer) {
     assert(font != NULL);
     assert(buffer != NULL);
     int length = font->face->glyph->bitmap.width * font->face->glyph->bitmap.rows;
@@ -116,7 +116,7 @@ void _cobbles_font_dump(CobblesFont * font) {
     }
 }
 
-#ifdef LIBHL_EXPORTS
+#ifdef COBBLES_HL
 DEFINE_PRIM(_ABSTRACT(CobblesFont), cobbles_open_font_file, _ABSTRACT(Cobbles) _BYTES _I32);
 DEFINE_PRIM(_ABSTRACT(CobblesFont), cobbles_open_font_bytes, _ABSTRACT(Cobbles) _BYTES _I32 _I32);
 DEFINE_PRIM(_I32, cobbles_font_get_error, _ABSTRACT(CobblesFont));

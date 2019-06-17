@@ -4,7 +4,7 @@
 #include <errno.h>
 #include <hb-ft.h>
 
-CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles) {
+CobblesShaper * cobbles_shaper_init(Cobbles * cobbles) {
     assert(cobbles != NULL);
     CobblesShaper * shaper = calloc(1, sizeof(CobblesShaper));
 
@@ -26,7 +26,7 @@ CobblesShaper * FUNC_NAME(cobbles_shaper_init)(Cobbles * cobbles) {
     return shaper;
 }
 
-void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper) {
+void cobbles_shaper_destroy(CobblesShaper * shaper) {
     assert(shaper != NULL);
 
     if (shaper->buffer != NULL) {
@@ -40,12 +40,12 @@ void FUNC_NAME(cobbles_shaper_destroy)(CobblesShaper * shaper) {
     free(shaper);
 }
 
-int FUNC_NAME(cobbles_shaper_get_error)(CobblesShaper * shaper) {
+int cobbles_shaper_get_error(CobblesShaper * shaper) {
     assert(shaper != NULL);
     return shaper->hb_error_code;
 }
 
-void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * font) {
+void cobbles_shaper_set_font(CobblesShaper * shaper, CobblesFont * font) {
     assert(shaper != NULL);
     assert(font != NULL);
 
@@ -60,7 +60,7 @@ void FUNC_NAME(cobbles_shaper_set_font)(CobblesShaper * shaper, CobblesFont * fo
     hb_ft_font_set_load_flags(shaper->font, FT_LOAD_DEFAULT);
 }
 
-void FUNC_NAME(cobbles_shaper_set_text)(CobblesShaper * shaper, const char * text, int encoding) {
+void cobbles_shaper_set_text(CobblesShaper * shaper, const char * text, int encoding) {
     assert(shaper != NULL);
     assert(text != NULL);
 
@@ -88,15 +88,15 @@ void cobbles_shaper_set_text_binary(CobblesShaper * shaper, const uint8_t * text
     assert(shaper != NULL);
     assert(text != NULL);
 
-    FUNC_NAME(cobbles_shaper_set_text)(shaper, (const char *) text, encoding);
+    cobbles_shaper_set_text(shaper, (const char *) text, encoding);
 }
 
-void FUNC_NAME(cobbles_shaper_guess_text_properties)(CobblesShaper * shaper) {
+void cobbles_shaper_guess_text_properties(CobblesShaper * shaper) {
     assert(shaper != NULL);
     hb_buffer_guess_segment_properties(shaper->buffer);
 }
 
-void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char * direction) {
+void cobbles_shaper_set_direction(CobblesShaper * shaper, const char * direction) {
     assert(shaper != NULL);
     assert(direction != NULL);
 
@@ -107,7 +107,7 @@ void FUNC_NAME(cobbles_shaper_set_direction)(CobblesShaper * shaper, const char 
         hb_direction_from_string(direction, -1));
 }
 
-void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * script) {
+void cobbles_shaper_set_script(CobblesShaper * shaper, const char * script) {
     assert(shaper != NULL);
     assert(script != NULL);
 
@@ -118,7 +118,7 @@ void FUNC_NAME(cobbles_shaper_set_script)(CobblesShaper * shaper, const char * s
         hb_script_from_string(script, -1));
 }
 
-void FUNC_NAME(cobbles_shaper_set_language)(CobblesShaper * shaper, const char * language) {
+void cobbles_shaper_set_language(CobblesShaper * shaper, const char * language) {
     assert(shaper != NULL);
     assert(language != NULL);
 
@@ -129,7 +129,7 @@ void FUNC_NAME(cobbles_shaper_set_language)(CobblesShaper * shaper, const char *
         hb_language_from_string(language, -1));
 }
 
-void FUNC_NAME(cobbles_shaper_shape)(CobblesShaper * shaper) {
+void cobbles_shaper_shape(CobblesShaper * shaper) {
     assert(shaper != NULL);
     assert(shaper->buffer != NULL);
     assert(shaper->font != NULL);
@@ -140,12 +140,12 @@ void FUNC_NAME(cobbles_shaper_shape)(CobblesShaper * shaper) {
     shaper->glyph_positions = hb_buffer_get_glyph_positions(shaper->buffer, &(shaper->glyph_count));
 }
 
-int FUNC_NAME(cobbles_shaper_get_glyph_count)(CobblesShaper * shaper) {
+int cobbles_shaper_get_glyph_count(CobblesShaper * shaper) {
     assert(shaper != NULL);
     return shaper->glyph_count;
 }
 
-void FUNC_NAME(cobbles_shaper_get_glyph_info)(CobblesShaper * shaper, int glyph_index, CobblesShaperGlyphInfoArray info) {
+void cobbles_shaper_get_glyph_info(CobblesShaper * shaper, int glyph_index, CobblesShaperGlyphInfoArray info) {
     assert(shaper != NULL);
     assert(info != NULL);
     hb_glyph_info_t hb_info = shaper->glyph_infos[glyph_index];
@@ -159,7 +159,7 @@ void FUNC_NAME(cobbles_shaper_get_glyph_info)(CobblesShaper * shaper, int glyph_
     _cobbles_bytes_write_int(info, 20, hb_pos.y_advance);
 }
 
-#ifdef LIBHL_EXPORTS
+#ifdef COBBLES_HL
 DEFINE_PRIM(_ABSTRACT(CobblesShaper), cobbles_shaper_init, _ABSTRACT(Cobbles));
 DEFINE_PRIM(_VOID, cobbles_shaper_destroy, _ABSTRACT(CobblesShaper));
 DEFINE_PRIM(_I32, cobbles_shaper_get_error, _ABSTRACT(CobblesShaper));
