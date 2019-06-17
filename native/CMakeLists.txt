@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.13)
 project(cobbles)
 
 set(FREETYPE_INCLUDE_PATH "/usr/include/freetype2" CACHE PATH "Include directory for Freetype (*.h)")
