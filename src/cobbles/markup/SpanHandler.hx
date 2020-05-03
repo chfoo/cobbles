@@ -1,7 +1,5 @@
 package cobbles.markup;
 
-import cobbles.font.FontTable.FontKey;
-
 using StringTools;
 
 @:enum
@@ -33,7 +31,7 @@ abstract SpanTextAttribute(String) from String to String {
  * - `lang`: BCP 47 tag.
  */
 class SpanHandler implements ElementHandler {
-    public var fontFaceMap(default, null):Map<String,FontKey>;
+    public var fontFaceMap(default, null):Map<String,FontID>;
 
     var attributesApplied:Array<Array<String>>;
     var level = 0;

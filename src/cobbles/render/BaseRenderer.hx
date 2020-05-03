@@ -1,87 +1,84 @@
 package cobbles.render;
 
-import cobbles.layout.PenRun;
-import cobbles.layout.InlineObject;
-import cobbles.layout.LayoutLine;
-import cobbles.layout.Layout;
-
 /**
  * Base class for renderers.
  */
 class BaseRenderer {
     var penPixelX:Int = 0;
     var penPixelY:Int = 0;
+    var library:Library;
+    var engine:Engine;
 
-    var resolution:Int = 72;
-    var verticalOrientation:Bool = false;
-
-    public function new() {
+    public function new(library:Library, engine:Engine) {
+        this.library = library;
+        this.engine = engine;
     }
 
-    public function render(layout:Layout) {
-        resolution = layout.resolution;
+    public function render() {
+        penPixelX = penPixelY = 0;
+        checkTileValidity();
+        processAdvances();
+    }
 
-        switch layout.orientation {
-            case HorizontalTopBottom:
-                verticalOrientation = false;
-            case VerticalLeftRight | VerticalRightLeft:
-                verticalOrientation = true;
-        }
-
-        for (line in layout.lines) {
-            advanceLine(line);
-            renderLine(line);
+    function checkTileValidity() {
+        if (!engine.tilesValid()) {
+            engine.rasterize();
+            saveGlyphImages();
         }
     }
 
-    function point64ToPixel(point64:Int):Int {
-        return Math.round(point64 / 64 / 72 * resolution);
-    }
+    function saveGlyphImages() {
+        prepareGlyphImageStorage();
 
-    function advanceLine(layoutLine:LayoutLine) {
-        penPixelX = point64ToPixel(layoutLine.x);
-        penPixelY = point64ToPixel(layoutLine.y);
-    }
+        var tiles = engine.tiles();
 
-    function renderLine(layoutLine:LayoutLine) {
-        for (item in layoutLine.items) {
-            switch item {
-                case PenRunItem(penRun):
-                    renderPenRun(penRun);
-                case InlineObjectItem(inlineObject):
-                    renderInlineObject(inlineObject);
-                    advanceInlineObject(inlineObject);
-            }
+        for (tile in tiles) {
+            var glyph = library.getGlyphInfo(tile.glyphID);
+            saveGlyphImage(tile, glyph);
         }
+
+        renderGlyphImageStorage();
     }
 
-    function renderPenRun(penRun:PenRun) {
-        for (index in 0...penRun.glyphShapes.length) {
-            renderGlyph(penRun, index);
-            advanceGlyph(penRun, index);
-        }
-    }
-
-    function renderGlyph(penRun:PenRun, glyphShapeIndex:Int) {
+    function prepareGlyphImageStorage() {
         // override me
     }
 
-    function advanceGlyph(penRun:PenRun, glyphShapeIndex:Int) {
-        var glyphShape = penRun.glyphShapes[glyphShapeIndex];
-
-        penPixelX += point64ToPixel(glyphShape.advanceX);
-        penPixelY += point64ToPixel(glyphShape.advanceY);
-    }
-
-    function renderInlineObject(inlineObject:InlineObject) {
+    function renderGlyphImageStorage() {
         // override me
     }
 
-    function advanceInlineObject(inlineObject:InlineObject) {
-        if (!verticalOrientation) {
-            penPixelX += point64ToPixel(inlineObject.getWidth());
-        } else {
-            penPixelY += point64ToPixel(inlineObject.getHeight());
+    function saveGlyphImage(tile:TileInfo, glyph:GlyphInfo) {
+        // override me
+    }
+
+    function processAdvances() {
+        var advances = engine.advances();
+
+        for (advance in advances) {
+            processAdvance(advance);
         }
+    }
+
+    function processAdvance(advance:AdvanceInfo) {
+        switch advance.type {
+            case Glyph:
+                renderGlyph(advance);
+            case InlineObject:
+                renderInlineObject(advance);
+            default:
+                // pass
+        }
+
+        penPixelX += advance.advanceX;
+        penPixelY += advance.advanceY;
+    }
+
+    function renderGlyph(advance:AdvanceInfo) {
+        // override me
+    }
+
+    function renderInlineObject(advance:AdvanceInfo) {
+        // override me
     }
 }

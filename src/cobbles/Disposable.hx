@@ -10,12 +10,11 @@ interface Disposable {
      * Clean up the object's internal references.
      */
     public function dispose():Void;
+
     /**
      * Returns whether the object is in the disposed state.
      *
-     * Use of the object when disposed is undefined behavior or exception
-     * thrown.
-     * @return Bool
+     * Use of the object when disposed is undefined behavior.
      */
     public function isDisposed():Bool;
 }

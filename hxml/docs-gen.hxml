@@ -1,1 +1,1 @@
--cmd haxelib run dox -i out/xml/ -o out/docs/ --include "cobbles" --title "Cobbles API Documentation"
+-cmd haxelib run dox -i out/xml/ -o out/docs/ --include "cobbles" --exclude "cobbles.native" --exclude "cobbles.core" --title "Cobbles API Documentation"

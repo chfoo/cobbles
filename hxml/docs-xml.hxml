@@ -8,7 +8,12 @@ libs.hxml
 --each
 
 -xml out/xml/sys.xml
--neko out/dummy.n
+-cpp out/dummy/
+
+--next
+
+-xml out/xml/sys.xml
+-hl out/dummy.hl
 
 --next
 

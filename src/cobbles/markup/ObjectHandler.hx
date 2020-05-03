@@ -1,6 +1,6 @@
 package cobbles.markup;
 
-import cobbles.layout.InlineObject;
+import cobbles.InlineObject;
 
 /**
  * Inline object (`<object/>`) element handler.

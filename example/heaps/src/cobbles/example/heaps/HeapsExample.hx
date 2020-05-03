@@ -8,11 +8,17 @@ class HeapsExample extends hxd.App {
     var demoText:DemoText;
     var fpsText:h2d.Text;
     var loadedFonts:Array<{name:String, data:Bytes}>;
+    var library:Library;
+
+    public function new(library:Library) {
+        this.library = library;
+        super();
+    }
 
     override function init() {
         super.init();
 
-        demoText = new DemoText(loadedFonts);
+        demoText = new DemoText(loadedFonts, library);
 
         // Show the texture atlas to see how well the library laid out the glyphs
         var atlasBitmap = new h2d.Bitmap(
@@ -42,12 +48,12 @@ class HeapsExample extends hxd.App {
         #if js
         // The Emscripten library is compiled into a module so it won't
         // conflict with the window namespace.
-        cobbles.Runtime.loadEmscripten().then(success -> {
+        Library.loadModule().then(library -> {
             trace("Starting Heaps");
-            new HeapsExample();
+            new HeapsExample(library);
         });
         #else
-        new HeapsExample();
+        new HeapsExample(new Library());
         #end
     }
 

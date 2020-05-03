@@ -6,7 +6,6 @@ import h3d.mat.Texture;
 import haxe.Resource;
 import h2d.TileGroup;
 import cobbles.render.heaps.TileGroupRenderer;
-import cobbles.font.FontTable;
 
 enum DemoMode {
     LeftText;
@@ -16,8 +15,10 @@ enum DemoMode {
 }
 
 class DemoText {
-    var cobbles:TextInput;
-    var defaultFont:Null<FontKey>;
+    var library:Library;
+    var engine:Engine;
+    var defaultFont:Null<FontID>;
+    var fontKeys:Array<FontID> = [];
     var counter:Int = 0;
     var demoMode:DemoMode = LeftText;
 
@@ -26,8 +27,9 @@ class DemoText {
     public var tileGroup(default, null):TileGroup;
     public var texture(default, null):Texture;
 
-    public function new(fonts:Array<{name:String, data:Bytes}>) {
-        cobbles = new TextInput();
+    public function new(fonts:Array<{name:String, data:Bytes}>, library:Library) {
+        this.library = library;
+        engine = new Engine(library);
 
         for (font in fonts) {
             var fontKey;
@@ -35,35 +37,44 @@ class DemoText {
             trace('Load ${font.name}');
 
             if (font.data != null) {
-                fontKey = TextConfig.instance().fontTable.openBytes(font.data);
+                fontKey = library.loadFontBytes(font.data);
             } else {
-                fontKey = TextConfig.instance().fontTable.openFile(font.name);
+                fontKey = library.loadFont(font.name);
             }
 
             if (defaultFont == null) {
                 defaultFont = fontKey;
             }
+
+            fontKeys.push(fontKey);
+        }
+
+        // Set up font fallback
+        for (index in 0...fontKeys.length - 1) {
+            library.setFontAlternative(fontKeys[index], fontKeys[index + 1]);
         }
 
         // Setting the default text properties
-        cobbles.lineBreakLength = 0;
-        cobbles.font = defaultFont;
-        cobbles.fontSize = 24;
-        cobbles.color = 0xffffffff;
+        engine.locale = "en-US"; // this should match your app's UI language
+        engine.lineLength = 0;
+        engine.font = defaultFont;
+        engine.fontSize = 24;
+        engine.setCustomProperty("color", 0xffffffff);
+        // color is ARGB in word-order (BGRA in little-endian byte-order)
+        // ie, 0xffff0000 = alpha=0xff, red=0xff, green=0x00, blue=0x00
 
         // The tile group renderer handles positioning of the tiles to match
-        // the glyphs in the texture.
+        // the glyphs in the texture. You can use the same engine and renderer
+        // to render many groups.
         var textureAtlas = new TextureAtlas(512, 512);
-        renderer = new TileGroupRenderer(TextConfig.instance().fontTable, textureAtlas);
+        renderer = new TileGroupRenderer(library, engine, textureAtlas);
         tileGroup = renderer.newTileGroup();
 
-        // Note in your application, you should reuse the same texture atlas
-        // such that all your text will be rasterized onto to it. It will
-        // handle rebuilding the texture and discarding unused glyphs
-        // automatically.
-        // You can do this by ensuring that you obtain tile groups from
-        // a single renderer or by passing the same texture atlas to the
-        // renderer.
+        // If you want to use more than one texture atlas, then create another
+        // engine and renderer. For example, you dedicate one
+        // {engine, texture atlas, renderer} to render GUI text labels, and
+        // dedicate another {engine, texture atlas, renderer} to render
+        // chat room message lines.
 
         // Expose the texture so outside caller can use it to show
         // for debugging
@@ -71,55 +82,28 @@ class DemoText {
     }
 
     function addDefaultText() {
-        // We only have one large layout as a demo. You should split out
-        // your text into multiple layouts as you see fit in your application.
+        // We only have one large tile group as a demo. You should split out
+        // your text into multiple tile groups as you see fit in your application.
         var dateStr = Date.now().toString();
-        cobbles.addText('$dateStr $counter');
-        cobbles.addLineBreak(2.0);
+        engine.addText('$dateStr $counter');
+        engine.addLineBreak();
 
-        cobbles.addText("The quick brown fox jumps over the lazy dog. ");
+        engine.addText("The quick brown fox jumps over the lazy dog. ");
 
         // You can also use markup. This demo demonstrates the default
-        // markup langauge.
-        cobbles.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld! <sa>يونيكود</sa></span>");
+        // markup language.
+        engine.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld! يونيكود</span>");
 
         // Text samples from http://kermitproject.org/utf8.html
 
-        // Setting the language and script manually
-        cobbles.addText("我能吞下玻璃而不伤身体。")
-            .script("Hans")
-            .language("zh-Hans")
-            .detectFont();
-
-        cobbles.addText("私はガラスを食べられます。それは私を傷つけません。")
-            .script("Jpan")
-            .language("ja")
-            .detectFont();
-
-        cobbles.addText("나는 유리를 먹을 수 있어요. 그래도 아프지 않아요. ")
-            .script("Kore")
-            .language("ko")
-            .detectFont();
-
-        // Automatic guessing of script
-        cobbles.addText("Я могу есть стекло, оно мне не вредит. ")
-            .detectScript()
-            .detectFont();
-
-        cobbles.addText("Tôi có thể ăn thủy tinh mà không hại gì. ")
-            .detectScript()
-            .detectFont();
-
-        // Some right to left text. Guessing script and direction.
-        cobbles.addText("أنا قادر على أكل الزجاج و هذا لا يؤلمني. ")
-            .detectScript() // Arab and RTL
-            .detectFont();
-
-        // Can set script and direction manually
-        cobbles.addText("אני יכול לאכול זכוכית וזה לא מזיק לי. ")
-            .script("Hebr")
-            .direction(Direction.RightToLeft)
-            .detectFont();
+        engine.addText(
+            "我能吞下玻璃而不伤身体。" +
+            "私はガラスを食べられます。それは私を傷つけません。" +
+            "나는 유리를 먹을 수 있어요. 그래도 아프지 않아요. " +
+            "Я могу есть стекло, оно мне не вредит. " +
+            "Tôi có thể ăn thủy tinh mà không hại gì. " +
+            "أنا قادر على أكل الزجاج و هذا لا يؤلمني. " +
+            "אני יכול לאכול זכוכית וזה לא מזיק לי. ");
     }
 
     public function setExtraText(text:String) {
@@ -132,25 +116,11 @@ class DemoText {
         // your application and layout the text only when the text is changed.
         // For this demo, we layout on each frame to test the performance
         // of rendering a paragraph of text.
-        cobbles.clearText();
+        engine.clear();
         addDefaultText();
-        cobbles.addText(extraText).detectFont().detectScript();
-        cobbles.layoutText();
-        renderer.renderTileGroup(cobbles.layout, tileGroup);
-
-        // This shows how to align your text. The output of the layout is based
-        // on the bounding box of glyphs such that (0, 0) is the top-left of
-        // the bounding box.
-        var windowWidth = hxd.Window.getInstance().width;
-
-        switch demoMode {
-            case LeftText:
-                tileGroup.x = 0;
-            case CenterText:
-                tileGroup.x = Math.round((windowWidth - cobbles.layout.point64ToPixel(cobbles.layout.boundingWidth)) / 2);
-            case RightText | RightToLeftMode:
-                tileGroup.x = windowWidth - cobbles.layout.point64ToPixel(cobbles.layout.boundingWidth);
-        }
+        engine.addText(extraText);
+        engine.layOut();
+        renderer.renderTileGroup(tileGroup);
 
         counter += 1;
     }
@@ -159,23 +129,23 @@ class DemoText {
     public function switchMode() {
         switch demoMode {
             case LeftText:
-                cobbles.alignment = Alignment.Center;
+                engine.textAlignment = Center;
                 demoMode = CenterText;
             case CenterText:
-                cobbles.alignment = Alignment.End;
+                engine.textAlignment = End;
                 demoMode = RightText;
             case RightText:
-                cobbles.alignment = Alignment.End;
-                cobbles.textDirection = RightToLeft;
+                engine.textAlignment = End;
+                engine.scriptDirection = RightToLeft;
                 demoMode = RightToLeftMode;
             case RightToLeftMode:
-                cobbles.alignment = Alignment.Start;
-                cobbles.textDirection = LeftToRight;
+                engine.textAlignment = Start;
+                engine.scriptDirection = LeftToRight;
                 demoMode = LeftText;
         }
     }
 
     public function setWidth(width:Int) {
-        cobbles.lineBreakLength = width;
+        engine.lineLength = width;
     }
 }

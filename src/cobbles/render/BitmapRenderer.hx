@@ -1,69 +1,69 @@
 package cobbles.render;
 
-import cobbles.layout.InlineObject;
-import cobbles.font.GlyphBitmap;
-import cobbles.shaping.GlyphShape;
-import cobbles.layout.PenRun;
-import cobbles.font.FontTable;
+import haxe.io.Bytes;
 
 using Safety;
+
+private typedef GlyphEntry = {
+    var image:Bytes;
+    var imageWidth:Int;
+    var imageHeight:Int;
+    var imageOffsetX:Int;
+    var imageOffsetY:Int;
+};
 
 /**
  * Renderer that outputs to a bitmap.
  */
 class BitmapRenderer extends BaseRenderer {
-    var fontTable:FontTable;
-    var glyphBitmapCache:GlyphBitmapCache;
     var bitmap:Null<Bitmap>;
-
-    public function new(fontTable:FontTable) {
-        super();
-
-        this.fontTable = fontTable;
-        glyphBitmapCache = new GlyphBitmapCache(fontTable);
-    }
+    var glyphImageStorage:Map<Int,GlyphEntry> = [];
 
     public function setBitmap(bitmap:Bitmap) {
         this.bitmap = bitmap;
     }
 
-    override function renderGlyph(penRun:PenRun, glyphShapeIndex:Int) {
-        var glyphShape = penRun.glyphShapes[glyphShapeIndex];
-        var glyphBitmap = getGlyphBitmap(penRun, glyphShape);
+    override function prepareGlyphImageStorage() {
+        glyphImageStorage.clear();
+    }
 
-        if (glyphShape.glyphID == 0) {
-            drawNotDef(penRun, glyphShape);
+    override function saveGlyphImage(tile:TileInfo, glyph:GlyphInfo) {
+        glyphImageStorage.set(tile.glyphID, {
+            image: glyph.image,
+            imageWidth: glyph.imageWidth,
+            imageHeight: glyph.imageHeight,
+            imageOffsetX: glyph.imageOffsetX,
+            imageOffsetY: glyph.imageOffsetY,
+        });
+    }
+
+    override function renderGlyph(advance:AdvanceInfo) {
+        var glyphEntry = glyphImageStorage.get(advance.glyphID);
+
+        if (glyphEntry == null) {
+            drawNotDef();
             return;
         }
 
         bitmap.sure().drawBytes(
-            penPixelX + point64ToPixel(glyphShape.offsetX) + glyphBitmap.left,
-            penPixelY + point64ToPixel(glyphShape.offsetY) - glyphBitmap.top,
-            glyphBitmap.width, glyphBitmap.height,
-            glyphBitmap.data);
+            penPixelX + advance.glyphOffsetX + glyphEntry.imageOffsetX,
+            penPixelY + advance.glyphOffsetY + glyphEntry.imageOffsetY,
+            glyphEntry.imageWidth, glyphEntry.imageHeight,
+            glyphEntry.image);
     }
 
-    override function renderInlineObject(inlineObject:InlineObject) {
+    function drawNotDef() {
+        var size = Math.round(engine.fontSize);
         bitmap.sure().drawDebugBox(
-            penPixelX, penPixelY - point64ToPixel(inlineObject.getHeight()),
-            point64ToPixel(inlineObject.getWidth()),
-            point64ToPixel(inlineObject.getHeight()),
+            penPixelX, penPixelY - size, size, size, true);
+    }
+
+    override function renderInlineObject(advance:AdvanceInfo) {
+        var inlineObject = advance.inlineObject.sure();
+
+        bitmap.sure().drawDebugBox(
+            penPixelX, penPixelY - inlineObject.getHeight(),
+            inlineObject.getWidth(), inlineObject.getHeight(),
             false);
-    }
-
-    function getGlyphBitmap(penRun:PenRun, glyphShape:GlyphShape):GlyphBitmap {
-        return glyphBitmapCache.getGlyphBitmap(penRun, glyphShape, resolution);
-    }
-
-    function drawNotDef(penRun:PenRun, glyphShape:GlyphShape) {
-        var width = glyphShape.advanceX != 0 ?
-            point64ToPixel(glyphShape.advanceX) :
-            point64ToPixel(penRun.fontSize);
-        var height = glyphShape.advanceY != 0 ?
-            point64ToPixel(glyphShape.advanceY) :
-            point64ToPixel(penRun.fontSize);
-
-        bitmap.sure().drawDebugBox(
-            penPixelX, penPixelY - height, width, height, true);
     }
 }

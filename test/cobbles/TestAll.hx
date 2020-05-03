@@ -5,19 +5,7 @@ import utest.ui.Report;
 
 class TestAll {
     public static function main() {
-        #if js
-        cobbles.test.font.TestFont.preloadFonts()
-        .then(function (success:Bool) {
-            return cobbles.Runtime.loadEmscripten();
-        })
-        .then(function (success:Bool) {
-            trace("Running tests...");
-            runTests();
-        })
-        .catchError(function (error) { trace(error); });
-        #else
         runTests();
-        #end
     }
 
     static function runTests() {

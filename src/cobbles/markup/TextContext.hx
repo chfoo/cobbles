@@ -1,36 +1,37 @@
 package cobbles.markup;
 
-import cobbles.layout.InlineObject;
-import cobbles.TextInput.TextInputTextFI;
-import cobbles.font.FontTable.FontKey;
+import cobbles.InlineObject;
+import cobbles.Engine;
+import cobbles.Library;
 
+using Safety;
 using cobbles.util.ArrayTools;
 
 /**
- * Interface to `TextInput` that applies properties to text using ranges.
+ * Interface to `Engine` that applies properties to text using ranges.
  */
 class TextContext {
-    public var textInput(default, null):TextInput;
+    public var engine(default, null):Engine;
 
-    var fontKeyStack:Array<FontKey>;
+    var fontKeyStack:Array<FontID>;
     var fontSizeStack:Array<Float>;
     var colorStack:Array<Int>;
-    var directionStack:Array<Direction>;
+    var scriptDirectionStack:Array<ScriptDirection>;
     var languageStack:Array<String>;
     var scriptStack:Array<String>;
     var dataStackMap:Map<String,Array<String>>;
 
     public var fontSize(get, never):Float;
 
-    public function new(textInput:TextInput) {
-        this.textInput = textInput;
+    public function new(engine:Engine) {
+        this.engine = engine;
 
-        fontKeyStack = [];
-        fontSizeStack = [];
-        colorStack = [];
-        directionStack = [];
-        languageStack = [];
-        scriptStack = [];
+        fontKeyStack = [engine.font];
+        fontSizeStack = [engine.fontSize];
+        colorStack = [engine.getCustomProperty("color").or(0xff000000)];
+        scriptDirectionStack = [engine.scriptDirection];
+        languageStack = [engine.language];
+        scriptStack = [engine.script];
         dataStackMap = new Map();
     }
 
@@ -38,91 +39,93 @@ class TextContext {
         if (!fontSizeStack.isEmpty()) {
             return fontSizeStack.last();
         } else {
-            return textInput.fontSize;
+            return engine.fontSize;
         }
     }
 
-    public function addText(text:String):TextInputTextFI {
-        var fluentInterface = textInput.addText(text);
-        var properties = fluentInterface.properties;
-
-        if (!fontKeyStack.isEmpty()) {
-            properties.fontKey = fontKeyStack.last();
-        }
-
-        if (!fontSizeStack.isEmpty()) {
-            properties.fontPointSize = fontSizeStack.last();
-        }
-
-        if (!colorStack.isEmpty()) {
-            properties.color = colorStack.last();
-        }
-
-        if (!directionStack.isEmpty()) {
-            properties.direction = directionStack.last();
-        }
-
-        if (!scriptStack.isEmpty()) {
-            properties.script = scriptStack.last();
-        }
-
-        return fluentInterface;
+    public function addText(text:String) {
+        engine.addText(text);
     }
 
     public function addLineBreak() {
-        textInput.addLineBreak();
+        engine.addLineBreak();
     }
 
     public function addInlineObject(inlineObject:InlineObject) {
-        textInput.addInlineObject(inlineObject);
+        engine.addInlineObject(inlineObject);
     }
 
-    public function pushFont(fontKey:FontKey) {
+    public function pushFont(fontKey:FontID) {
         fontKeyStack.push(fontKey);
+        engine.font = fontKey;
     }
 
     public function popFont() {
         fontKeyStack.pop();
+        if (!fontKeyStack.isEmpty()) {
+            engine.font = fontKeyStack.last();
+        }
     }
 
     public function pushFontSize(size:Float) {
         fontSizeStack.push(size);
+        engine.fontSize = size;
     }
 
     public function popFontSize() {
         fontSizeStack.pop();
+        if (!fontSizeStack.isEmpty()) {
+            engine.fontSize = fontSizeStack.last();
+        }
     }
 
     public function pushColor(color:Int) {
         colorStack.push(color);
+        engine.setCustomProperty("color", color);
     }
 
     public function popColor() {
         colorStack.pop();
+        if (!colorStack.isEmpty()) {
+            engine.setCustomProperty("color", colorStack.last());
+        }
+
     }
 
-    public function pushDirection(direction:Direction) {
-        directionStack.push(direction);
+    public function pushDirection(direction:ScriptDirection) {
+        scriptDirectionStack.push(direction);
+        engine.scriptDirection = direction;
     }
 
     public function popDirection() {
-        directionStack.pop();
+        scriptDirectionStack.pop();
+        if (!scriptDirectionStack.isEmpty()) {
+            engine.scriptDirection = scriptDirectionStack.last();
+        }
     }
 
     public function pushLanguage(language:String) {
         languageStack.push(language);
+        engine.language = language;
     }
 
     public function popLanguage() {
         languageStack.pop();
+        if (!languageStack.isEmpty()) {
+            engine.language = languageStack.last();
+        }
     }
 
     public function pushScript(script:String) {
         scriptStack.push(script);
+        engine.script = script;
     }
 
     public function popScript() {
         scriptStack.pop();
+        if (!scriptStack.isEmpty()) {
+            engine.script = scriptStack.last();
+        }
     }
 
     public function pushData(key:String, value:String) {

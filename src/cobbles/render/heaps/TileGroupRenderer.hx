@@ -1,12 +1,9 @@
 package cobbles.render.heaps;
 
-import cobbles.layout.InlineObject;
-import cobbles.layout.PenRun;
 import h2d.Tile;
-import cobbles.layout.Layout;
-import cobbles.font.GlyphBitmap;
-import cobbles.font.FontTable;
 import h2d.TileGroup;
+
+using Safety;
 
 /**
  * Renders glyphs by using TileGroup instances.
@@ -15,8 +12,6 @@ import h2d.TileGroup;
  * whenever a glyph needs to be displayed on the screen.
  */
 class TileGroupRenderer extends BaseRenderer {
-    var fontTable:FontTable;
-    var glyphBitmapCache:GlyphBitmapCache;
     public var textureAtlas(default, null):TextureAtlas;
     var tileGroup:TileGroup;
 
@@ -24,15 +19,11 @@ class TileGroupRenderer extends BaseRenderer {
      * @param fontTable Font table containing the required fonts.
      * @param textureAtlas If given, it will be reused. Otherwise, a new
      *  texture atlas is used.
-     * @param glyphCacheSize The cache size for the number of glyph bitmaps
-     *  cached from the glyph rasterizer.
      */
-    public function new(fontTable:FontTable, ?textureAtlas:TextureAtlas,
-    glyphCacheSize:Int = 1024) {
-        super();
+    public function new(library:Library, engine:Engine,
+            ?textureAtlas:TextureAtlas) {
+        super(library, engine);
 
-        this.fontTable = fontTable;
-        glyphBitmapCache = new GlyphBitmapCache(fontTable, glyphCacheSize);
         this.textureAtlas = textureAtlas != null ?
             textureAtlas : new TextureAtlas(512, 512);
     }
@@ -47,81 +38,44 @@ class TileGroupRenderer extends BaseRenderer {
     /**
      * Adds the Tile instances to the tile group required to display the text.
      */
-    public function renderTileGroup(layout:Layout, tileGroup:TileGroup) {
-        var glyphsAdded = gatherRequiredGlyphs(layout);
-
-        if (glyphsAdded > 0) {
-            textureAtlas.buildTexture();
-        }
-
-        tileGroup.clear();
+    public function renderTileGroup(tileGroup:TileGroup) {
         this.tileGroup = tileGroup;
 
-        render(layout);
+        tileGroup.clear();
+        render();
     }
 
-    function gatherRequiredGlyphs(layout:Layout):Int {
-        var missCount = 0;
-
-        for (line in layout.lines) {
-            for (item in line.items) {
-                switch item {
-                    case PenRunItem(penRun):
-                        missCount += addPenRunGlyphsToAtlas(
-                            penRun, layout.resolution);
-                    default:
-                        // pass
-                }
-            }
-        }
-
-        return missCount;
+    override function prepareGlyphImageStorage() {
+        textureAtlas.clearTexture();
+        engine.packTiles(textureAtlas.width, textureAtlas.height);
     }
 
-    function addPenRunGlyphsToAtlas(penRun:PenRun, resolution:Int):Int {
-        var missCount = 0;
-
-        for (glyphShape in penRun.glyphShapes) {
-            if (glyphShape.glyphID == 0) {
-                // We'll draw our own .notdef glyph
-                continue;
-            }
-
-            var glyphKey = new GlyphRenderKey(penRun.fontKey,
-                glyphShape.glyphID, penRun.fontSize, resolution);
-
-            if (textureAtlas.hasGlyph(glyphKey)) {
-                continue;
-            }
-
-            var glyphBitmap = glyphBitmapCache.getGlyphBitmap(
-                    penRun, glyphShape, resolution);
-
-            textureAtlas.addGlyph(glyphKey, glyphBitmap);
-            missCount += 1;
-        }
-
-        return missCount;
+    override function renderGlyphImageStorage() {
+        textureAtlas.uploadTexture();
     }
 
-    override function renderGlyph(penRun:PenRun, glyphShapeIndex:Int) {
-        var glyphShape = penRun.glyphShapes[glyphShapeIndex];
-        var glyphKey = new GlyphRenderKey(penRun.fontKey, glyphShape.glyphID,
-            penRun.fontSize, resolution);
-
-        var glyphTile = textureAtlas.getGlyphTile(glyphKey);
-
-        var red = ((penRun.color & 0xFF0000) >> 16) / 255;
-        var green = ((penRun.color & 0xFF00) >> 8) / 255;
-        var blue = (penRun.color & 0xFF) / 255;
-
-        var drawX = penPixelX + glyphTile.bitmapLeft + point64ToPixel(glyphShape.offsetX);
-        var drawY = penPixelY - glyphTile.bitmapTop - point64ToPixel(glyphShape.offsetY);
-
-        tileGroup.addColor(drawX, drawY, red, green, blue, 1.0, glyphTile.tile);
+    override function saveGlyphImage(tile:TileInfo, glyph:GlyphInfo) {
+        textureAtlas.addGlyph(tile, glyph);
     }
 
-    override function renderInlineObject(inlineObject:InlineObject) {
-        // TODO: draw a box
+    override function renderGlyph(advance:AdvanceInfo) {
+        final tile = textureAtlas.getGlyphTile(advance.glyphID);
+        final x = penPixelX + advance.glyphOffsetX + tile.offsetX;
+        final y = penPixelY + advance.glyphOffsetY + tile.offsetY;
+
+        final color:Int = advance.customProperties.get("color").or(0xffffffff);
+        final red = (color >> 16) & 0xff;
+        final green = (color >> 8) & 0xff;
+        final blue = (color >> 0) & 0xff;
+        final alpha = (color >> 24) & 0xff;
+
+        tileGroup.addColor(x, y,
+            red / 255, green / 255, blue / 255, alpha / 255,
+            tile.tile);
     }
+
+    override function renderInlineObject(advance:AdvanceInfo) {
+        // customize me
+    }
+
 }

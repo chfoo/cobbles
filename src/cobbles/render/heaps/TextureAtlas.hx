@@ -1,21 +1,19 @@
 package cobbles.render.heaps;
 
-
+import haxe.io.Bytes;
 import haxe.Int64;
-import cobbles.font.GlyphBitmap;
 import h2d.Tile;
 import h3d.mat.Texture;
 import h3d.mat.Data.TextureFormat;
-import cobbles.font.FontTable;
-import cobbles.ds.Int64Map;
 
 @:structInit
-class GlyphAtlasInfo {
+class AtlasGlyph {
     public var x:Int;
     public var y:Int;
     public var width:Int;
     public var height:Int;
-    public var glyphBitmap:GlyphBitmap;
+    public var imageOffsetX:Int;
+    public var imageOffsetY:Int;
 }
 
 /**
@@ -27,140 +25,86 @@ class TextureAtlas {
     public var bitmap(default, null):PixelsBitmap;
     public var texture(default, null):Texture;
 
-    var glyphMap:GlyphMap<GlyphAtlasInfo>;
+    var glyphMap:Map<GlyphID,AtlasGlyph> = [];
 
     /**
      * @param width Width in pixels of the texture. Should be a multiple of 2.
      * @param height Height in pixels of the texture. Should be a multiple
      *  of 2 and match `width`
-     * @param maxGlyphs If positive, maximum number of glyphs where
-     *  least recently used glyphs are removed before adding new ones. If 0,
-     *  glyphs are not automatically removed.
      */
-    public function new(width:Int, height:Int, maxGlyphs:Int = 1024) {
+    public function new(width:Int, height:Int) {
         this.width = width;
         this.height = height;
         bitmap = new PixelsBitmap(width, height);
         texture = new Texture(width, height, TextureFormat.RGBA);
-
-        if (maxGlyphs > 0) {
-            glyphMap = new GlyphMap(new GlyphCache(maxGlyphs));
-        } else {
-            glyphMap = new GlyphMap(new Int64Map<GlyphAtlasInfo>());
-        }
     }
 
     /**
-     * Draws the glyphs to the texture.
+     * Clear the texture pixels buffer.
      */
-    public function buildTexture() {
+    public function clearTexture() {
         bitmap.pixels.clear(0);
-
-        var items = getGlyphsAsSortedArray();
-        var penX = 0;
-        var penY = 0;
-        var maxHeight = 0;
-
-        for (item in items) {
-            var glyphAtlasInfo = item.value;
-            var glyphBitmap = glyphAtlasInfo.glyphBitmap;
-
-            if (penX + glyphAtlasInfo.width >= width) {
-                penX = 0;
-                penY += maxHeight;
-                maxHeight = 0;
-            }
-
-            bitmap.drawBytes(penX, penY,
-                glyphAtlasInfo.width, glyphAtlasInfo.height,
-                glyphBitmap.data);
-
-            glyphAtlasInfo.x = penX;
-            glyphAtlasInfo.y = penY;
-
-            if (glyphAtlasInfo.height > maxHeight) {
-                maxHeight = glyphAtlasInfo.height;
-            }
-
-            penX += glyphAtlasInfo.width;
-        }
-
-        drawNotdefGlyph();
-
-        texture.uploadPixels(bitmap.pixels);
     }
 
-    function getGlyphsAsSortedArray():Array<{key:Int64, value:GlyphAtlasInfo}> {
-        var items = [];
+    /**
+     * Add glyph to the texture and draw to the texture pixels buffer.
+     */
+    public function addGlyph(tile:TileInfo, glyph:GlyphInfo) {
+        bitmap.drawBytes(tile.atlasX, tile.atlasY,
+            glyph.imageWidth, glyph.imageHeight, glyph.image);
 
-        for (item in glyphMap.keyValueIterator()) {
-            items.push(item);
-        }
-
-        // Sort by tallest to shortest
-        items.sort(function (item1, item2) {
-            return Reflect.compare(item2.value.height, item1.value.height);
+        glyphMap.set(tile.glyphID, {
+            x: tile.atlasX,
+            y: tile.atlasY,
+            width: glyph.imageWidth,
+            height: glyph.imageHeight,
+            imageOffsetX: glyph.imageOffsetX,
+            imageOffsetY: glyph.imageOffsetY
         });
-
-        return items;
     }
 
-    function drawNotdefGlyph() {
-        var size = 16;
-        bitmap.drawDebugBox(width - size, height - size, size, size, true);
+    /**
+     * Upload the texture pixels buffer to the texture.
+     */
+    public function uploadTexture() {
+        texture.uploadPixels(bitmap.pixels);
     }
 
     /**
      * Returns whether the texture atlas has the given glyph.
      * @param glyphKey
      */
-    public function hasGlyph(glyphKey:GlyphRenderKey) {
+    public function hasGlyph(glyphKey:GlyphID) {
         return glyphMap.exists(glyphKey);
-    }
-
-    /**
-     * Adds a glyph to be drawn.
-     */
-    public function addGlyph(glyphKey:GlyphRenderKey, glyphBitmap:GlyphBitmap) {
-        glyphMap.set(
-            glyphKey, {
-                x: 0,
-                y: 0,
-                width: glyphBitmap.width,
-                height: glyphBitmap.height,
-                glyphBitmap: glyphBitmap
-            });
     }
 
     /**
      * Returns a new Tile instance that is positioned to a glyph in the
      * texture.
      */
-    public function getGlyphTile(glyphKey:GlyphRenderKey):GlyphTile {
+    public function getGlyphTile(glyphKey:GlyphID):GlyphTile {
         var tile = Tile.fromTexture(texture);
-        var glyphAtlasInfo = glyphMap.get(glyphKey);
+        var glyphInfo = glyphMap.get(glyphKey);
 
-        if (glyphAtlasInfo != null) {
-            tile.setPosition(glyphAtlasInfo.x, glyphAtlasInfo.y);
-            tile.setSize(glyphAtlasInfo.width, glyphAtlasInfo.height);
-
-            return {
-                tile: tile,
-                bitmapTop: glyphAtlasInfo.glyphBitmap.top,
-                bitmapLeft: glyphAtlasInfo.glyphBitmap.left
-            };
-        } else {
-            var size = 16;
-            tile.setPosition(width - size, height - size);
-            tile.setSize(size, size);
+        if (glyphInfo == null) {
+            tile.setPosition(0, 0);
+            tile.setSize(1, 1);
 
             return {
                 tile: tile,
-                bitmapTop: size,
-                bitmapLeft: 0
+                offsetX: 0,
+                offsetY: 0
             };
         }
 
+        tile.setPosition(glyphInfo.x, glyphInfo.y);
+        tile.setSize(glyphInfo.width, glyphInfo.height);
+
+        return {
+            tile: tile,
+            offsetX: glyphInfo.imageOffsetX,
+            offsetY: glyphInfo.imageOffsetY
+        };
     }
 
     /**
@@ -168,15 +112,14 @@ class TextureAtlas {
      *
      * This does not affect the texture until it is rebuilt.
      */
-    public function clear() {
-        glyphMap = new GlyphMap(new Int64Map());
+    public function clearGlyphs() {
+        glyphMap.clear();
     }
 }
-
 
 @:structInit
 class GlyphTile {
     public var tile:Tile;
-    public var bitmapTop:Int;
-    public var bitmapLeft:Int;
+    public var offsetX:Int;
+    public var offsetY:Int;
 }

@@ -28,16 +28,12 @@ class ParseUtil {
         return None;
     }
 
-    public static function parseDirection(text:String):Option<Direction> {
+    public static function parseDirection(text:String):Option<ScriptDirection> {
         switch text {
             case "ltr":
-                return Some(Direction.LeftToRight);
+                return Some(ScriptDirection.LeftToRight);
             case "rtl":
-                return Some(Direction.RightToLeft);
-            case "ttb":
-                return Some(Direction.TopToBottom);
-            case "btt":
-                return Some(Direction.BottomToTop);
+                return Some(ScriptDirection.RightToLeft);
             default:
                 return None;
         }

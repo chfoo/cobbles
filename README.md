@@ -1,35 +1,14 @@
 # Cobbles
 
-Cobbles is a text layout/rendering engine library for Haxe. It uses Freetype and Harfbuzz for font loading, text shaping, and glyph rasterization. Its intended purpose is for use in 3D graphics (OpenGL/WebGL/DirectX) applications that uses textures directly to display text. This is useful when no other facility to display text is available.
+Cobbles is a Haxe binding to [Cobbletext](https://github.com/chfoo/cobbletext) layout/rendering engine library. It is intended for use in 3D graphics (OpenGL/WebGL/DirectX) applications that uses textures directly to display text. This is useful when no other facility to display text is available.
+
+This binding tries to align the same supported features in the main Cobbletext project.
 
 [WebGL demo](https://chfoo.github.io/cobbles/demo/example_heaps.html)—Built using Heaps.io and Emscripten.
 
-## Feature Summary
-
-What is supported:
-
-* Left-to-right text
-* Right-to-left text with direction and script specified
-* Automatic and manual line breaking
-* Simple script, direction, and font detection
-* Markup language (including manual bidirectional support)
-* Rendering text using Heaps.io
-
-What is not supported:
-
-* Vertical text
-* Text decoration (underline, emphasis dots)
-* Unicode line breaking algorithm (Only a simple implementation is used currently)
-* Format text by arbitrary ranges (like an editor)
-* Font family querying by name
-* Text segmentation:
-  * Font fallback
-  * Unicode bidirectional algorithm
-* Text cursor navigation (characters vs clusters)
-
 ## Getting started
 
-Requires Haxe 3 or 4.
+Requires Haxe 4.
 
 Install the library from Haxelib:
 
@@ -39,36 +18,110 @@ Or the latest from the repo:
 
     haxelib git https://github.com/chfoo/cobbles
 
-Next, you will need the native library and as well the dependencies installed. To do this, see the library section below. Once those are built or installed, continue here.
+Next, you will need the Cobbletext version **0.1.0** libraries. See the Cobbletext project for downloads in the Releases or see the readme on how to build it. Either install the Cobbletext libraries to the system or place them in a directory to be specified in the configuration next.
 
-The easiest entry to using the library is with the `TextInput` class:
+### CPP target
+
+When compiling with hxcpp, you need to configure your hxcpp build config (in `~/.hxcpp_config.xml` or `%HOMEPATH%/.hxcpp_config.xml`).
+
+Example config:
+
+```xml
+<!--
+    Include the Cobbletext header files.
+    Note that the directory specified should contain the cobbletext directory of C/C++ header files.
+-->
+<compiler id="gcc">
+    <flag value="-I/home/username/path/to/cobbletext/include/"/>
+</compiler>
+<compiler id="MSVC">
+    <flag value="-Ic:/users/username/path/to/cobbletext/include/"/>
+</compiler>
+
+<!--
+    Link the Cobbletext libraries.
+    Note that the directory specified should contain (lib)cobbletext.{lib,so,dylib} and related {lib,so,dylib} files.
+-->
+<linker id="exe">
+    <!-- for GCC: -->
+    <flag value="-L/home/username/path/to/cobbletext/lib"/>
+    <flag value="-Wl,-rpath-link,/home/username/path/to/cobbletext/lib">
+    <lib name="-lcobbletext"/>
+
+    <!-- for MSVC: -->
+    <flag value="-libpath:c:/users/username/path/to/cobbletext/lib"/>
+    <lib name="cobbletext.lib"/>
+</linker>
+```
+
+Cobbles will link directly to Cobbletext.
+
+### HashLink
+
+Cobbles requires a `cobbles.hdll` file wich is native HashLink library binding to Cobbletext. You can either get `cobbles.hdll` from within a release zip.
+
+You can also build it yourself with cmake:
+
+    mkdir out
+    cd out
+    cmake .. -D CMAKE_BUILD_TYPE=Release
+    cmake --build . --config Release
+
+Use `-D` or set varibles in CMakeCache.txt as needed:
+
+* `COBBLETEXT_INCLUDE_PATH`: Directory containing the `cobbletext` directory C/C++ header files.
+* `COBBLETEXT_LIBRARY_PATH`: Filename of the Cobbletext library (lib/so/dylib).
+* `HASHLINK_INCLUDE_PATH`: Directory containing `hl.h`.
+* `HASHLINK_LIBRARY_PATH`: Filename of the HashLink library (lib/so/dylib).
+
+`cobbles.hdll` will be built to `out/native/` or `out/native/Release`.
+
+### JavaScript
+
+You will need `cobbletext.js` and `cobbletext.wasm` from the Cobbletext project.
+
+The JavaScript object `CobbletextModule` from `cobblescript.js` needs to be available before creating any Cobbles objects. The easiest way is to include the script into the HTML before yours:
+
+```html
+<script src="cobblescript.js"></script>
+<script src="my_app.js"></script>
+```
+
+### Starting with Cobbles
+
+The Cobbles API tries align with Cobbletext, so let's start with opening a library context and layout engine:
 
 ```haxe
-import cobbles.TextConfig;
-import cobbles.TextInput;
+import cobbles.Library;
 
-var config = TextConfig.instance();
-var cobbles = new TextInput();
+var library = new Library();
+var engine = new Engine(library);
+
+// on JavaScript use:
+Library.loadModule().then(library -> {
+    var engine = new Engine(library);
+    // ...
+});
 ```
 
 In order to display anything meaningful, load a font from the filesystem:
 
 ```haxe
-var latinSans = config.fontTable.openFile("path/to/font.ttf");
+var latinSans = library.loadFont("path/to/font.ttf");
 ```
 
 Or by the bytes directly:
 
 ```haxe
 var fontBytes:Bytes; // your font here
-var latinSans = config.fontTable.openBytes(fontBytes);
+var latinSans = library.loadFontBytes(fontBytes);
 ```
 
 Next, we set the default font properties:
 
 ```haxe
-cobbles.font = latinSans;
-cobbles.fontSize = 14;
+engine.font = latinSans;
+engine.fontSize = 14;
 ```
 
 Now we add some text:
@@ -76,23 +129,29 @@ Now we add some text:
 ```haxe
 cobbles.addText("Hello world in the default properties!");
 cobbles.addLineBreak();
-cobbles.addText("This is tiny.").fontSize(8);
+cobbles.fontSize = 8;
+cobbles.addText("This is tiny.")
 ```
 
 Then perform the layout:
 
 ```haxe
-cobbles.layoutText()
+cobbles.layOut()
 ```
 
-The text has been shaped and positioned. In order to see anything, the glyphs need to be rasterized. For this example, we'll save it to a PGM file. First we create a bitmap where the data will be stored:
+The text has been shaped and positioned. In order to see anything, the glyphs need to be rasterized and drawn.
+
+### Builtin renderer
+
+For this example, we'll save it to a PGM file using a builtin renderer. The builtin renderers take care of storing the glyph images and drawing them to a destination. If you don't like this, skip to the manual drawing section.
+
+First we create a bitmap where the data will be stored:
 
 ```haxe
 import cobbles.render.GrayscaleBitmap;
 
-var layout = cobbles.layout;
-var width = layout.point64ToPixel(layout.boundingWidth);
-var height = layout.point64ToPixel(layout.boundingHeight);
+var width = engine.outputInfo.textWidth;
+var height = engine.outputInfo.textHeight;
 var bitmap = new GrayscaleBitmap(width, height);
 ```
 
@@ -101,9 +160,9 @@ Next, we use a renderer that will draw each glyph onto the bitmap:
 ```haxe
 import cobbles.render.BitmapRenderer;
 
-var renderer = new BitmapRenderer(config.fontTable);
+var renderer = new BitmapRenderer(library, engine);
 renderer.setBitmap(bitmap);
-renderer.render(layout);
+renderer.render();
 ```
 
 Finally, we save to disk:
@@ -112,7 +171,105 @@ Finally, we save to disk:
 bitmap.savePGM("my_text_on_a_bitmap.pgm");
 ```
 
-To learn more, please see the [API documentation](https://chfoo.github.io/cobbles/api/).
+### Manual drawing
+
+For complete control, you can use the low level API matching Cobbletext. When `engine.layOut()` is called, Cobbletext stores the text into tiles and advances. Tiles represent images of the glyphs associated with the given text and advances represent pen instructions to draw tiles.
+
+#### Texture atlas creation
+
+First, convert the glyphs to images:
+
+```haxe
+engine.rasterize();
+```
+
+Then, arrange the tiles to a texture atlas:
+
+```haxe
+var hasOverflow:Bool = engine.packTiles(256, 256);
+```
+
+The tile packing function will return a value indicating that the tiles did not fit within the texture. To handle the case where it does not fit, double the texture size. If you aren't using a texture atlas, you can skip the texture atlas step.
+
+Now get the tiles, glyph images, and store the atlas metadata:
+
+```haxe
+var tiles = engine.tiles();
+
+for (tile in tiles) {
+    var glyph = library.getGlyphInfo(tile.glyphID);
+
+    myDrawToAtlas(
+        glyph.image, glyph.imageWidth, glyph.imageHeight, // Source
+        tile.atlasX, tile.atlasY // Destination
+    );
+    myAtlas.set(
+        tile.glyphID, // Key
+        tile.atlasX, tile.atlasY, // Location on atlas
+        glyph.imageOffsetX, glyph.imageOffsetY // Drawing metadata
+    );
+}
+```
+
+In order to not recreate the atlas every time text is changed, use:
+
+```haxe
+var isValid:Bool = engine.tilesValid();
+```
+
+#### Draw advances
+
+First prepare the destination image:
+
+```haxe
+var myImage = new MyImage(engine.outputInfo.textWidth, engine.outputInfo.textHeight);
+```
+
+Then loop through the advances:
+
+```haxe
+var advances = engine.advances();
+var penX = 0;
+var penY = 0;
+
+for (advance in advances) {
+    switch advance.type {
+        case Glyph:
+            var myAtlasEntry = myAtlas.get(advance.glyphID);
+
+            var x = penX + advance->glyphOffsetX + entry.imageOffsetX;
+            var y = penY + advance->glyphOffsetY + entry.imageOffsetY;
+
+            myImage.myDrawTile(
+                entry.atlasX, entry.atlasY, // Source position
+                x, y // Destination position
+            );
+    }
+
+    penX += advance.advanceX;
+    penY += advance.advanceY;
+}
+```
+
+### Reuse engine
+
+To reuse the engine, call `clear()`. This will remove the text from its internal buffer but keep all properties intact.
+
+```haxe
+engine.clear();
+engine.addText("your text here");
+```
+
+### Running your application
+
+When running your application, (lib)cobbletext.{dll,so,dylib} and related files (and cobbles.hdll if HashLink) needs to be in your OS library search path.
+
+On Windows, the search path includes the exe folder, so you can place the dll files in the same folder.
+
+On MacOS, the search path may include the same directory as your application. But you can temporarily include library paths using the `DYLIB_LIBRARY_PATH` environment variable. For example: `DYLIB_LIBRARY_PATH=my/path/to/dylib/directory/ ./my_application`.
+
+On Linux, you can temporarily include library paths using the `LIB_LIBRARY_PATH` environment variable. For example: `LIB_LIBRARY_PATH=my/path/to/so/directory/ ./my_application`.
+
 
 ## Heaps.io integration
 
@@ -122,32 +279,36 @@ There is a [Heaps](https://heaps.io/) renderer included in the library. It is us
 import cobbles.render.heaps.TextureAtlas;
 import cobbles.render.heaps.TileGroupRenderer;
 
-var cobbles:TextInput; // your instance here
+var library = new Library();
+var engine = new Engine(library);
 var textureAtlas = new TextureAtlas(512, 512);
-var renderer = new TileGroupRenderer(config.fontTable, textureAtlas);
+var renderer = new TileGroupRenderer(library, engine, textureAtlas);
 var tileGroup = renderer.newTileGroup();
 
 s2d.addChild(tileGroup);
 
-// Whenever you update your text, call
-renderer.renderTileGroup(cobbles.layout, tileGroup);
+engine.addText("Hello world!");
+engine.layOut();
+
+renderer.renderTileGroup(tileGroup);
 ```
 
-A texture atlas contains all the glyphs required to display the text. The renderer will automatically build the texture atlas as needed. Remember that a single texture atlas is intended to be shared for all your text blocks. If you create more than one renderer, provide it with the texture atlas in the arguments. Otherwise, it will create new texture atlas by default.
+A texture atlas contains all the glyphs required to display the text. The renderer will automatically build the texture atlas as needed. Remember that a single texture atlas is tied to the renderer and the engine. If you want more than one texture atlas, create another engine and renderer.
+
+For example, one set of engine, texture atlas, and renderer can be dedicated to drawing GUI elements with each element containing a tile group. And another set of engine, texture atlas, and renderer can be dedicated to drawing chat messages with each message represented by a tile group.
 
 For details, see the example in the `example/heaps` directory and the API docs.
 
 ## Markup language
 
-Cobbles also supports markup language. The following shows how to use the default tags that correspond to the methods on `TextInput`:
+Cobbles also supports markup language. The following shows how to use the default tags that correspond to the methods on `Engine`:
 
 ```haxe
-cobbles.addMarkup(
+engine.addMarkup(
     "You can have things like " +
     "<span color='#ff0000'>color</span> and<br/>line breaks." +
     " And maybe an inline <object name='abc' width='10pt'/> too. " +
-    " Simplistic bidirectional text like this (Unicode/<sa>يونيكود</sa>) " +
-    " is also possible.");
+    " Bidirectional text is handled automatically: Unicode/يونيكود ");
 ```
 
 For the full details on the syntax, see the API doc on `MarkupParser`.
@@ -183,7 +344,7 @@ class MyShoutHandler implements ElementHandler {
 And add it to the markup parser:
 
 ```haxe
-var parser = TextConfig.instance().markupParser;
+var parser = engine.markupParser;
 parser.elementHandlers.set("shout", new MyShoutHandler());
 ```
 
@@ -193,145 +354,20 @@ And use it like so:
 cobbles.addMarkup("I said it before and I'll say it again...<br/><shout>Nope! Nope! Nope!</shout>");
 ```
 
-## Other text layout and typographic features
+Note that markup support is implemented in Cobbles, not in Cobbletext, at this time.
 
-Cobbles only provides a minimal subset of [features](https://w3c.github.io/typography/) to get your OpenGL/WebGL/DirectX application looking fairly decent. (Text engines are hard to write.) If you need to render significant amounts of text, consider alternative solutions such as embedding a web view or adding a hyperlink to open a web browser in your application.
+## Further reading
 
-If you would like to help getting a feature implemented (or make a feature run faster), see the Contributing section.
-
-## Native library and dependencies
-
-The native library (cobbles.hdll/cobbles.wasm) is required in order for Haxe generated code to communicate with other libraries like Freetype and Harfbuzz.
-
-Prebuilt libraries may be bundled in the zip file under the "bin" folder which can be distributed along with your application. Or you can build them yourself.
-
-### Dependencies
-
-The following dependencies are required:
-
-* [Freetype](https://www.freetype.org/download.html) 2+
-* [Harfbuzz](https://www.freedesktop.org/wiki/Software/HarfBuzz/) 1.8+
-* iconv (part of GNU C Library)
-
-#### Linux
-
-The libraries are most likely installed, however if this is not the case, they can be installed by a package manager.
-
-On Ubuntu:
-
-    apt install libfreetype6 libharfbuzz0b libc6
-
-The headers can be installed with
-
-    apt install libfreetype6-dev libharfbuzz-dev libc6-dev
-
-The `LD_LIBRARY_PATH` environment variable with directory path containing the cobbles library is required for applications that don't search in the current directory.
-
-#### Windows
-
-You will need the dll files match the architecture of the HashLink exe. If you downloaded HashLink from the Haxe website, you will need 32-bit versions. The dlls can be installed to your system and bundled within the same directory as your application.
-
-If prebuilt dlls are not available or you want to build them yourself, you can use [vcpkg](https://github.com/Microsoft/vcpkg):
-
-1. Install Visual Studio 2017
-2. Install Desktop C++ workload under "Get Tools and Features..."
-3. Install vcpkg
-4. run `vcpkg install freetype:x86-windows harfbuzz:x86-windows libiconv:x86-windows`
-5. run `vcpkg export --zip freetype:x86-windows harfbuzz:x86-windows libiconv:x86-windows`
-
-This will create a zip file containing the libraries and the dependent libraries. Dig into the "x64-windows" folder and the libraries will be in the "bin" folder and header files in the "include" folder.
-
-#### Mac OS
-
-If prebuilt libraries are not available or you want to build them yourself, you can use Homebrew:
-
-    brew install freetype harfbuzz
-
-The libraries and headers will be symlinked into /usr/local. Use `brew info` to find the location of the libraries.
-
-### Targets
-
-The instructions and makefiles assume a Linux-like environemnt. On Windows, use something like Git Bash that gives you Bash shell to your Windows documents.
-
-#### CPP
-
-Compilation should work seamlessly as the XML config is injected into the build. Cobbles will be linked statically while dependencies are dynamically linked.
-
-If the Freetype, Harfbuzz, or Libiconv cannot be found, you can specify in your `~/.hxcpp_config.xml` or `%HOMEPATH%/.hxcpp_config.xml` file. For header include path `-I` flag, add `<flag>` to the `<compiler>` section. To specify dynamic library link path `-L` flag, add `<flag>` to the `<linker>` section.
-
-On Windows, you may optionally use MinGW-w64 if you have trouble compiling. Under the "VARS" section, set `mingw` to `1`.
-
-#### HashLink
-
-Build files for cobbles.hdll can be generated using CMake.
-
-The following commands assumes a Bash shell.
-
-1. Create a build directory and change to it.
-
-        mkdir -p out/ && cd out/
-
-2. Run cmake to generate build files using a release config and specifying the include and linker paths to Harfbuzz and Freetype.
-
-        cmake .. -DCMAKE_BUILD_TYPE=Release \
-        -DHARFBUZZ_INCLUDE_PATH:PATH=/path/to/include/harfbuzz/ \
-        -DHARFBUZZ_LIB_PATH:PATH=/path/to/lib/  \
-        -DFREETYPE_INCLUDE_PATH:PATH=/path/to/include/freetype/ \
-        -DFREETYPE_LIB_PATH:PATH=/path/to/lib/  \
-
-Alternatively, a manually written makefile can be used:
-
-    cd native/
-    make hdll
-
-On Windows, instead of "make", use:
-
-    mingw32-make.exe hdll GCC=i686-w64-mingw32-gcc.exe WIN_PREFIX=/c/path/to/libraries/
-
-On Mac OS, use:
-    make hdll LINK_ICONV=-liconv
-
-Inspect the makefile to see the exact paths needed. If you used the vcpkg step, "bin" and "include" folders should be in the `WIN_PREFIX` path.
-
-#### JavaScript
-
-Follow the [Emscripten download and install instructions](https://emscripten.org/docs/getting_started/downloads.html) to install the Emscripten SDK. Note that you don't have to install any dependencies yourself, they are automatically downloaded and included as part of the build.
-
-Generate the Javascript by running the makefile:
-
-    cd native/
-    make js
-
-The output will be placed in the `out/js/` directory.
-
-Next in your Haxe application, load the Emscripten library with
-
-    cobbles.Runtime.loadEmscripten().then(success -> {
-        // ... your code continues here ...
-    });
-
-Then load or package `cobbles.js`, followed by `cobbles_binding.js`, and then your application JS.
+To learn more, please see the [Cobbletext readme and API docs](https://github.com/chfoo/cobbletext) and the Cobbles [API documentation](https://chfoo.github.io/cobbles/api/).
 
 ## Contributing
 
 Use the GitHub issues or pull requests section for bug reports and features.
 
-Optimizing and improving the general architecture (especially to match the best practices of "real" text engines) would be appreciated.
-
-If you want to implement a feature, please consider the guidelines:
-
-* The feature is likely to be used by at least 80% of users.
-* It does not cause library to run significantly slower. (The demo WebGL app takes about 2 milliseconds per frame on a 2015 mobile device.)
-* It does not significantly increase the library's size. (It should not rely on the full Unicode database.)
-
-To run the unit tests, use the hxml files in the `hxml/` directory. For example:
-
-    haxe hxml/test.hl.hxml
-
-Output is placed in the `out/` directory.
-
 ## License
+
+Copyright 2019-2020 Christopher Foo.
 
 Licensed under MIT. See the licence file.
 
-Remember that you must comply with the licenses of Freetype, Harfbuzz, libiconv and their dependencies when bundling them.
+Remember that you must comply with the licenses of Freetype, Harfbuzz, ICU and their dependencies when bundling them.

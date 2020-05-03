@@ -1,17 +1,17 @@
-cmake_minimum_required(VERSION 3.13)
-project(cobbles)
+add_library(cobbles_hdll SHARED cobbles_hl.c)
 
-set(FREETYPE_INCLUDE_PATH "/usr/include/freetype2" CACHE PATH "Include directory for Freetype (*.h)")
-set(FREETYPE_LIB_PATH "/usr/lib/" CACHE PATH "Link directory for Freetype (*.{so,dll,dynlib})")
-set(HARFBUZZ_INCLUDE_PATH "/usr/include/harfbuzz" CACHE PATH "Include directory for Harfbuzz (*.h)")
-set(HARFBUZZ_LIB_PATH "/usr/lib/" CACHE PATH "Link directory for Harfbuzz (*.{so,dll,dynlib})")
+find_path(COBBLETEXT_INCLUDE_PATH "cobbletext/cobbletext.h")
+find_library(COBBLETEXT_LIBRARY_PATH "cobbletext")
 
-add_library(cobbles_hdll SHARED cobbles.c cobbles_font.c cobbles_shaper.c)
-target_include_directories(cobbles_hdll BEFORE PRIVATE "${FREETYPE_INCLUDE_PATH}")
-target_link_directories(cobbles_hdll BEFORE PRIVATE "${FREETYPE_LIB_PATH}")
-target_include_directories(cobbles_hdll BEFORE PRIVATE "${HARFBUZZ_INCLUDE_PATH}")
-target_link_directories(cobbles_hdll BEFORE PRIVATE "${HARFBUZZ_INCLUDE_PATH}")
-target_link_libraries(cobbles_hdll freetype harfbuzz)
+find_path(HASHLINK_INCLUDE_PATH "hl.h")
+find_library(HASHLINK_LIBRARY_PATH "hl")
+
+target_include_directories(cobbles_hdll PRIVATE
+    "${COBBLETEXT_INCLUDE_PATH}"
+    "${HASHLINK_INCLUDE_PATH}")
+target_link_libraries(cobbles_hdll PRIVATE
+    "${COBBLETEXT_LIBRARY_PATH}"
+    "${HASHLINK_LIBRARY_PATH}")
 
 if(MSVC)
     target_compile_options(cobbles_hdll PRIVATE /W4)
@@ -26,3 +26,5 @@ set_target_properties(cobbles_hdll PROPERTIES
     C_STANDARD 99
 )
 target_compile_definitions(cobbles_hdll PRIVATE COBBLES_HL)
+
+install(TARGETS cobbles_hdll DESTINATION lib)
