@@ -23,7 +23,7 @@ private class MyInlineObject implements InlineObject {
 class TestEngine extends BaseTestCase {
     public function testSmoketest(asyncHandle:Async) {
         #if js
-        loadAndRun(asyncHandle, _testSmoketest, "out/js/DejaVuSans.ttf");
+        loadAndRun(asyncHandle, _testSmoketest, "out/js/LiberationSerif-Regular.ttf");
         #else
         loadAndRun(asyncHandle, _testSmoketest);
         #end

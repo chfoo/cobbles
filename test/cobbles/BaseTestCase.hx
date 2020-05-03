@@ -45,7 +45,7 @@ class BaseTestCase implements ITest {
 
     #if sys
     function getFontPath():String {
-        var fontPath = "DejaVuSans.ttf";
+        var fontPath = "resource/fonts/liberation/LiberationSerif-Regular.ttf";
 
         final envVars = Sys.environment();
         if (envVars.exists("FONT_PATH")) {

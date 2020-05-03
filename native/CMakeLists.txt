@@ -4,7 +4,12 @@ find_path(COBBLETEXT_INCLUDE_PATH "cobbletext/cobbletext.h")
 find_library(COBBLETEXT_LIBRARY_PATH "cobbletext")
 
 find_path(HASHLINK_INCLUDE_PATH "hl.h")
-find_library(HASHLINK_LIBRARY_PATH "hl")
+
+if(WIN32)
+    find_library(HASHLINK_LIBRARY_PATH "libhl")
+else()
+    find_library(HASHLINK_LIBRARY_PATH "hl")
+endif()
 
 target_include_directories(cobbles_hdll PRIVATE
     "${COBBLETEXT_INCLUDE_PATH}"
