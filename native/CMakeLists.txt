@@ -24,6 +24,13 @@ else()
     target_compile_options(cobbles_hdll PRIVATE -Wall -Wextra -pedantic)
 endif()
 
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE("uchar.h" HAS_UCHAR)
+
+if(NOT HAS_UCHAR)
+    target_compile_definitions(cobbles_hdll COBBLETEXT_NO_UCHAR_H=1)
+endif()
+
 set_target_properties(cobbles_hdll PROPERTIES
     PREFIX ""
     OUTPUT_NAME "cobbles"

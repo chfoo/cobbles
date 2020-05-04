@@ -22,37 +22,12 @@ Next, you will need the Cobbletext version **0.1.0** libraries. See the Cobblete
 
 ### CPP target
 
-When compiling with hxcpp, you need to configure your hxcpp build config (in `~/.hxcpp_config.xml` or `%HOMEPATH%/.hxcpp_config.xml`).
+When compiling with hxcpp, an XML config is injected into the build process which uses the following defines (`haxe -D YOUR_DEFINE_HERE=123 ...`):
 
-Example config:
+* `COBBLETEXT_INCLUDE_PATH`: Directory containing the `cobbletext` directory C/C++ header files.
+* `COBBLETEXT_LIBRARIES_PATH`: Directory containing all the cobbletext libraries (lib,so,dylib).
 
-```xml
-<!--
-    Include the Cobbletext header files.
-    Note that the directory specified should contain the cobbletext directory of C/C++ header files.
--->
-<compiler id="gcc">
-    <flag value="-I/home/username/path/to/cobbletext/include/"/>
-</compiler>
-<compiler id="MSVC">
-    <flag value="-Ic:/users/username/path/to/cobbletext/include/"/>
-</compiler>
-
-<!--
-    Link the Cobbletext libraries.
-    Note that the directory specified should contain (lib)cobbletext.{lib,so,dylib} and related {lib,so,dylib} files.
--->
-<linker id="exe">
-    <!-- for GCC: -->
-    <flag value="-L/home/username/path/to/cobbletext/lib"/>
-    <flag value="-Wl,-rpath-link,/home/username/path/to/cobbletext/lib">
-    <lib name="-lcobbletext"/>
-
-    <!-- for MSVC: -->
-    <flag value="-libpath:c:/users/username/path/to/cobbletext/lib"/>
-    <lib name="cobbletext.lib"/>
-</linker>
-```
+These optional defines can be used if Cobbletext is not installed in a well-known path. Alternatively, you can manually edit your `~/.hxcpp_config.xml` or `%HOMEPATH%/.hxcpp_config.xml` to include Cobbletext.
 
 Cobbles will link directly to Cobbletext.
 
@@ -67,7 +42,7 @@ You can also build it yourself with cmake:
     cmake .. -D CMAKE_BUILD_TYPE=Release
     cmake --build . --config Release
 
-Use `-D` or set varibles in CMakeCache.txt as needed:
+Use `-D` or set variables in CMakeCache.txt as needed:
 
 * `COBBLETEXT_INCLUDE_PATH`: Directory containing the `cobbletext` directory C/C++ header files.
 * `COBBLETEXT_LIBRARY_PATH`: Filename of the Cobbletext library (lib/so/dylib).
@@ -266,10 +241,11 @@ When running your application, (lib)cobbletext.{dll,so,dylib} and related files 
 
 On Windows, the search path includes the exe folder, so you can place the dll files in the same folder.
 
-On MacOS, the search path may include the same directory as your application. But you can temporarily include library paths using the `DYLIB_LIBRARY_PATH` environment variable. For example: `DYLIB_LIBRARY_PATH=my/path/to/dylib/directory/ ./my_application`.
+On MacOS, the search path may include the same directory as your application. But you can temporarily include library paths using the `DYLD_LIBRARY_PATH` environment variable. For example: `DYLD_LIBRARY_PATH=my/path/to/dylib/directory/ ./my_application`.
 
-On Linux, you can temporarily include library paths using the `LIB_LIBRARY_PATH` environment variable. For example: `LIB_LIBRARY_PATH=my/path/to/so/directory/ ./my_application`.
+On Linux, you can temporarily include library paths using the `LD_LIBRARY_PATH` environment variable. For example: `LD_LIBRARY_PATH=my/path/to/so/directory/ ./my_application`.
 
+Check the Cobbletext project for information about troubleshooting libraries.
 
 ## Heaps.io integration
 

@@ -1,0 +1,20 @@
+<xml>
+    <files id="haxe">
+        <section if="COBBLETEXT_INCLUDE_PATH">
+            <compilerflag value="-I${COBBLETEXT_INCLUDE_PATH}"/>
+        </section>
+        <compilerflag value="-DCOBBLETEXT_NO_UCHAR_H" if="macos"/>
+    </files>
+    <target id="haxe">
+        <section if="COBBLETEXT_LIBRARIES_PATH isMsvc">
+            <flag value="-libpath:${COBBLETEXT_LIBRARIES_PATH}"/>
+            <lib name="cobbletext.lib"/>
+        </section>
+        <section if="COBBLETEXT_LIBRARIES_PATH" unless="isMsvc">
+            <flag value="-L${COBBLETEXT_LIBRARIES_PATH}"/>
+            <flag value="-Wl,-rpath-link,${COBBLETEXT_LIBRARIES_PATH}" if="linux"/>
+            <flag value="-Wl,-rpath,@executable_path/." if="macos"/>
+            <lib name="-lcobbletext"/>
+        </section>
+    </target>
+</xml>

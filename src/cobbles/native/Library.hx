@@ -5,6 +5,7 @@ package cobbles.native;
 import cpp.ConstCharStar;
 import cpp.RawConstPointer;
 import cpp.UInt8;
+import cobbles.native.HxcppConfig;
 
 @:include("cobbletext/cobbletext.h")
 @:native("CobbletextLibrary *")
