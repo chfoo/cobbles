@@ -1,0 +1,56 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  test_cpp:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [windows-x86, windows-x64, ubuntu, macos]
+        include:
+        - target: windows-x86
+          vm: windows-latest
+          hxcpp_flags: "-D HXCPP_M32"
+        - target: windows-x64
+          vm: windows-latest
+          hxcpp_flags: "-D HXCPP_M64"
+        - target: ubuntu
+          vm: ubuntu-18.04
+          hxcpp_flags: ""
+        - target: macos
+          vm: macos-latest
+          hxcpp_flags: ""
+    runs-on: ${{ matrix.vm }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2.1.0
+        with:
+          submodules: true
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.0.5
+      - uses: actions/cache@v1
+        id: cache-cobbletext
+        with:
+          path: cobbletext/
+          key: cache-cobbletext-0.1.0-${{ matrix.target }}-v1
+      - run: .github/workflows/get_cobbletext.sh ${{ matrix.target }} "0.1.0"
+        if: steps.cache-cobbletext-${{ matrix.target }}-v1.cache-hit != 'true'
+      - run: |
+          haxelib install --always test.hxml
+          haxelib install --always hxcpp
+      - run: |
+          haxe hxml/test.cpp.hxml \
+            ${{ matrix.hxcpp_flags }} \
+            -D COBBLETEXT_INCLUDE_PATH=${{ github.workspace }}/cobbletext/include \
+            -D COBBLETEXT_LIBRARIES_PATH=${{ github.workspace }}/cobbletext/lib
+          cp -a cobbletext/lib/. ./out/cpp/
+          if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/cpp/; fi
+      - run: ./TestAll-debug
+        working-directory: out/cpp
+        env:
+          LD_LIBRARY_PATH=${{ github.workspace }}/out/cpp
+
