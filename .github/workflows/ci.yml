@@ -62,8 +62,9 @@ jobs:
       matrix:
         target: [windows-x86, windows-x64, ubuntu, macos]
         include:
-        - target: windows-x86
-          vm: windows-latest
+        # shrug ¯\_(ツ)_/¯
+        # - target: windows-x86
+        #   vm: windows-latest
         - target: windows-x64
           vm: windows-latest
         - target: ubuntu
@@ -84,7 +85,10 @@ jobs:
           haxe-version: 4.0.5
       - uses: microsoft/setup-msbuild@v1.0.0
         if: contains( matrix.target, 'windows' )
+      - run: .github/workflows/get_hashlink_bin.sh ${{ matrix.target }} "1.11.0" "1.11"
+        if: contains( matrix.target, 'windows' )
       - run: .github/workflows/get_hashlink.sh ${{ matrix.target }} "1.11"
+        if: "! contains( matrix.target, 'windows' )"
       - uses: actions/cache@v1
         id: cache-cobbletext
         with:
@@ -103,6 +107,16 @@ jobs:
             -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib;c:/hl/" \
           cmake --build . --config Release
           cmake --install . --config Release --prefix install_dir/
+        if: contains( matrix.target, 'windows' )
+      - run: |
+          mkdir -p out/
+          cd out/
+          cmake .. -D CMAKE_BUILD_TYPE=Release \
+            -D CMAKE_INCLUDE_PATH="$GITHUB_WORKSPACE/cobbletext/include" \
+            -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib" \
+          cmake --build .
+          cmake --install . --prefix install_dir/
+        if: "! contains( matrix.target, 'windows' )"
       - run: |
           haxe hxml/test.hl.hxml
           cp -a out/install_dir/lib/cobbles.hdll ./out/hl/

@@ -2,11 +2,6 @@
 set -x
 set -e
 
-if [ -d "hl" ]; then
-    echo "hl directory already exists"
-    exit 1
-fi
-
 TARGET="$1"
 VERSION="$2"
 
@@ -49,6 +44,7 @@ case "$PLATFORM" in
                 ;;
         esac
         cd "$PACKAGE_NAME"
+        # This doesn't work anymore :(
         msbuild.exe hl.sln \
             /p:Configuration=Release \
             /p:Platform=$BUILD_PLATFORM \
