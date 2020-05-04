@@ -29,6 +29,7 @@ jobs:
       - uses: actions/checkout@v2.1.0
         with:
           submodules: true
+      # Install dependencies
       - uses: krdlab/setup-haxe@v1
         with:
           haxe-version: 4.0.5
@@ -42,6 +43,7 @@ jobs:
       - run: |
           haxelib install --quiet --always test.hxml
           haxelib install --quiet --always hxcpp
+      # Build and copy dependencies into test app directory
       - run: |
           haxe hxml/test.cpp.hxml \
             ${{ matrix.hxcpp_flags }} -D HXCPP_VERBOSE \
@@ -49,8 +51,70 @@ jobs:
             -D COBBLETEXT_LIBRARIES_PATH=$GITHUB_WORKSPACE/cobbletext/lib
           cp -a cobbletext/lib/. ./out/cpp/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/cpp/; fi
+      # Test
       - run: ./TestAll-debug
         working-directory: out/cpp
         env:
           LD_LIBRARY_PATH: ${{ github.workspace }}/out/cpp
-
+  test_hl_and_release:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [windows-x86, windows-x64, ubuntu, macos]
+        include:
+        - target: windows-x86
+          vm: windows-latest
+        - target: windows-x64
+          vm: windows-latest
+        - target: ubuntu
+          vm: ubuntu-18.04
+        - target: macos
+          vm: macos-latest
+    runs-on: ${{ matrix.vm }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v2.1.0
+        with:
+          submodules: true
+      # Install dependencies
+      - uses: krdlab/setup-haxe@v1
+        with:
+          haxe-version: 4.0.5
+      - uses: microsoft/setup-msbuild@v1.0.0
+        if: contains( matrix.target, 'windows' )
+      - run: .github/workflows/get_hashlink.sh ${{ matrix.target }} "1.11"
+      - uses: actions/cache@v1
+        id: cache-cobbletext
+        with:
+          path: cobbletext/
+          key: cache-cobbletext-0.1.0-${{ matrix.target }}-v1
+      - run: .github/workflows/get_cobbletext.sh ${{ matrix.target }} "0.1.0"
+        if: steps.cache-cobbletext.outputs.cache-hit != 'true'
+      - run: |
+          haxelib install --quiet --always test.hxml
+      # Build and copy dependencies into app test directory
+      - run: |
+          mkdir -p out/
+          cd out/
+          cmake .. -D CMAKE_BUILD_TYPE=Release \
+            -D CMAKE_INCLUDE_PATH="$GITHUB_WORKSPACE/cobbletext/include;c:/hl/include" \
+            -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib;c:/hl/" \
+          cmake --build . --config Release
+          cmake --install . --config Release --prefix install_dir/
+      - run: |
+          haxe hxml/test.hl.hxml
+          cp -a out/install_dir/lib/cobbles.hdll ./out/hl/
+          cp -a cobbletext/lib/. ./out/hl/
+          if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/hl/; fi
+      # Run test
+      - run: hl test.hl
+        working-directory: out/hl
+        env:
+          LD_LIBRARY_PATH: ${{ github.workspace }}/out/hl
+      # Package cobbles.hdll
+      - uses: actions/upload-artifact@v2
+        with:
+          name: cobbles-${{ matrix.target }}-hdll
+          path: out/install_dir/lib/cobbles.hdll
