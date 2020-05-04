@@ -45,12 +45,12 @@ jobs:
       - run: |
           haxe hxml/test.cpp.hxml \
             ${{ matrix.hxcpp_flags }} \
-            -D COBBLETEXT_INCLUDE_PATH=${{ github.workspace }}/cobbletext/include \
-            -D COBBLETEXT_LIBRARIES_PATH=${{ github.workspace }}/cobbletext/lib
+            -D COBBLETEXT_INCLUDE_PATH=$GITHUB_WORKSPACE/cobbletext/include \
+            -D COBBLETEXT_LIBRARIES_PATH=$GITHUB_WORKSPACE/cobbletext/lib
           cp -a cobbletext/lib/. ./out/cpp/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/cpp/; fi
       - run: ./TestAll-debug
         working-directory: out/cpp
         env:
-          LD_LIBRARY_PATH=${{ github.workspace }}/out/cpp
+          LD_LIBRARY_PATH: ${{ github.workspace }}/out/cpp
 
