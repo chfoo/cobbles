@@ -60,9 +60,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [windows-x86, windows-x64, ubuntu, macos]
-        include:
+        # target: [windows-x86, windows-x64, ubuntu, macos]
         # shrug ¯\_(ツ)_/¯
+        target: [windows-x64, ubuntu, macos]
+        include:
         # - target: windows-x86
         #   vm: windows-latest
         - target: windows-x64
@@ -104,19 +105,9 @@ jobs:
           cd out/
           cmake .. -D CMAKE_BUILD_TYPE=Release \
             -D CMAKE_INCLUDE_PATH="$GITHUB_WORKSPACE/cobbletext/include;c:/hl/include" \
-            -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib;c:/hl/" \
+            -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib;c:/hl/"
           cmake --build . --config Release
           cmake --install . --config Release --prefix install_dir/
-        if: contains( matrix.target, 'windows' )
-      - run: |
-          mkdir -p out/
-          cd out/
-          cmake .. -D CMAKE_BUILD_TYPE=Release \
-            -D CMAKE_INCLUDE_PATH="$GITHUB_WORKSPACE/cobbletext/include" \
-            -D CMAKE_LIBRARY_PATH="$GITHUB_WORKSPACE/cobbletext/lib" \
-          cmake --build .
-          cmake --install . --prefix install_dir/
-        if: "! contains( matrix.target, 'windows' )"
       - run: |
           haxe hxml/test.hl.hxml
           cp -a out/install_dir/lib/cobbles.hdll ./out/hl/
