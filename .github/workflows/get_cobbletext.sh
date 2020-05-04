@@ -12,11 +12,11 @@ VERSION="$2"
 
 case "$TARGET" in
     "windows-x86")
-        PLATFORM="windows-x64"
+        PLATFORM="windows-x86"
         EXTENSION=".zip"
         ;;
     "windows-x64")
-        PLATFORM="windows-x86"
+        PLATFORM="windows-x64"
         EXTENSION=".zip"
         ;;
     "ubuntu")
@@ -36,7 +36,7 @@ esac
 PACKAGE_NAME="cobbletext-${VERSION}-${PLATFORM}"
 FILENAME="cobbletext-${VERSION}-${PLATFORM}${EXTENSION}"
 
-curl --connect-timeout 60 --location --no-progress-meter \
+curl --connect-timeout 60 --location --silent --show-error \
     --retry 5 --remote-name \
     "https://github.com/chfoo/cobbletext/releases/download/v${VERSION}/cobbletext-${VERSION}-${PLATFORM}${EXTENSION}"
 
