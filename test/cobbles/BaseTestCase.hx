@@ -45,11 +45,27 @@ class BaseTestCase implements ITest {
 
     #if sys
     function getFontPath():String {
-        var fontPath = "resource/fonts/liberation/LiberationSerif-Regular.ttf";
+        final defaultFontPaths = [
+            "resource/fonts/liberation/LiberationSerif-Regular.ttf",
+            "../resource/fonts/liberation/LiberationSerif-Regular.ttf",
+            "../../resource/fonts/liberation/LiberationSerif-Regular.ttf",
+            "../LiberationSerif-Regular.ttf",
+            "../../LiberationSerif-Regular.ttf",
+            "LiberationSerif-Regular.ttf",
+        ];
+        var fontPath = defaultFontPaths[0];
 
         final envVars = Sys.environment();
         if (envVars.exists("FONT_PATH")) {
             fontPath = envVars.get("FONT_PATH").sure();
+        } else {
+            for (candidate in defaultFontPaths) {
+                fontPath = candidate;
+
+                if (sys.FileSystem.exists(fontPath)) {
+                    break;
+                }
+            }
         }
 
         if (!sys.FileSystem.exists(fontPath)) {
