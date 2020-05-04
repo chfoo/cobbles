@@ -62,6 +62,7 @@ case "$PLATFORM" in
         ;;
     *)
         cd "$PACKAGE_NAME"
+        sudo apt update
         sudo apt install --yes libpng-dev libturbojpeg0-dev  libvorbis-dev libopenal-dev libsdl2-dev libmbedtls-dev libuv1-dev
         make
         sudo make install

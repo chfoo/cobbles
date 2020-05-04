@@ -53,6 +53,7 @@ esac
 case "$PLATFORM" in
     "windows-x86"|"windows-x64")
         mv $PACKAGE_NAME c:/hl
+        echo "::add-path::c:/hl"
         ;;
     *)
         echo "unsupported"
