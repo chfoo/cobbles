@@ -7,18 +7,14 @@ fi
 
 echo "Minifying..."
 
-closure-compiler --js out/js/cobbles.js \
-    --js_output_file out/js/cobbles.min.js \
-    --language_in ECMASCRIPT5
-closure-compiler --js cobbles_binding.js \
-    --js_output_file out/js/cobbles_binding.min.js \
+closure-compiler --js out/js/cobbletext.js \
+    --js_output_file out/js/cobbletext.min.js \
     --language_in ECMASCRIPT5
 closure-compiler --js out/js/example_heaps.js \
     --js_output_file out/js/example_heaps.min.js \
     --language_in ECMASCRIPT5
 
-sed 's:out/js/cobbles.js:cobbles.min.js:' example_heaps.html |
-    sed 's:cobbles_binding.js:cobbles_binding.min.js:' |
+sed 's:out/js/cobbletext.js:cobbletext.min.js:' example_heaps.html |
     sed 's:out/js/example_heaps.js:example_heaps.min.js:' > out/js/example_heaps.html
 
 echo "Output placed in out/js"

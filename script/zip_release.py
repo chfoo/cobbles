@@ -44,17 +44,9 @@ def add_bin(zip_filename: str, project_dir: str):
     print('Adding binaries')
 
     filenames = (
-        'bin/js/cobbles_binding.min.js',
-        'bin/js/cobbles.min.js',
-        'bin/js/cobbles.wasm',
-        'bin/win32/bz2.dll',
-        'bin/win32/cobbles.hdll',
-        'bin/win32/freetype.dll',
-        'bin/win32/harfbuzz.dll',
-        'bin/win32/libcharset.dll',
-        'bin/win32/libiconv.dll',
-        'bin/win32/libpng16.dll',
-        'bin/win32/zlib1.dll',
+        'bin/linux-x64/cobbles.hdll',
+        'bin/macos-x64/cobbles.hdll',
+        'bin/windows-x64/cobbles.hdll',
     )
 
     zip_file = zipfile.ZipFile(zip_filename, mode='a')
