@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.100.0 (Unreleased)
+0.100.0 (2020-05-05)
 --------------------
 
 The native code has been moved into a separate project called
