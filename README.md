@@ -41,6 +41,7 @@ You can also build it yourself with cmake:
     cd out
     cmake .. -D CMAKE_BUILD_TYPE=Release
     cmake --build . --config Release
+    cmake --install . --config Release --prefix installed/
 
 Use `-D` or set variables in CMakeCache.txt as needed:
 
@@ -49,7 +50,7 @@ Use `-D` or set variables in CMakeCache.txt as needed:
 * `HASHLINK_INCLUDE_PATH`: Directory containing `hl.h`.
 * `HASHLINK_LIBRARY_PATH`: Filename of the HashLink library (lib/so/dylib).
 
-`cobbles.hdll` will be built to `out/native/` or `out/native/Release`.
+`cobbles.hdll` will be built to `out/native/` or `out/native/Release` for development. `out/installed/` contains one suitable for redistribution (rpath stuff). On macOS, see "Running your application" for important tips.
 
 ### JavaScript
 
