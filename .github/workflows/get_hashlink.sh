@@ -60,11 +60,16 @@ case "$PLATFORM" in
         make
         sudo make install
         ;;
-    *)
+    "linux-x64")
         cd "$PACKAGE_NAME"
         sudo apt update
         sudo apt install --yes libpng-dev libturbojpeg0-dev  libvorbis-dev libopenal-dev libsdl2-dev libmbedtls-dev libuv1-dev
         make
-        sudo make install
+        # HashLink on Ubuntu with /usr/local never seems to work
+        sudo make install PREFIX=/usr
+        ;;
+    *)
+        echo "unknown platform"
+        exit 1
         ;;
 esac

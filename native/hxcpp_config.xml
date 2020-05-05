@@ -13,7 +13,10 @@
         <section if="COBBLETEXT_LIBRARIES_PATH" unless="isMsvc">
             <flag value="-L${COBBLETEXT_LIBRARIES_PATH}"/>
             <flag value="-Wl,-rpath-link,${COBBLETEXT_LIBRARIES_PATH}" if="linux"/>
-            <flag value="-Wl,-rpath,@executable_path/." if="macos"/>
+
+            <!-- Set application rpath to resolve "@rpath/libcobbletext.dylib" and etc. to the current executable directory-->
+            <flag value="-Wl,-rpath,@executable_path/." if="macos COBBLES_UNIT_TEST"/>
+
             <lib name="-lcobbletext"/>
         </section>
     </target>

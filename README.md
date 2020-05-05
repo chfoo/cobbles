@@ -241,7 +241,7 @@ When running your application, (lib)cobbletext.{dll,so,dylib} and related files 
 
 On Windows, the search path includes the exe folder, so you can place the dll files in the same folder.
 
-On MacOS, the search path may include the same directory as your application. But you can temporarily include library paths using the `DYLD_LIBRARY_PATH` environment variable. For example: `DYLD_LIBRARY_PATH=my/path/to/dylib/directory/ ./my_application`.
+On MacOS, the search path may include the same directory as your application. But you can temporarily include library paths using the `DYLD_LIBRARY_PATH` environment variable. For example: `DYLD_LIBRARY_PATH=my/path/to/dylib/directory/ ./my_application`. As well, use `otool` on your application or cobbles.hdll to check the paths of the library dependencies. Use `install_name_tool` to change these paths.
 
 On Linux, you can temporarily include library paths using the `LD_LIBRARY_PATH` environment variable. For example: `LD_LIBRARY_PATH=my/path/to/so/directory/ ./my_application`.
 

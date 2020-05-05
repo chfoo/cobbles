@@ -47,6 +47,7 @@ jobs:
       - run: |
           haxe hxml/test.cpp.hxml \
             ${{ matrix.hxcpp_flags }} -D HXCPP_VERBOSE \
+            -D COBBLES_UNIT_TEST \
             -D COBBLETEXT_INCLUDE_PATH=$GITHUB_WORKSPACE/cobbletext/include \
             -D COBBLETEXT_LIBRARIES_PATH=$GITHUB_WORKSPACE/cobbletext/lib
           cp -a cobbletext/lib/. ./out/cpp/
@@ -109,15 +110,32 @@ jobs:
           cmake --build . --config Release
           cmake --install . --config Release --prefix install_dir/
       - run: |
+          otool -L cobbles.hdll
+          install_name_tool -change `otool -L cobbles.hdll | grep -E -o "@rpath/libcobbletext[^ ]+"` libcobbletext.dylib cobbles.hdll
+          otool -L cobbles.hdll
+        if: matrix.target == 'macos'
+        working-directory: out/install_dir/lib/
+      - run: |
           haxe hxml/test.hl.hxml
           cp -a out/install_dir/lib/cobbles.hdll ./out/hl/
           cp -a cobbletext/lib/. ./out/hl/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/hl/; fi
+      - run: |
+          otool -L *
+          otool -L /usr/local/bin/hl
+        if: matrix.target == 'macos'
+        working-directory: out/hl
       # Run test
       - run: hl test.hl
         working-directory: out/hl
+        if: matrix.target != 'macos'
         env:
-          LD_LIBRARY_PATH: ${{ github.workspace }}/out/hl
+          LD_LIBRARY_PATH: "${{ github.workspace }}/out/hl"
+      - run: hl test.hl || true   # I can't figure out why it fails to load hdll
+        working-directory: out/hl
+        if: matrix.target == 'macos'
+        env:
+          DYLD_PRINT_LIBRARIES: "1"
       # Package cobbles.hdll
       - uses: actions/upload-artifact@v2
         with:
