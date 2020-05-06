@@ -4,8 +4,10 @@ Changelog
 Unreleased
 ----------
 
-* HashLink: Fixed serious runtime string corruption.
-* HashLink: Fixed `Library.loadFont()` & `Library.loadFontBytes()` not throwing exceptions.
+* HashLink:
+  * Fixed serious runtime string corruption.
+  * Fixed `Library.loadFont()` & `Library.loadFontBytes()` not throwing exceptions.
+  * Added hdll version check.
 
 0.100.0 (2020-05-05)
 --------------------

@@ -55,6 +55,9 @@ extern class Library {
 import haxe.io.Bytes;
 
 extern class Library {
+    @:hlNative("cobbles", "get_api_version")
+    static public function getAPIVersion():Int;
+
     @:hlNative("cobbles", "library_new")
     static public function new_():LibraryHandle;
 

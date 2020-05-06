@@ -6,6 +6,8 @@ import cobbles.native.Library as NativeLibrary;
 import cobbles.native.LibraryHandle;
 
 class LibraryHL implements Library {
+    static final MINIMUM_API_VERSION = 1;
+
     public var fallbackFont(get, never):FontID;
 
     @:allow(cobbles)
@@ -14,6 +16,13 @@ class LibraryHL implements Library {
     var _disposed = false;
 
     public function new() {
+        final binaryAPIVersion = NativeLibrary.getAPIVersion();
+
+        if (binaryAPIVersion < MINIMUM_API_VERSION) {
+            throw new Exception('Outdated cobbles.hdll version. ' +
+                'Expected $MINIMUM_API_VERSION, got $binaryAPIVersion');
+        }
+
         handle = NativeLibrary.new_();
         checkError();
     }

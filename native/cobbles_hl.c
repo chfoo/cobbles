@@ -24,6 +24,10 @@ const char * vstring_to_utf8(vstring * source) {
     }
 }
 
+int cobbles_get_api_version() {
+    return COBBLES_API_VERSION;
+}
+
 hl_CobbletextLibrary * cobbles_library_new() {
     return cobbletext_library_new();
 }
@@ -229,6 +233,7 @@ void cobbles_engine_get_output_info(hl_CobbletextEngine * engine, hl_OutputInfo 
     out_output_info->textHeight = output_info->text_height;
 }
 
+HL_COBBLES_DEFINE(get_api_version, _I32, _NO_ARG )
 HL_COBBLES_DEFINE(library_new, _ABSTRACT(hl_CobbletextLibrary), _NO_ARG )
 HL_COBBLES_DEFINE(library_delete, _VOID, _ABSTRACT(hl_CobbletextLibrary) )
 HL_COBBLES_DEFINE(library_get_error_code, _I32, _ABSTRACT(hl_CobbletextLibrary) )

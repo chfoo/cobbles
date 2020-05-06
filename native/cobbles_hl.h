@@ -6,6 +6,8 @@
 #define HL_DEFINE(name,impl_name,t,args) DEFINE_PRIM_WITH_NAME(t,impl_name,args,name)
 #define HL_COBBLES_DEFINE(name,t,args) DEFINE_PRIM_WITH_NAME(t,cobbles_##name,args,name)
 
+#define COBBLES_API_VERSION 1
+
 #include <cobbletext/cobbletext.h>
 
 typedef struct CobbletextLibrary hl_CobbletextLibrary;
@@ -112,6 +114,9 @@ typedef struct hl_OutputInfo {
 vstring * utf8_to_vstring(const char * source, hl_type * vstring_type);
 
 const char * vstring_to_utf8(vstring * source);
+
+API
+int cobbles_get_api_version();
 
 API
 hl_CobbletextLibrary * cobbles_library_new();
