@@ -18,6 +18,9 @@ class TestMarkup extends BaseTestCase {
         engine.addMarkup("<span size='40pt' color='#ff3333'>Hel͜lo<br/>wo̎rld! يونيكود</span>");
         engine.layOut();
 
+        engine.dispose();
+        library.dispose();
+
         Assert.pass();
     }
 }

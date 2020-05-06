@@ -18,12 +18,12 @@ class LibraryHL implements Library {
         checkError();
     }
 
-    @:access(String.fromUTF8)
+    @:access(String.fromUCS2)
     public function checkError() {
         final errorCode = NativeLibrary.getErrorCode(handle);
 
         if (errorCode != 0) {
-            final message = String.fromUTF8(NativeLibrary.getErrorMessage(handle));
+            final message = String.fromUCS2(NativeLibrary.getErrorMessage(handle));
             throw new Exception(message);
         }
 
@@ -44,11 +44,15 @@ class LibraryHL implements Library {
     }
 
     public function loadFont(path:String):FontID {
-        return NativeLibrary.loadFont(handle, path);
+        final result = NativeLibrary.loadFont(handle, path);
+        checkError();
+        return result;
     }
 
     public function loadFontBytes(data:Bytes, faceIndex:Int = 0):FontID {
-        return NativeLibrary.loadFontBytes(handle, data, faceIndex);
+        final result = NativeLibrary.loadFontBytes(handle, data, faceIndex);
+        checkError();
+        return result;
     }
 
     public function getFontInfo(id:FontID):FontInfo {

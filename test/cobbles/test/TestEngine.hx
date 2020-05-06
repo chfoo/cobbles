@@ -108,4 +108,25 @@ class TestEngine extends BaseTestCase {
         engine.lineLength = 50;
         Assert.equals(50, engine.lineLength);
     }
+
+    public function testException(asyncHandle:Async) {
+        loadAndRun(asyncHandle, _testException);
+    }
+
+    function _testException(library:Library) {
+        #if js
+        Assert.raises(() -> {
+            library.loadFontBytes(Bytes.alloc(1000));
+        });
+        #else
+        Assert.raises(() -> {
+            library.loadFont("non-existent-file");
+        },
+        Exception);
+        Assert.raises(() -> {
+            library.loadFontBytes(Bytes.alloc(1000));
+        },
+        Exception);
+        #end
+    }
 }

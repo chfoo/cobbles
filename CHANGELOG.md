@@ -5,6 +5,8 @@ Unreleased
 ----------
 
 * HashLink: Fixed serious runtime string corruption.
+* HashLink: Fixed `Library.loadFont()` & `Library.loadFontBytes()` not throwing exceptions.
+
 0.100.0 (2020-05-05)
 --------------------
 

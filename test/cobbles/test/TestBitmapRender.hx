@@ -32,6 +32,9 @@ class TestBitmapRender extends BaseTestCase {
         FileSystem.createDirectory("out/test");
         bitmap.savePGM("out/test/bitmap_render.pgm");
 
+        engine.dispose();
+        library.dispose();
+
         Assert.pass();
     }
     #end
