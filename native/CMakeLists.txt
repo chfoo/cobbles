@@ -1,5 +1,7 @@
 add_library(cobbles_hdll SHARED cobbles_hl.c)
 
+set(COBBLES_DEBUG_SANITIZER false CACHE BOOL "Add address sanitizer flags for debugging")
+
 find_path(COBBLETEXT_INCLUDE_PATH "cobbletext/cobbletext.h")
 find_library(COBBLETEXT_LIBRARY_PATH "cobbletext")
 
@@ -29,6 +31,11 @@ CHECK_INCLUDE_FILE("uchar.h" HAS_UCHAR)
 
 if(NOT HAS_UCHAR)
     target_compile_definitions(cobbles_hdll PRIVATE COBBLETEXT_NO_UCHAR_H=1)
+endif()
+
+if(COBBLES_DEBUG_SANITIZER)
+    target_compile_options(cobbles_hdll PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+    target_link_options(cobbles_hdll PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 endif()
 
 set_target_properties(cobbles_hdll PROPERTIES

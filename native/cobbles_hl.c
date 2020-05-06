@@ -1,17 +1,23 @@
 #include "cobbles_hl.h"
 
-void set_utf8_to_vstring(const char * source, vstring * dest) {
-    //
+vstring * utf8_to_vstring(const char * source, hl_type * vstring_type) {
+    vstring * dest = (vstring *) hl_alloc_obj(vstring_type);
+    // TODO: It would be nice if we could have access to the length
+    // to save a few CPU cycles
     dest->bytes = hl_to_utf16(source);
     dest->length = ustrlen(dest->bytes);
+    return dest;
 }
 
 const char * vstring_to_utf8(vstring * source) {
     if (source->length == 0) {
-        // bytes is invalid in this case because reasons
+        // bytes is garbage pointer in this case
         return "";
     } else {
-        return hl_to_utf8(source->bytes);
+        // return hl_to_utf8(source->bytes); // bytes missing null terminator
+        int size;
+        return (const char *) hl_utf16_to_utf8(
+            (vbyte * )source->bytes, source->length, &size);
     }
 }
 
@@ -59,8 +65,8 @@ void cobbles_library_get_font_info(hl_CobbletextLibrary * library, int font_id, 
     const struct CobbletextFontInfo * info = cobbletext_library_get_font_info(library, font_id);
 
     out_font_info->id = info->id;
-    set_utf8_to_vstring(info->family_name, out_font_info->familyName);
-    set_utf8_to_vstring(info->style_name, out_font_info->styleName);
+    out_font_info->familyName = utf8_to_vstring(info->family_name, out_font_info->familyName->t);
+    out_font_info->styleName = utf8_to_vstring(info->style_name, out_font_info->styleName->t);
     out_font_info->unitsPerEM = info->units_per_em;
     out_font_info->ascender = info->ascender;
     out_font_info->descender = info->descender;
@@ -97,7 +103,7 @@ void cobbles_engine_get_properties(hl_CobbletextEngine * engine, hl_EngineProper
     const struct CobbletextEngineProperties * properties = cobbletext_engine_get_properties(engine);
 
     out_properties->lineLength = properties->line_length;
-    set_utf8_to_vstring(properties->locale, out_properties->locale);
+    out_properties->locale = utf8_to_vstring(properties->locale, out_properties->locale->t);
     out_properties->textAlignment = properties->text_alignment;
 }
 
@@ -114,8 +120,8 @@ void cobbles_engine_set_properties(hl_CobbletextEngine * engine, hl_EngineProper
 void cobbles_engine_get_text_properties(hl_CobbletextEngine * engine, hl_TextProperties * out_text_properties) {
     const struct CobbletextTextProperties * text_properties = cobbletext_engine_get_text_properties(engine);
 
-    set_utf8_to_vstring(text_properties->language, out_text_properties->language);
-    set_utf8_to_vstring(text_properties->script, out_text_properties->script);
+    out_text_properties->language = utf8_to_vstring(text_properties->language, out_text_properties->language->t);
+    out_text_properties->script = utf8_to_vstring(text_properties->script, out_text_properties->script->t);
     out_text_properties->scriptDirection = text_properties->script_direction;
     out_text_properties->font = text_properties->font;
     out_text_properties->fontSize = text_properties->font_size;

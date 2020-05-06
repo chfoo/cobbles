@@ -11,6 +11,10 @@
 typedef struct CobbletextLibrary hl_CobbletextLibrary;
 typedef struct CobbletextEngine hl_CobbletextEngine;
 
+// copy and pasted from HL string.c because it's not in the public header
+// TODO: is this a bug?
+extern vbyte *hl_utf16_to_utf8( vbyte *str, int len, int *size );
+
 // haxe.io.BytesData
 typedef struct hl_BytesData {
     hl_type *t;
@@ -105,7 +109,7 @@ typedef struct hl_OutputInfo {
 } hl_OutputInfo;
 #define OUTPUT_INFO _OBJ( _I32 _I32 )
 
-void set_utf8_to_vstring(const char * source, vstring * dest);
+vstring * utf8_to_vstring(const char * source, hl_type * vstring_type);
 
 const char * vstring_to_utf8(vstring * source);
 

@@ -1,6 +1,10 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* HashLink: Fixed serious runtime string corruption.
 0.100.0 (2020-05-05)
 --------------------
 
