@@ -14,10 +14,13 @@ const char * vstring_to_utf8(vstring * source) {
         // bytes is garbage pointer in this case
         return "";
     } else {
-        // return hl_to_utf8(source->bytes); // bytes missing null terminator
-        int size;
-        return (const char *) hl_utf16_to_utf8(
-            (vbyte * )source->bytes, source->length, &size);
+        // assuming bytes from String has null terminator
+        return hl_to_utf8(source->bytes);
+        // int size;
+        // char * output = (char *) hl_utf16_to_utf8(
+        //     (vbyte * )source->bytes, source->length, &size);
+        // output[size] = 0;
+        // return output;
     }
 }
 
