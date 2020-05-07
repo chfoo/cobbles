@@ -11,5 +11,4 @@ interface Library extends Disposable {
     public function getGlyphInfo(id:GlyphID):GlyphInfo;
     public function setFontAlternative(id:FontID, fallbackID:FontID):Void;
     public function getFontAlternative(id:FontID):FontID;
-    public function clearGlyphs():Void;
 }

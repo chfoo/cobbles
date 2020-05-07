@@ -104,10 +104,5 @@ class LibraryCPP implements Library {
     public function getFontAlternative(id:FontID):FontID {
         return NativeLibrary.getFontAlternative(handle, id);
     }
-
-    public function clearGlyphs():Void {
-        NativeLibrary.clearGlyphs(handle);
-    }
-
 }
 #end

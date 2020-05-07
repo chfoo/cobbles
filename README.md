@@ -18,7 +18,7 @@ Or the latest from the repo:
 
     haxelib git https://github.com/chfoo/cobbles
 
-Next, you will need the Cobbletext version **0.1.0** libraries. See the Cobbletext project for downloads in the Releases or see the readme on how to build it. Either install the Cobbletext libraries to the system or place them in a directory to be specified in the configuration next.
+Next, you will need the Cobbletext version **0.2.0** libraries. See the Cobbletext project for downloads in the Releases or see the readme on how to build it. Either install the Cobbletext libraries to the system or place them in a directory to be specified in the configuration next.
 
 ### CPP target
 
@@ -229,11 +229,19 @@ for (advance in advances) {
 
 ### Reuse engine
 
-To reuse the engine, call `clear()`. This will remove the text from its internal buffer but keep all properties intact.
+To reuse the engine, call `clear()`. This will remove the text from its internal buffer but keep all properties and tiles intact.
 
 ```haxe
 engine.clear();
 engine.addText("your text here");
+```
+
+### Clearing tiles
+
+If your texture atlas for an engine is filling up, instead of deleting and recreating an engine entirely, you can clear the tiles and the associated glyphs.
+
+```haxe
+engine.clearTiles();
 ```
 
 ### Running your application

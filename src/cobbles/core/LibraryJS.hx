@@ -82,9 +82,5 @@ class LibraryJS implements Library {
     public function getFontAlternative(id:FontID):FontID {
         return jsLibrary.getFontAlternative(id);
     }
-
-    public function clearGlyphs() {
-        jsLibrary.clearGlyphs();
-    }
 }
 #end

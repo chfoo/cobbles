@@ -32,10 +32,13 @@ extern class Engine {
     static public function addText(engine:Engine, text:ConstCharStar, length:Int):Void;
 
     @:native("cobbletext_engine_add_inline_object")
-    static public function addInlineObject(engine:Engine, id:Int, size:Int):Void;
+    static public function addInlineObject(engine:Engine, id:Int, width:Int, height:Int):Void;
 
     @:native("cobbletext_engine_clear")
     static public function clear(engine:Engine):Void;
+
+    @:native("cobbletext_engine_clear_tiles")
+    static public function clearTiles(engine:Engine):Void;
 
     @:native("cobbletext_engine_lay_out")
     static public function layOut(engine:Engine):Void;
@@ -96,10 +99,13 @@ extern class Engine {
     static public function addText(engine:EngineHandle, text:String):Void;
 
     @:hlNative("cobbles", "engine_add_inline_object")
-    static public function addInlineObject(engine:EngineHandle, id:Int, size:Int):Void;
+    static public function addInlineObject(engine:EngineHandle, id:Int, width:Int, height:Int):Void;
 
     @:hlNative("cobbles", "engine_clear")
     static public function clear(engine:EngineHandle):Void;
+
+    @:hlNative("cobbles", "engine_clear_tiles")
+    static public function clearTiles(engine:EngineHandle):Void;
 
     @:hlNative("cobbles", "engine_lay_out")
     static public function layOut(engine:EngineHandle):Void;
@@ -161,9 +167,10 @@ extern class Engine {
     public function addTextUTF16(text:String):Void;
     public function addTextUTF32(text:EmbindVector<Int>):Void;
 
-    public function addInlineObject(id:Int, size:Int):Void;
+    public function addInlineObject(id:Int, width:Int, height:Int):Void;
 
     public function clear():Void;
+    public function clearTiles():Void;
     public function layOut():Void;
 
     public function tilesValid():Bool;

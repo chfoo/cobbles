@@ -3,7 +3,7 @@ package cobbles;
 import haxe.io.Bytes;
 
 /**
- * Opaque handle to the library's context.
+ * Represents the library's context.
  *
  * Use `new Library()` to create one.
  *
@@ -132,21 +132,5 @@ class Library implements Disposable {
      */
     public function getFontAlternative(id:FontID):FontID {
         return coreLibrary.getFontAlternative(id);
-    }
-
-    /**
-     * Clear and reset any glyph information and state.
-     *
-     * The library context caches glyphs until the library context is deleted.
-     * This function can be called to reduce memory usage especially if your
-     * text sources are from user generated content.
-     *
-     * All registered glyphs and images will be removed and the
-     * unique glyph ID assignment counter will be reset. This means that
-     * glyph IDs will be reassigned and no longer unique unless you clear
-     * glyph ID references in your application.
-     */
-    public function clearGlyphs() {
-        coreLibrary.clearGlyphs();
     }
 }

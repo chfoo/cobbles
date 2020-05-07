@@ -188,9 +188,9 @@ class EngineHL implements Engine {
         NativeEngine.addText(handle, text);
     }
 
-    public function addInlineObject(id:InlineObjectID, size:Int):Void {
+    public function addInlineObject(id:InlineObjectID, width:Int, height:Int):Void {
         applyProperties();
-        NativeEngine.addInlineObject(handle, id, size);
+        NativeEngine.addInlineObject(handle, id, width, height);
     }
 
     function applyProperties() {
@@ -207,6 +207,10 @@ class EngineHL implements Engine {
 
     public function clear():Void {
         NativeEngine.clear(handle);
+    }
+
+    public function clearTiles():Void {
+        NativeEngine.clearTiles(handle);
     }
 
     public function layOut():Void {

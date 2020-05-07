@@ -45,9 +45,6 @@ extern class Library {
 
     @:native("cobbletext_library_get_glyph_info")
     static public function getGlyphInfo(library:Library, glyph:Int):GlyphInfo;
-
-    @:native("cobbletext_library_clear_glyphs")
-    static public function clearGlyphs(library:Library):Void;
 }
 
 #elseif (hl && !doc_gen)
@@ -93,9 +90,6 @@ extern class Library {
 
     @:hlNative("cobbles", "library_get_glyph_info")
     static public function getGlyphInfo(library:LibraryHandle, glyphID:Int, out_glyphInfo:GlyphInfo):Void;
-
-    @:hlNative("cobbles", "library_clear_glyphs")
-    static public function clearGlyphs(library:LibraryHandle):Void;
 }
 
 #elseif (js && !doc_gen)
@@ -110,7 +104,6 @@ extern class Library {
     public function getGlyphInfo(glyphID:Int):GlyphInfo;
     public function setFontAlternative(fontID:Int, fallbackID:Int):Void;
     public function getFontAlternative(fontID:Int):Int;
-    public function clearGlyphs():Void;
 }
 
 #else

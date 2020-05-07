@@ -6,7 +6,7 @@ import cobbles.markup.MarkupParser;
 using Safety;
 
 /**
- * Opaque handle to a layout and render engine.
+ * Represents layout and render engine.
 
  * An engine is used repeatedly to process text.
  *
@@ -278,7 +278,8 @@ class Engine implements Disposable {
     public function addInlineObject(inlineObject:InlineObject) {
         applyCustomProperties();
         inlineObjectMap.set(inlineObjectSequenceID, inlineObject);
-        coreEngine.addInlineObject(inlineObjectSequenceID, inlineObject.getWidth());
+        coreEngine.addInlineObject(inlineObjectSequenceID,
+            inlineObject.getWidth(), inlineObject.getHeight());
         inlineObjectSequenceID += 1;
     }
 
@@ -332,7 +333,7 @@ class Engine implements Disposable {
      * Empty the text buffer.
      *
      * This empties the text buffer so the engine can be used to process
-     * anther set of text. The properties are not reset.
+     * anther set of text. The properties are not reset and tiles are not cleared.
      */
     public function clear() {
         coreEngine.clear();
@@ -340,6 +341,22 @@ class Engine implements Disposable {
         customPropertiesSequenceID = 1;
         inlineObjectMap.clear();
         customPropertiesMap.clear();
+    }
+
+    /**
+     * Clear associated tiles and glyphs.
+     *
+     * The library context caches glyphs until no engine has a reference to them.
+     * This function can be called to reduce memory usage or clear a full
+     * texture atlas. This is especially important if your text sources are
+     * from user generated content.
+     *
+     * This function doesn't affect properties or buffered text, and
+     * does not affect other engines. If you have associated data structures,
+     * such as a texture atlas, remember to clear those too.
+     */
+    public function clearTiles() {
+        coreEngine.clearTiles();
     }
 
     /**

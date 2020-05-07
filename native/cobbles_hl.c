@@ -94,10 +94,6 @@ void cobbles_library_get_glyph_info(hl_CobbletextLibrary * library, int glyph_id
     out_glyph_info->imageOffsetY = info->image_offset_y;
 }
 
-void cobbles_library_clear_glyphs(hl_CobbletextLibrary * library) {
-    cobbletext_library_clear_glyphs(library);
-}
-
 hl_CobbletextEngine * cobbles_engine_new(hl_CobbletextLibrary * library) {
     return cobbletext_engine_new(library);
 }
@@ -152,12 +148,16 @@ void cobbles_engine_add_text(hl_CobbletextEngine * engine, vstring * text) {
     cobbletext_engine_add_text_utf16(engine, text->bytes, text->length);
 }
 
-void cobbles_engine_add_inline_object(hl_CobbletextEngine * engine, int id, int size) {
-    cobbletext_engine_add_inline_object(engine, id, size);
+void cobbles_engine_add_inline_object(hl_CobbletextEngine * engine, int id, int width, int height) {
+    cobbletext_engine_add_inline_object(engine, id, width, height);
 }
 
 void cobbles_engine_clear(hl_CobbletextEngine * engine) {
     cobbletext_engine_clear(engine);
+}
+
+void cobbles_engine_clear_tiles(hl_CobbletextEngine * engine) {
+    cobbletext_engine_clear_tiles(engine);
 }
 
 void cobbles_engine_lay_out(hl_CobbletextEngine * engine) {
@@ -246,7 +246,6 @@ HL_COBBLES_DEFINE(library_set_font_alternative, _VOID, _ABSTRACT(hl_CobbletextLi
 HL_COBBLES_DEFINE(library_get_font_alternative, _I32, _ABSTRACT(hl_CobbletextLibrary) _I32 )
 HL_COBBLES_DEFINE(library_get_font_info, _VOID, _ABSTRACT(hl_CobbletextLibrary) _I32 FONT_INFO )
 HL_COBBLES_DEFINE(library_get_glyph_info, _VOID, _ABSTRACT(hl_CobbletextLibrary) _I32 GLYPH_INFO )
-HL_COBBLES_DEFINE(library_clear_glyphs, _VOID, _ABSTRACT(hl_CobbletextLibrary) )
 
 HL_COBBLES_DEFINE(engine_new, _ABSTRACT(hl_CobbletextEngine), _ABSTRACT(hl_CobbletextLibrary) )
 HL_COBBLES_DEFINE(engine_delete, _VOID, _ABSTRACT(hl_CobbletextEngine) )
@@ -255,8 +254,9 @@ HL_COBBLES_DEFINE(engine_set_properties, _VOID, _ABSTRACT(hl_CobbletextEngine) E
 HL_COBBLES_DEFINE(engine_get_text_properties, _VOID, _ABSTRACT(hl_CobbletextEngine) TEXT_PROPERTIES )
 HL_COBBLES_DEFINE(engine_set_text_properties, _VOID, _ABSTRACT(hl_CobbletextEngine) TEXT_PROPERTIES )
 HL_COBBLES_DEFINE(engine_add_text, _VOID, _ABSTRACT(hl_CobbletextEngine) _STRING )
-HL_COBBLES_DEFINE(engine_add_inline_object, _VOID, _ABSTRACT(hl_CobbletextEngine) _I32 _I32 )
+HL_COBBLES_DEFINE(engine_add_inline_object, _VOID, _ABSTRACT(hl_CobbletextEngine) _I32 _I32 _I32 )
 HL_COBBLES_DEFINE(engine_clear, _VOID, _ABSTRACT(hl_CobbletextEngine) )
+HL_COBBLES_DEFINE(engine_clear_tiles, _VOID, _ABSTRACT(hl_CobbletextEngine) )
 HL_COBBLES_DEFINE(engine_lay_out, _VOID, _ABSTRACT(hl_CobbletextEngine) )
 HL_COBBLES_DEFINE(engine_tiles_valid, _BOOL, _ABSTRACT(hl_CobbletextEngine) )
 HL_COBBLES_DEFINE(engine_rasterize, _VOID, _ABSTRACT(hl_CobbletextEngine) )

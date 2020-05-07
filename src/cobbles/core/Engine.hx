@@ -15,8 +15,9 @@ interface Engine extends Disposable {
     public function tiles():Array<TileInfo>;
     public function advances():Array<AdvanceInfo>;
     public function addText(text:String):Void;
-    public function addInlineObject(id:InlineObjectID, size:Int):Void;
+    public function addInlineObject(id:InlineObjectID, width:Int, height:Int):Void;
     public function clear():Void;
+    public function clearTiles():Void;
     public function layOut():Void;
     public function tilesValid():Bool;
     public function rasterize():Void;

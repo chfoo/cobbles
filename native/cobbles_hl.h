@@ -6,7 +6,7 @@
 #define HL_DEFINE(name,impl_name,t,args) DEFINE_PRIM_WITH_NAME(t,impl_name,args,name)
 #define HL_COBBLES_DEFINE(name,t,args) DEFINE_PRIM_WITH_NAME(t,cobbles_##name,args,name)
 
-#define COBBLES_API_VERSION 1
+#define COBBLES_API_VERSION 2
 
 #include <cobbletext/cobbletext.h>
 
@@ -155,9 +155,6 @@ API
 void cobbles_library_get_glyph_info(hl_CobbletextLibrary * library, int glyph_id, hl_GlyphInfo * out_glyph_info);
 
 API
-void cobbles_library_clear_glyphs(hl_CobbletextLibrary * library);
-
-API
 hl_CobbletextEngine * cobbles_engine_new(hl_CobbletextLibrary * library);
 
 API
@@ -179,10 +176,13 @@ API
 void cobbles_engine_add_text(hl_CobbletextEngine * engine, vstring * text);
 
 API
-void cobbles_engine_add_inline_object(hl_CobbletextEngine * engine, int id, int size);
+void cobbles_engine_add_inline_object(hl_CobbletextEngine * engine, int id, int width, int height);
 
 API
 void cobbles_engine_clear(hl_CobbletextEngine * engine);
+
+API
+void cobbles_engine_clear_tiles(hl_CobbletextEngine * engine);
 
 API
 void cobbles_engine_lay_out(hl_CobbletextEngine * engine);

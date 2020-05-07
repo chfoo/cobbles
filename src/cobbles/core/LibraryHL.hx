@@ -6,7 +6,7 @@ import cobbles.native.Library as NativeLibrary;
 import cobbles.native.LibraryHandle;
 
 class LibraryHL implements Library {
-    static final MINIMUM_API_VERSION = 1;
+    static final MINIMUM_API_VERSION = 2;
 
     public var fallbackFont(get, never):FontID;
 
@@ -99,10 +99,6 @@ class LibraryHL implements Library {
 
     public function getFontAlternative(id:FontID):FontID {
         return NativeLibrary.getFontAlternative(handle, id);
-    }
-
-    public function clearGlyphs():Void {
-        NativeLibrary.clearGlyphs(handle);
     }
 }
 #end

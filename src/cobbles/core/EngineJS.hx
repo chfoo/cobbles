@@ -169,12 +169,16 @@ class EngineJS implements Engine {
         jsEngine.addTextUTF8(text);
     }
 
-    public function addInlineObject(id:InlineObjectID, size:Int) {
-        jsEngine.addInlineObject(id, size);
+    public function addInlineObject(id:InlineObjectID, width:Int, height:Int) {
+        jsEngine.addInlineObject(id, width, height);
     }
 
     public function clear() {
         jsEngine.clear();
+    }
+
+    public function clearTiles() {
+        jsEngine.clearTiles();
     }
 
     public function layOut() {

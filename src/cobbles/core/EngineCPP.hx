@@ -210,9 +210,9 @@ class EngineCPP implements Engine {
         NativeEngine.addText(handle, text, -1);
     }
 
-    public function addInlineObject(id:InlineObjectID, size:Int):Void {
+    public function addInlineObject(id:InlineObjectID, width:Int, height:Int):Void {
         applyProperties();
-        NativeEngine.addInlineObject(handle, id, size);
+        NativeEngine.addInlineObject(handle, id, width, height);
     }
 
     function applyProperties() {
@@ -229,6 +229,10 @@ class EngineCPP implements Engine {
 
     public function clear():Void {
         NativeEngine.clear(handle);
+    }
+
+    public function clearTiles():Void {
+        NativeEngine.clearTiles(handle);
     }
 
     public function layOut():Void {
