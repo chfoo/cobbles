@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+0.101.0 (2020-05-09)
+--------------------
 
 * Synchronized with Cobbletext 0.2.0
   * Removed `Library.clearGlyphs()`, added `Engine.clearTiles()`.
