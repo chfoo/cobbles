@@ -102,6 +102,9 @@ jobs:
           haxelib install --quiet --always test.hxml
       # Build and copy dependencies into app test directory
       - run: |
+          haxe hxml/test.hl.hxml
+          haxe hxml/test.hlc.hxml
+      - run: |
           mkdir -p out/
           cd out/
           cmake .. -D CMAKE_BUILD_TYPE=Release \
@@ -116,7 +119,6 @@ jobs:
         if: matrix.target == 'macos'
         working-directory: out/install_dir/lib/
       - run: |
-          haxe hxml/test.hl.hxml
           cp -a out/install_dir/lib/cobbles.hdll ./out/hl/
           cp -a cobbletext/lib/. ./out/hl/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/hl/; fi
@@ -126,8 +128,10 @@ jobs:
         if: matrix.target == 'macos'
         working-directory: out/hl
       # Run test
-      - run: $GITHUB_WORKSPACE/.github/workflows/run_test.sh
+      - run: $GITHUB_WORKSPACE/.github/workflows/run_test_hl.sh
         working-directory: out/hl
+      - run: $GITHUB_WORKSPACE/.github/workflows/run_test_hlc.sh
+        working-directory: out/test
       # Package cobbles.hdll
       - uses: actions/upload-artifact@v2
         with:
