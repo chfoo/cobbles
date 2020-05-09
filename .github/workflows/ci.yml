@@ -125,8 +125,8 @@ jobs:
           cp -a cobbletext/lib/. ./out/hl/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/hl/; fi
       - run: |
-          otool -L *
-          otool -L /usr/local/bin/hl
+          otool -L * || true
+          otool -L /usr/local/bin/hl || true
         if: matrix.target == 'macos'
         working-directory: out/hl
       # Run test
