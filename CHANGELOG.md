@@ -6,6 +6,7 @@ Unreleased
 
 * Synchronized with Cobbletext 0.2.0
   * Removed `Library.clearGlyphs()`, added `Engine.clearTiles()`.
+* Added `hasOverflow` property to `TileGroupRenderer`.
 
 0.100.1 (2020-05-06)
 --------------------

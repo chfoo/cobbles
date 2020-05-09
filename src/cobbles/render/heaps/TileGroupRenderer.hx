@@ -13,6 +13,12 @@ using Safety;
  */
 class TileGroupRenderer extends BaseRenderer {
     public var textureAtlas(default, null):TextureAtlas;
+
+    /**
+     * Result from `Engine.packTiles()`.
+     */
+    public var hasOverflow(default, null):Bool = false;
+
     var tileGroup:TileGroup;
 
     /**
@@ -47,7 +53,7 @@ class TileGroupRenderer extends BaseRenderer {
 
     override function prepareGlyphImageStorage() {
         textureAtlas.clearTexture();
-        engine.packTiles(textureAtlas.width, textureAtlas.height);
+        hasOverflow = engine.packTiles(textureAtlas.width, textureAtlas.height);
     }
 
     override function renderGlyphImageStorage() {
