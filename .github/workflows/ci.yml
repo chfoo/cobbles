@@ -100,6 +100,7 @@ jobs:
         if: steps.cache-cobbletext.outputs.cache-hit != 'true'
       - run: |
           haxelib install --quiet --always test.hxml
+          haxelib install --quiet --always hashlink
       # Build and copy dependencies into app test directory
       - run: |
           haxe hxml/test.hl.hxml
