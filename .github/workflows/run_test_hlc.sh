@@ -8,4 +8,4 @@ set -e
 LD_LIBRARY_PATH="$GITHUB_WORKSPACE/out/hl" \
     DYLD_FALLBACK_LIBRARY_PATH="$GITHUB_WORKSPACE/out/hl:/usr/local/lib:/lib:/usr/lib" \
     DYLD_PRINT_LIBRARIES=1 \
-    test_hlc
+    ./test_hlc

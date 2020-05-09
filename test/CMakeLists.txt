@@ -1,5 +1,7 @@
 add_executable(test_hlc "${CMAKE_SOURCE_DIR}/out/hl/test/test.c")
 
+find_path(HASHLINK_INCLUDE_PATH "hl.h")
+
 if(WIN32)
     find_library(HASHLINK_LIBRARY_PATH "libhl")
 else()
@@ -9,7 +11,8 @@ endif()
 find_library(COBBLETEXT_LIBRARY_PATH "cobbletext")
 
 target_include_directories(test_hlc PRIVATE
-    "${CMAKE_SOURCE_DIR}/out/hl/test/")
+    "${CMAKE_SOURCE_DIR}/out/hl/test/"
+    "${HASHLINK_INCLUDE_PATH}")
 target_link_libraries(test_hlc PRIVATE
     "${HASHLINK_LIBRARY_PATH}"
     "${COBBLETEXT_LIBRARY_PATH}"

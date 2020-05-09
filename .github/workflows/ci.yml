@@ -121,6 +121,7 @@ jobs:
         working-directory: out/install_dir/lib/
       - run: |
           cp -a out/install_dir/lib/cobbles.hdll ./out/hl/
+          cp -a out/install_dir/bin/. ./out/hl/
           cp -a cobbletext/lib/. ./out/hl/
           if [ -d "cobbletext/bin/" ]; then cp -a cobbletext/bin/. ./out/hl/; fi
       - run: |
@@ -132,7 +133,7 @@ jobs:
       - run: $GITHUB_WORKSPACE/.github/workflows/run_test_hl.sh
         working-directory: out/hl
       - run: $GITHUB_WORKSPACE/.github/workflows/run_test_hlc.sh
-        working-directory: out/test
+        working-directory: out/hl
       # Package cobbles.hdll
       - uses: actions/upload-artifact@v2
         with:
