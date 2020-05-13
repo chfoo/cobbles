@@ -39,10 +39,10 @@ class EngineCPP implements Engine {
         handle = NativeEngine.new_(library.handle);
         library.checkError();
 
-        final enginePropertiesSize =
-            CPPUtil.sizeof(Native.star(@:nullSafety(Off) engineProperties));
-        final textPropertiesSize =
-            CPPUtil.sizeof(Native.star(@:nullSafety(Off) textProperties));
+        final enginePropertiesSize = CPPUtil.sizeof(
+            untyped __cpp__("struct CobbletextEngineProperties"));
+        final textPropertiesSize = CPPUtil.sizeof(
+            untyped __cpp__("struct CobbletextTextProperties"));
 
         engineProperties = cast NativeGc.allocGcBytesRaw(
             enginePropertiesSize, false);

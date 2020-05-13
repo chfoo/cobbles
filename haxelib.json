@@ -6,7 +6,7 @@
     "description": "Text layout/rendering engine library for applications running under a 3D graphics API",
     "version": "0.101.1",
     "classPath": "src/",
-    "releasenote": "Fixed Haxe 4.1 exception conflict (see changelog for details)",
+    "releasenote": "Fixed Haxe 4.1 compatibility (see changelog for details)",
     "contributors": ["chfoo"],
     "dependencies": {
         "safety": ""
