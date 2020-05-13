@@ -1,6 +1,13 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+* Fixed exception conflict with Haxe 4.1.
+  * If using Haxe older than 4.1, compile with `-lib exception`.
+  * If using Haxe 4.1 or newer, upgrade [`safety`](https://github.com/RealyUniqueName/Safety) or use the latest with `haxelib git`.
+
 0.101.0 (2020-05-09)
 --------------------
 
