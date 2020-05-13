@@ -32,7 +32,7 @@ jobs:
       # Install dependencies
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.0.5
+          haxe-version: 4.1.0
       - uses: actions/cache@v1
         id: cache-cobbletext
         with:
@@ -84,7 +84,7 @@ jobs:
       # Install dependencies
       - uses: krdlab/setup-haxe@v1
         with:
-          haxe-version: 4.0.5
+          haxe-version: 4.1.0
       - uses: microsoft/setup-msbuild@v1.0.0
         if: contains( matrix.target, 'windows' )
       - run: .github/workflows/get_hashlink_bin.sh ${{ matrix.target }} "1.11.0" "1.11"
