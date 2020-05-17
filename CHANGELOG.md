@@ -1,8 +1,8 @@
 Changelog
 =========
 
-Unreleased
-----------
+0.101.1 (2020-05-17)
+--------------------
 
 * Fixed exception conflict with Haxe 4.1.
   * If using Haxe older than 4.1, compile with `-lib exception`.
