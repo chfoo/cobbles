@@ -43,7 +43,6 @@ jobs:
       - run: |
           haxelib install --quiet --always test.hxml
           haxelib install --quiet --always hxcpp
-          haxelib git safety https://github.com/RealyUniqueName/Safety
       # Build and copy dependencies into test app directory
       - run: |
           haxe hxml/test.cpp.hxml \
@@ -102,7 +101,6 @@ jobs:
       - run: |
           haxelib install --quiet --always test.hxml
           haxelib install --quiet --always hashlink
-          haxelib git safety https://github.com/RealyUniqueName/Safety
       # Build and copy dependencies into app test directory
       - run: |
           haxe hxml/test.hl.hxml
